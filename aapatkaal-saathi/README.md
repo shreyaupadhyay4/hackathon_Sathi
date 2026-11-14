@@ -8,11 +8,13 @@ Hindi + English. Real OpenStreetMap data. Core app works without API keys.
 | Feature | How it works |
 |---|---|
 | Big **SOS** button | Gets GPS, finds nearest hospitals, starts a live-location link, alerts your Telegram contacts, shows 112 |
+| **Emergency calling** | 112 is always available as a direct call link. 108 is shown as an ambulance option where available; coverage varies by state |
 | **Gemini card routing** (optional) | Matches a short Hindi/English description to one of the existing reviewed cards, or returns unsure. Gemini never writes first-aid steps |
 | **What to tell 112** | Builds a Hindi or English call script from your coordinates, an approximate OSM place/road, and details you enter; nothing but coordinates for reverse lookup are sent to the server |
-| **Nearest hospitals, clinics, pharmacies, police** | OpenStreetMap via Overpass API, sorted by distance, with Call and Directions buttons |
+| **Nearby map and services** | Google Maps coordinate pin recenters as GPS moves; OpenStreetMap also shows a live location marker and nearby facilities. Hospital and pharmacy lists show distance from your current location, with clinic/police filters and Call and Directions buttons |
 | **9 first-aid cards** (accident, chest pain, CPR, snakebite, burn, choking, bleeding, seizure, stroke) | Short steps plus a red **"Do NOT do this"** list, Hindi and English, read aloud by the phone's voice |
-| **Live location on WhatsApp** | Creates a link to a page that updates every 10 seconds (OpenStreetMap map, no login for the receiver) |
+| **Emergency WhatsApp message** | After choosing a first-aid card, open WhatsApp with that incident and a map link for a locally saved contact. Review and tap Send; the phone number stays on the device and is not sent to Gemini |
+| **Live location on WhatsApp** | Creates a link to a page that updates every 10 seconds, with nearby hospital, clinic, pharmacy, and police markers on an OpenStreetMap map (no login for the receiver) |
 | **Walk with me** | Timer runs on the server. No "I'm safe" tap in time, or panic pressed: Telegram alert + last location to contacts |
 | **Works offline** | App shell, first-aid cards and the last nearby list are cached. Distances are recomputed from your current GPS |
 
@@ -35,7 +37,7 @@ Set `PUBLIC_BASE_URL` to that https URL so alert links are correct.
 
 The Help screen can send a short incident description to Gemini and ask it to choose only from card IDs already present in `frontend/firstaid.json`. The app displays the unchanged reviewed card; Gemini cannot provide steps, diagnose, assess urgency, or remove the visible 112 action. An unknown card, low model confidence, missing key, timeout, or provider error falls back to the manual card menu.
 
-Set `GEMINI_API_KEY` in `.env` on the server to enable it. `GEMINI_MODEL` defaults to `gemini-2.5-flash` and can be changed if unavailable to your account. Never put the key in frontend code or commit it. The model call sends the user's typed description and the app's card labels to Google; the app does not include GPS, contact details, or the user's device token in that request. Tell users not to enter names, phone numbers, or exact addresses. Google's current data handling, quota, and pricing terms apply; the rest of the app does not call Gemini and remains usable without the key.
+Set `GEMINI_API_KEY` in `.env` on the server to enable it. `GEMINI_MODEL` defaults to `gemini-3.8-flash` and can be changed if unavailable to your account. Never put the key in frontend code or commit it. The model call sends the user's typed description and the app's card labels to Google; the app does not include GPS, contact details, or the user's device token in that request. Tell users not to enter names, phone numbers, or exact addresses. Google's current data handling, quota, and pricing terms apply; the rest of the app does not call Gemini and remains usable without the key.
 
 The model's confidence is only a routing heuristic, not a measured probability or medical assessment. The optional live evaluation uses 30 synthetic English, Hindi, and Hinglish descriptions:
 
@@ -55,7 +57,9 @@ This sends 30 requests and may consume account quota. Do not claim an accuracy p
 
 ## Reliability and health
 
-* SOS shows the 112 action immediately. It asks Overpass for hospitals within 3 km first (short per-mirror timeout), then loads clinics, pharmacies and police in the background. External map providers can still be slow or unavailable; a fresh hospital result is not guaranteed within 3 seconds.
+* Opening Nearby refreshes GPS; **Use my current location** retries it. The screen identifies whether it is showing live GPS, a searched pin, or a saved location. Hospitals and pharmacies are listed together by distance; clinic and police filters are also available. If all four Overpass mirrors fail, the app falls back to bounded OpenStreetMap/Nominatim searches for named hospitals and pharmacies. If those services fail or have no mapped hospitals, the first page offers a Google Maps nearby-hospital search link. External map providers can still be slow or unavailable.
+* The SOS panel always keeps a direct 112 call action available. It can also open the phone's native share sheet with an emergency message and location link; the user chooses an app/contact and confirms sending. Facility phone buttons appear only when a number is present in OpenStreetMap data; verify the number and availability when possible.
+* The 108 quick dial is a state-dependent ambulance option, not a nationwide guarantee. Maharashtra's National Health Mission lists 108 for its emergency medical service ([official source](https://nhm.maharashtra.gov.in/en/scheme/maharashtra-emergency-medical-services-mems-emergency-medical-service-on-call/)); if 108 is unavailable, call 112.
 * The last successful place list is saved in this browser with its update time. The app shell, first-aid cards and saved list remain available offline; distances use the current or last saved location.
 * `GET /api/health` reports a cached Overpass reachability probe, Telegram poller state, and walk watcher state. The Overpass probe is limited to once per minute.
 * Active walks remain in SQLite and are checked again when the watcher starts after a server restart. Keep persistent storage enabled on the host if walks must survive redeploys.
@@ -65,9 +69,10 @@ This sends 30 requests and may consume account quota. Do not claim an accuracy p
 ## Privacy and deleting data
 
 * The browser creates an unguessable device token and stores it in local storage. The server stores only its SHA-256 digest to associate that device's safety contacts, live tracks, and walks. If site data is cleared or the device is lost, the token cannot be recovered; live tracks expire, but contact and walk records may remain until an administrator removes the database.
-* Precise coordinates and place-search text are sent in POST bodies rather than URL query strings. Nearby and reverse-geocoding requests still send location to the configured OpenStreetMap services. SOS, Walk, and live sharing send location to the contacts or link recipients selected by the user.
+* WhatsApp emergency numbers are stored only in this browser. Selecting one opens a prefilled WhatsApp chat containing the selected incident and location map link; you must review and tap Send. The message and location are not sent to Gemini.
+* Precise coordinates and place-search text are sent in POST bodies rather than URL query strings. Nearby and reverse-geocoding requests send location to the configured OpenStreetMap services; the Nearby Google Maps embed also receives a roughly 100-metre-rounded location and the selected service type. SOS, Walk, and live sharing send location to the contacts or link recipients selected by the user.
 * Gemini routing is opt-in per description. The entered text is sent to Google; do not enter identifying details. Location and first-aid card content are not included in the Gemini request (only card IDs and titles are).
-* **Walk tab > Delete my data** removes the device's contacts, tracks, and walks from the server and clears personal/location state and demo messages from this browser. It ends live links immediately. It cannot recall Telegram/WhatsApp messages already delivered or copies recipients made.
+* **Walk tab > Delete my data** removes the device's contacts, tracks, and walks from the server and clears WhatsApp numbers, personal/location state, and demo messages from this browser. It ends live links immediately. It cannot recall Telegram/WhatsApp messages already delivered or copies recipients made.
 * Removing one safety contact revokes its invite and removes it from that device's future walk alerts.
 * API limits apply by peer IP and, for device/link/session operations, by an unguessable token. These counters are bounded and in-memory, so run one server process/replica; multiple workers would not share limits. With a reverse proxy, configure `FORWARDED_ALLOW_IPS` as described below; otherwise clients behind that proxy share one IP bucket.
 
@@ -100,6 +105,7 @@ Map data © OpenStreetMap contributors (ODbL). Places come from Overpass API; pl
 
 * OpenStreetMap is patchy in small towns, and a listed place may be closed or have no beds.
 * Not a replacement for 112. It does not dispatch an ambulance.
+* 108 ambulance coverage depends on the state; use 112 if it does not connect.
 * First-aid cards are general guidance, not medical advice, and do not diagnose.
 * Telegram alerts only reach contacts who pressed Start on your bot.
 * Live location only updates while the sender's page stays open in the browser.

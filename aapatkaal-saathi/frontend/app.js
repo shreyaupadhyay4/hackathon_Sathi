@@ -1,4 +1,4 @@
-/* Aapatkaal Saathi — front end (no build step, no external libraries). */
+/* Aapatkaal Saathi — front end (no build step; Leaflet loads from its CDN). */
 'use strict';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,7 +13,7 @@ const TXT = {
     appName: 'Aapatkaal Saathi', sosHint: 'Tap in an emergency', locating: 'Finding your location…',
     locOk: 'Location found (±{m} m)', locSaved: 'Using your last saved location', locFail: 'Could not get your location. Search for a place instead.',
     changeLanguage: 'Change language', sosLabel: 'Emergency help',
-    locationTitle: 'Use location', locationReason: 'Location helps share your position and find nearby help; 112 works without it.',
+    locationTitle: 'Use location', locationReason: 'Location finds nearby listed hospitals and can be shared with your contacts. You can call 112 without it.',
     useLocation: 'Use my location', skipLocation: 'Not now',
     locationRequesting: 'Getting your location…',
     locationPermissionDenied: 'Could not get location. Search for a place instead; calling 112 still works.',
@@ -48,7 +48,50 @@ const TXT = {
     geminiMatch: 'Gemini suggests “{title}”. This is not a diagnosis. Check the card and call 112.',
     geminiUnsure: 'No clear card match. Choose a card below or call 112.',
     geminiNotConfigured: 'Gemini is not configured. Choose a card below; the app works without a Gemini key.',
+    geminiKeyInvalid: 'Gemini API key was rejected. Check the server configuration.',
+    geminiModelUnavailable: 'Gemini model is unavailable. Check GEMINI_MODEL on the server and restart the app.',
+    geminiRequestRejected: 'Gemini rejected the request. Check the server model and API configuration.',
+    geminiBusy: 'Gemini is busy. Choose a card below or call 112.',
+    geminiTimedOut: 'Gemini timed out. Choose a card below or call 112.',
     geminiUnavailable: 'Gemini could not help right now. Choose a card below or call 112.',
+    ambulanceNotice: '108 ambulance service availability varies by state. If unavailable, call 112.',
+    homeNearbyTitle: 'Nearby hospitals listed on OpenStreetMap',
+    homeNearbyLoading: 'Finding nearby listed hospitals…',
+    homeNearbyError: 'Could not load nearby OpenStreetMap listings. This does not mean there are no hospitals. Try again or call 112.',
+    homeNearbyEmpty: 'No hospitals are listed within 3 km on OpenStreetMap. Search the wider Nearby list, or call 112 if urgent.',
+    homeNearbyPrompt: 'Tap to search for hospitals near this location.',
+    homeNearbyRetry: 'Retry hospital search',
+    homeNearbyAll: 'See all nearby services',
+    homeNearbyGoogle: 'Search nearby hospitals on Google Maps',
+    incidentShareTitle: 'Share this emergency',
+    incidentShareExplain: 'Choose a contact to open WhatsApp with this incident and your location map link. WhatsApp receives the prefilled draft; it is not delivered to the contact until you tap Send. Gemini does not receive your location.',
+    incidentShareNoContacts: 'Add a WhatsApp contact in the Walk tab first.',
+    waAddContact: 'Add WhatsApp contact',
+    waContactSend: 'WhatsApp {name}',
+    waPreparing: 'Getting your location and preparing the message…',
+    waLocationUnavailable: 'Could not get a location. Enable location or call 112.',
+    waReady: 'WhatsApp opened for {name}. Review the message and tap Send.',
+    waGeneric: 'Emergency',
+    waMessage: 'I need help. Emergency: {event}. My location: {map}. Please call me. In India, call 112 for emergency help.',
+    emergencyPhoneShare: 'Share alert using phone apps',
+    emergencyPhoneShareExplain: 'Choose SMS or another available app. Review the message and send it yourself; your location is included when available.',
+    emergencyPhoneShareUnavailable: 'Phone sharing is unavailable here. Use WhatsApp below or call 112.',
+    whatsappContactsTitle: 'WhatsApp contacts (saved on this device)',
+    whatsappContactsExplain: 'Numbers are stored on this device and are not sent to our server or Gemini. When you tap a contact, WhatsApp receives the number and prefilled message; you decide whether to send it.',
+    waContactName: 'Contact name',
+    waContactPhone: 'WhatsApp number (10-digit India number or include country code)',
+    waContactNamePH: 'e.g. Family',
+    waContactPhonePH: '+91 98765 43210',
+    waContactSave: 'Save WhatsApp contact',
+    waContactUpdate: 'Update WhatsApp contact',
+    waContactCancel: 'Cancel edit',
+    waContactEdit: 'Edit',
+    waContactRemove: 'Remove',
+    waContactEmpty: 'No WhatsApp contacts saved on this device yet.',
+    waContactInvalid: 'Enter a valid phone number. Use 10 digits for an Indian number or include the country code.',
+    waContactSaved: 'WhatsApp contact saved on this device.',
+    waContactRemoved: 'WhatsApp contact removed.',
+    waRemoveConfirm: 'Remove {name} from this device?',
     searchPlace: 'Search for your place', search: 'Search', placePH: 'e.g. Kalyanpur, Kanpur',
     whatHappened: 'What happened?', stepsH: 'Do this now', dontsH: 'Do NOT do this',
     read: '🔊 Read aloud', stop: 'Stop', noVoice: 'No Hindi voice found on this phone. Add Hindi text-to-speech in phone settings.',
@@ -58,9 +101,31 @@ const TXT = {
     call: '📞 Call', dir: '🧭 Directions', emerg: 'Emergency dept', unnamed: 'Unnamed place',
     noResults: 'Nothing mapped nearby. OpenStreetMap may be incomplete here. Call 112.',
     osmWarn: 'Listed on OpenStreetMap. Opening hours and beds are not confirmed. Call first if you can.',
+    osmMapFallback: 'View OpenStreetMap at this location',
+    nearErrorNoSavedType: 'No saved listing for this type. Could not load a fresh list; that does not mean none exist.',
     savedList: 'Place list updated {m} min ago.', nearFresh: 'Places updated just now.',
     nearLoading: 'Finding nearby places…', nearError: 'Could not load places. Try refresh or call 112.',
     nearOffline: 'Could not refresh. Showing saved OSM data, updated {m} min ago.',
+    nearUseLocation: 'Use my current location',
+    nearLocationUpdating: 'Getting your current GPS location…',
+    nearLocationGps: 'Current GPS location: {lat}, {lon} (accuracy ±{m} m).',
+    nearLocationSaved: 'Could not refresh GPS; using saved location: {lat}, {lon}. Tap the button to retry.',
+    nearLocationManual: 'Using searched map location: {lat}, {lon}. This is not live GPS.',
+    nearLocationMissing: 'Location unavailable. Allow location access or search for a place.',
+    nearLocationSecure: 'This page is not secure (HTTP), so Edge blocks live location. Open the app over HTTPS, or use localhost on this same device.',
+    nearLocationDenied: 'Location permission is blocked. Allow location in your browser settings, then retry.',
+    nearLocationFailed: 'Could not get GPS. Check device location settings and retry; showing saved location if available.',
+    nearEssentials: 'Hospitals & pharmacies',
+    nearMapCenter: 'Center map on my location', nearMapYou: 'Your location',
+    nearMapAria: 'Nearby services map', nearMapLegend: 'Map markers',
+    nearMapGoogle: 'Google Maps', nearMapOsm: 'OpenStreetMap pins',
+    nearMapGoogleOpen: 'Open nearby search in Google Maps',
+    nearMapGoogleStatus: 'Google Maps shows a pin at your latest GPS fix and recenters as you move. Nearby services are listed below.',
+    nearMapLoading: 'Loading nearby map listings…',
+    nearMapUnavailable: 'The map could not load. Use the nearby list below or call 112.',
+    nearMapNeedLocation: 'Allow location to show nearby services on the map.',
+    nearMapPlaces: '{n} nearby places shown. Listings may be incomplete or out of date.',
+    nearMapNoPlaces: 'No nearby places are listed on OpenStreetMap. This does not mean none exist.',
     findingHospital: 'Finding the nearest listed hospital…',
     hospitalUnavailable: 'Could not refresh hospitals. The saved list may be old.',
     sendingAlert: 'Sending alert to your contacts…',
@@ -78,15 +143,15 @@ const TXT = {
     away: 'away', del: 'Remove', removeContact: 'Remove {name}', countdownLabel: 'Time remaining',
     call112Label: 'Call emergency number 112', sosStatus: 'Emergency help status', dismissWalk: 'Close walk status',
     inviteExpired: 'Invite expired. Remove and add again.',
-    privacyTitle: 'Privacy and your data', privacyNote: 'Your saved location and nearby list stay on this device. Map searches send coordinates to OpenStreetMap services. SOS, live sharing, and Walk send your location to the contacts or link you choose. Live links expire automatically; use Delete my data to end sharing now. Deleting cannot recall messages already delivered.',
-    deleteData: 'Delete my data from this device', deleteConfirm: 'Delete this device’s saved contacts, live links, walks, and demo messages? This cannot recall messages already delivered.',
+    privacyTitle: 'Privacy and your data', privacyNote: 'Your saved location, nearby list, and WhatsApp numbers stay on this device. Nearby searches send coordinates to OpenStreetMap services; the Google Maps embed also receives your location and selected service type. SOS, live sharing, and Walk send your location to the contacts or link you choose. Live links expire automatically; use Delete my data to end sharing now. Deleting cannot recall messages already delivered.',
+    deleteData: 'Delete my data from this device', deleteConfirm: 'Delete this device’s saved contacts, WhatsApp numbers, live links, walks, and demo messages? This cannot recall messages already delivered.',
     deleteSuccess: 'Your device data was deleted.', deleteFail: 'Could not delete server data. Check your connection and try again.', deletingData: 'Deleting your data…',
   },
   hi: {
     appName: 'आपातकाल साथी', sosHint: 'आपातकाल में दबाएं', locating: 'आपकी लोकेशन खोज रहे हैं…',
     locOk: 'लोकेशन मिली (±{m} मी)', locSaved: 'पिछली सेव लोकेशन इस्तेमाल हो रही है', locFail: 'लोकेशन नहीं मिली। कोई जगह खोजें।',
     changeLanguage: 'भाषा बदलें', sosLabel: 'आपातकाल में मदद लें',
-    locationTitle: 'लोकेशन दें', locationReason: 'लोकेशन से आपकी जगह साझा होगी और पास की मदद मिलेगी; 112 इसके बिना भी काम करता है।',
+    locationTitle: 'लोकेशन दें', locationReason: 'लोकेशन से पास के दर्ज अस्पताल खोजे जाएंगे और आप इसे संपर्कों से साझा कर सकते हैं। 112 पर बिना लोकेशन भी कॉल कर सकते हैं।',
     useLocation: 'मेरी लोकेशन लें', skipLocation: 'अभी नहीं',
     locationRequesting: 'आपकी लोकेशन ले रहे हैं…',
     locationPermissionDenied: 'लोकेशन नहीं मिली। जगह खोजें; 112 पर कॉल कर सकते हैं।',
@@ -121,7 +186,50 @@ const TXT = {
     geminiMatch: 'Gemini ने “{title}” कार्ड चुना है। यह बीमारी की पहचान नहीं है। कार्ड पढ़ें और 112 पर कॉल करें।',
     geminiUnsure: 'कोई साफ़ मेल नहीं मिला। नीचे कार्ड चुनें या 112 पर कॉल करें।',
     geminiNotConfigured: 'Gemini चालू नहीं है। नीचे कार्ड चुनें; बिना Gemini key के भी ऐप काम करता है।',
+    geminiKeyInvalid: 'Gemini API key स्वीकार नहीं हुई। सर्वर की सेटिंग जांचें।',
+    geminiModelUnavailable: 'Gemini मॉडल उपलब्ध नहीं है। सर्वर में GEMINI_MODEL जांचें और ऐप फिर शुरू करें।',
+    geminiRequestRejected: 'Gemini ने अनुरोध स्वीकार नहीं किया। सर्वर का मॉडल और API सेटिंग जांचें।',
+    geminiBusy: 'Gemini अभी व्यस्त है। नीचे कार्ड चुनें या 112 पर कॉल करें।',
+    geminiTimedOut: 'Gemini से जवाब आने में देर हुई। नीचे कार्ड चुनें या 112 पर कॉल करें।',
     geminiUnavailable: 'अभी Gemini से मदद नहीं मिली। नीचे कार्ड चुनें या 112 पर कॉल करें।',
+    ambulanceNotice: '108 एम्बुलेंस हर राज्य में उपलब्ध नहीं है। संपर्क न हो तो 112 पर कॉल करें।',
+    homeNearbyTitle: 'OpenStreetMap पर दर्ज पास के अस्पताल',
+    homeNearbyLoading: 'पास के दर्ज अस्पताल खोज रहे हैं…',
+    homeNearbyError: 'पास की OpenStreetMap सूची नहीं मिल सकी। इसका मतलब यह नहीं कि अस्पताल नहीं हैं। फिर कोशिश करें या 112 पर कॉल करें।',
+    homeNearbyEmpty: 'OpenStreetMap पर 3 किमी के भीतर अस्पताल दर्ज नहीं है। Nearby में बड़ा दायरा खोजें या ज़रूरत हो तो 112 पर कॉल करें।',
+    homeNearbyPrompt: 'इस लोकेशन के पास अस्पताल खोजने के लिए दबाएं।',
+    homeNearbyRetry: 'अस्पताल फिर खोजें',
+    homeNearbyAll: 'पास की सभी सेवाएं देखें',
+    homeNearbyGoogle: 'Google Maps पर पास के अस्पताल खोजें',
+    incidentShareTitle: 'यह आपातकालीन संदेश भेजें',
+    incidentShareExplain: 'संपर्क चुनें। WhatsApp में घटना और आपकी लोकेशन का नक्शा लिंक भरा हुआ खुलेगा। WhatsApp को संदेश मिलेगा, लेकिन संपर्क तक तभी जाएगा जब आप भेजें दबाएंगे। आपकी लोकेशन Gemini को नहीं जाती।',
+    incidentShareNoContacts: 'पहले "साथ चलें" टैब में WhatsApp संपर्क जोड़ें।',
+    waAddContact: 'WhatsApp संपर्क जोड़ें',
+    waContactSend: '{name} को WhatsApp करें',
+    waPreparing: 'लोकेशन लेकर संदेश तैयार कर रहे हैं…',
+    waLocationUnavailable: 'लोकेशन नहीं मिली। लोकेशन चालू करें या 112 पर कॉल करें।',
+    waReady: '{name} के लिए WhatsApp खुल गया है। संदेश जाँचकर भेजें दबाएं।',
+    waGeneric: 'आपातकाल',
+    waMessage: 'मुझे मदद चाहिए। आपातकाल: {event}। मेरी लोकेशन: {map}। कृपया मुझे कॉल करें। भारत में आपातकालीन मदद के लिए 112 पर कॉल करें।',
+    emergencyPhoneShare: 'फ़ोन के ऐप से मदद का संदेश भेजें',
+    emergencyPhoneShareExplain: 'SMS या उपलब्ध कोई दूसरा ऐप चुनें। संदेश खुद जाँचकर भेजें; लोकेशन उपलब्ध होने पर शामिल होगी।',
+    emergencyPhoneShareUnavailable: 'यहाँ फ़ोन से शेयर करना उपलब्ध नहीं है। नीचे WhatsApp चुनें या 112 पर कॉल करें।',
+    whatsappContactsTitle: 'WhatsApp संपर्क (इस फ़ोन में सेव)',
+    whatsappContactsExplain: 'नंबर इसी फ़ोन में सेव रहते हैं; हमारे सर्वर या Gemini को नहीं भेजे जाते। संपर्क दबाने पर WhatsApp को नंबर और भरा हुआ संदेश मिलेगा; भेजने का फैसला आपका है।',
+    waContactName: 'संपर्क का नाम',
+    waContactPhone: 'WhatsApp नंबर (भारत का 10 अंकों का नंबर या देश कोड सहित)',
+    waContactNamePH: 'जैसे परिवार',
+    waContactPhonePH: '+91 98765 43210',
+    waContactSave: 'WhatsApp संपर्क सेव करें',
+    waContactUpdate: 'WhatsApp संपर्क बदलें',
+    waContactCancel: 'बदलाव रद्द करें',
+    waContactEdit: 'बदलें',
+    waContactRemove: 'हटाएं',
+    waContactEmpty: 'इस फ़ोन में अभी कोई WhatsApp संपर्क सेव नहीं है।',
+    waContactInvalid: 'सही फ़ोन नंबर लिखें। भारत का नंबर 10 अंकों में या देश कोड के साथ लिखें।',
+    waContactSaved: 'WhatsApp संपर्क इसी फ़ोन में सेव हो गया।',
+    waContactRemoved: 'WhatsApp संपर्क हटा दिया गया।',
+    waRemoveConfirm: 'क्या इस फ़ोन से {name} को हटाएं?',
     searchPlace: 'अपनी जगह खोजें', search: 'खोजें', placePH: 'जैसे कल्याणपुर, कानपुर',
     whatHappened: 'क्या हुआ?', stepsH: 'अभी यह करें', dontsH: 'यह न करें',
     read: '🔊 सुनें', stop: 'रोकें', noVoice: 'इस फ़ोन में हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
@@ -131,9 +239,31 @@ const TXT = {
     call: '📞 कॉल', dir: '🧭 रास्ता', emerg: 'आपातकालीन विभाग', unnamed: 'बिना नाम की जगह',
     noResults: 'पास में कुछ मैप में नहीं मिला। यहाँ OpenStreetMap अधूरा हो सकता है। 112 पर कॉल करें।',
     osmWarn: 'OpenStreetMap पर दर्ज है। खुलने का समय और बिस्तर पक्के नहीं हैं। हो सके तो पहले फ़ोन करें।',
+    osmMapFallback: 'इस जगह का OpenStreetMap नक्शा देखें',
+    nearErrorNoSavedType: 'इस तरह की सेव की हुई जगह नहीं है। नई सूची नहीं मिल सकी; इसका मतलब यह नहीं कि यहाँ कोई जगह नहीं है।',
     savedList: 'जगहों की सूची {m} मिनट पहले अपडेट हुई।', nearFresh: 'जगहों की सूची अभी अपडेट हुई।',
     nearLoading: 'पास की जगहें खोज रहे हैं…', nearError: 'जगहें नहीं मिलीं। फिर कोशिश करें या 112 पर कॉल करें।',
     nearOffline: 'नई जानकारी नहीं मिली। सेव OSM सूची {m} मिनट पुरानी है।',
+    nearUseLocation: 'मेरी मौजूदा लोकेशन लें',
+    nearLocationUpdating: 'आपकी मौजूदा GPS लोकेशन ले रहे हैं…',
+    nearLocationGps: 'मौजूदा GPS लोकेशन: {lat}, {lon} (सटीकता ±{m} मीटर)।',
+    nearLocationSaved: 'GPS लोकेशन नहीं मिली; सेव लोकेशन इस्तेमाल हो रही है: {lat}, {lon}। फिर कोशिश करने के लिए बटन दबाएं।',
+    nearLocationManual: 'खोजी हुई नक्शे की लोकेशन: {lat}, {lon}। यह लाइव GPS नहीं है।',
+    nearLocationMissing: 'लोकेशन उपलब्ध नहीं है। लोकेशन की अनुमति दें या जगह खोजें।',
+    nearLocationSecure: 'यह पेज सुरक्षित HTTPS पर नहीं है, इसलिए Edge लाइव लोकेशन रोकता है। ऐप HTTPS लिंक से खोलें या इसी डिवाइस पर localhost इस्तेमाल करें।',
+    nearLocationDenied: 'लोकेशन की अनुमति बंद है। ब्राउज़र सेटिंग में अनुमति दें और फिर कोशिश करें।',
+    nearLocationFailed: 'GPS नहीं मिला। डिवाइस की लोकेशन सेटिंग देखें; सेव लोकेशन हो तो वही दिखेगी।',
+    nearEssentials: 'अस्पताल और फार्मेसी',
+    nearMapCenter: 'मेरी लोकेशन पर नक्शा केंद्रित करें', nearMapYou: 'आपकी लोकेशन',
+    nearMapAria: 'पास की सेवाओं का नक्शा', nearMapLegend: 'नक्शे के संकेत',
+    nearMapGoogle: 'Google Maps', nearMapOsm: 'OpenStreetMap पिन',
+    nearMapGoogleOpen: 'Google Maps में पास की जगहें खोलें',
+    nearMapGoogleStatus: 'Google Maps पर आपकी नई GPS लोकेशन का पिन दिखता है और चलते समय नक्शा फिर केंद्रित होता है। पास की जगहों की सूची नीचे है।',
+    nearMapLoading: 'पास की जगहों का नक्शा लोड हो रहा है…',
+    nearMapUnavailable: 'नक्शा लोड नहीं हुआ। नीचे पास की सूची देखें या 112 पर कॉल करें।',
+    nearMapNeedLocation: 'नक्शे पर पास की सेवाएं देखने के लिए लोकेशन दें।',
+    nearMapPlaces: 'पास की {n} जगहें दिखाई गई हैं। सूची अधूरी या पुरानी हो सकती है।',
+    nearMapNoPlaces: 'OpenStreetMap पर पास की जगहें दर्ज नहीं हैं। इसका मतलब यह नहीं कि कोई जगह नहीं है।',
     findingHospital: 'पास का दर्ज अस्पताल खोज रहे हैं…',
     hospitalUnavailable: 'अस्पतालों की नई जानकारी नहीं मिली। सेव सूची पुरानी हो सकती है।',
     sendingAlert: 'आपके संपर्कों को अलर्ट भेज रहे हैं…',
@@ -151,8 +281,8 @@ const TXT = {
     away: 'दूर', del: 'हटाएं', removeContact: '{name} को हटाएं', countdownLabel: 'बाकी समय',
     call112Label: 'आपातकालीन नंबर 112 पर कॉल करें', sosStatus: 'आपातकालीन मदद की स्थिति', dismissWalk: 'वॉक की स्थिति बंद करें',
     inviteExpired: 'निमंत्रण की अवधि खत्म। हटाकर फिर जोड़ें।',
-    privacyTitle: 'आपकी निजता और डेटा', privacyNote: 'सेव की हुई लोकेशन और पास की सूची इसी फ़ोन में रहती है। जगह खोजने पर निर्देशांक OpenStreetMap सेवाओं को भेजे जाते हैं। SOS, लाइव लोकेशन और “साथ चलें” में आपकी लोकेशन चुने हुए संपर्कों या लिंक पर भेजी जाती है। लाइव लिंक अपने-आप खत्म होते हैं; शेयरिंग तुरंत रोकने के लिए मेरा डेटा हटाएं। पहले भेजे संदेश वापस नहीं लिए जा सकते।',
-    deleteData: 'इस डिवाइस से मेरा डेटा हटाएं', deleteConfirm: 'इस डिवाइस के सेव संपर्क, लाइव लिंक, वॉक और डेमो संदेश हटाएं? पहले भेजे संदेश वापस नहीं लिए जा सकते।',
+    privacyTitle: 'आपकी निजता और डेटा', privacyNote: 'सेव की हुई लोकेशन, पास की सूची और WhatsApp नंबर इसी फ़ोन में रहते हैं। पास की जगह खोजने पर निर्देशांक OpenStreetMap सेवाओं को भेजे जाते हैं; Google Maps एम्बेड को भी आपकी लोकेशन और चुनी हुई सेवा का प्रकार मिलता है। SOS, लाइव लोकेशन और “साथ चलें” में आपकी लोकेशन चुने हुए संपर्कों या लिंक पर भेजी जाती है। लाइव लिंक अपने-आप खत्म होते हैं; शेयरिंग तुरंत रोकने के लिए मेरा डेटा हटाएं। पहले भेजे संदेश वापस नहीं लिए जा सकते।',
+    deleteData: 'इस डिवाइस से मेरा डेटा हटाएं', deleteConfirm: 'इस डिवाइस के सेव संपर्क, WhatsApp नंबर, लाइव लिंक, वॉक और डेमो संदेश हटाएं? पहले भेजे संदेश वापस नहीं लिए जा सकते।',
     deleteSuccess: 'इस डिवाइस का डेटा हटा दिया गया।', deleteFail: 'सर्वर से डेटा नहीं हट सका। इंटरनेट जांचकर फिर कोशिश करें।', deletingData: 'आपका डेटा हटाया जा रहा है…',
   },
 };
@@ -165,10 +295,23 @@ let locationPrompted = store.get('locationPrompted', false);
 let locationRequestStatus = '';
 let cards = [];
 let curCard = null;
-let nearType = 'hospital';
+let nearType = 'essential';
 let nearData = store.get('nearby', null); // {at, data}
-let nearError = false, nearLoading = false, nearLoadPromise = null;
+let nearError = false, nearLoading = false, nearLoadPromise = null, nearRestPromise = null;
+let nearbyMap = null, nearbyMapLocation = null, nearbyMapPlaces = null;
+let nearbyMapFollow = true, nearbyMapLastPosition = null, nearbyMapDataKey = '';
+let nearbyMapProvider = 'google', nearbyMapControlsBound = false;
+let nearbyLocationChecked = false, nearbyLocationLoading = false, nearbyLocationRefreshFailed = false;
+let nearbyLocationError = '';
+let nearbyGoogleMapPosition = null;
+let homeNearbyLoading = false, homeNearbyError = false, homeNearbySearched = false, homeNearbyPromise = null;
 let contacts = store.get('contacts', []); // [{code,label,joined,link}]
+let waContacts = store.get('waContacts', []);
+if (!Array.isArray(waContacts)) waContacts = [];
+waContacts = waContacts.filter(c => c && typeof c.label === 'string' && typeof c.phone === 'string')
+  .map(c => ({label: c.label.trim().slice(0, 40), phone: normalizeWhatsAppPhone(c.phone)}))
+  .filter(c => c.label && c.phone);
+let editingWaContact = null;
 let share = store.get('share', null);     // {token,key,url}
 let walkSt = store.get('walk', null);     // {id,deadline,track,status,sent}
 let shareTimer = null, walkTimers = [], watchId = null, demoMode = false;
@@ -282,8 +425,10 @@ function applyLang() {
   $('#geminiDescription').placeholder = t('geminiPlaceholder');
   $('#operatorPeople').placeholder = t('operatorPeoplePH');
   $('#operatorEvent').placeholder = t('operatorEventPH');
+  $('#waContactName').placeholder = t('waContactNamePH');
+  $('#waContactPhone').placeholder = t('waContactPhonePH');
   $('#yourName').value = store.get('name', '');
-  renderLocationIntro(); renderChips(); renderCard(); renderNear(); renderContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator();
+  renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator();
 }
 $('#langBtn').onclick = () => { lang = lang === 'hi' ? 'en' : 'hi'; store.set('lang', lang); stopSpeak(); applyLang(); };
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
@@ -296,7 +441,14 @@ function showTab(n) {
     else b.removeAttribute('aria-current');
   });
   window.scrollTo(0, 0);
-  if (n === 'near') loadNearby();
+  if (n === 'near') {
+    if (!nearbyLocationChecked) refreshNearbyLocation();
+    else loadNearby();
+    requestAnimationFrame(() => {
+      nearbyMap?.invalidateSize();
+      renderNearbyMap();
+    });
+  }
   if (n === 'walk') pollContacts();
 }
 
@@ -308,24 +460,62 @@ function renderLocationIntro() {
   status.textContent = locationRequestStatus ? t(locationRequestStatus) : '';
 }
 
+function renderNearbyLocationStatus(message) {
+  const status = $('#nearLocationStatus');
+  if (!status) return;
+  if (message) {
+    status.textContent = message;
+    return;
+  }
+  if (!pos) {
+    status.textContent = t(nearbyLocationError === 'insecure' ? 'nearLocationSecure'
+      : nearbyLocationError === 'denied' ? 'nearLocationDenied'
+      : nearbyLocationError ? 'nearLocationFailed' : 'nearLocationMissing');
+    return;
+  }
+  const coordinates = {lat: pos.lat.toFixed(5), lon: pos.lon.toFixed(5)};
+  status.textContent = nearbyLocationError
+    ? `${t(nearbyLocationError === 'insecure' ? 'nearLocationSecure'
+      : nearbyLocationError === 'denied' ? 'nearLocationDenied' : 'nearLocationFailed')} ${t('nearLocationSaved', coordinates)}`
+    : pos.manual ? t('nearLocationManual', coordinates)
+    : !nearbyLocationRefreshFailed && pos.updatedAt && Date.now() - pos.updatedAt < 120000
+      ? t('nearLocationGps', {...coordinates, m: pos.acc ?? '?'})
+      : t('nearLocationSaved', coordinates);
+}
+
 function locate() {
   return new Promise((res, rej) => {
+    if (!window.isSecureContext) return rej(new Error('insecure-context'));
     if (!navigator.geolocation) return rej(new Error('no-geo'));
     navigator.geolocation.getCurrentPosition(p => {
       pos = {lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy), updatedAt: Date.now()};
       store.set('lastpos', pos); $('#locLine').textContent = t('locOk', {m: pos.acc});
       locationRequestStatus = '';
       locationPrompted = true; store.set('locationPrompted', true); renderLocationIntro();
-      $('#manualLoc').hidden = true; startWatch(); res(pos);
-    }, err => rej(err), {enableHighAccuracy: true, timeout: 12000, maximumAge: 20000});
+      $('#manualLoc').hidden = true; nearbyLocationChecked = true; nearbyLocationRefreshFailed = false;
+      renderNearbyLocationStatus(); renderNearbyMap(); startWatch(); loadHomeNearby(); res(pos);
+    }, err => rej(err), {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
   });
 }
 function startWatch() {
   if (watchId !== null || !navigator.geolocation) return;
   watchId = navigator.geolocation.watchPosition(p => {
     pos = {lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy), updatedAt: Date.now()};
-    store.set('lastpos', pos);
-  }, () => {}, {enableHighAccuracy: true, maximumAge: 15000});
+    store.set('lastpos', pos); nearbyLocationRefreshFailed = false;
+    if (!$('#tab-near').hidden) {
+      renderNearbyLocationStatus();
+      renderNearbyMap();
+      refreshNearbyDistances();
+      if (!$('#tab-near').hidden && nearData?.data?.center &&
+          Date.now() - nearData.at >= 60000 && hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) > 500) {
+        loadNearby();
+      }
+    }
+  }, error => {
+    nearbyLocationError = error.code === 1 ? 'denied' : 'unavailable';
+    nearbyLocationRefreshFailed = true;
+    renderNearbyLocationStatus();
+  }, {enableHighAccuracy: true, maximumAge: 0});
 }
 async function ensureLocation() {
   $('#locLine').textContent = t('locating');
@@ -335,6 +525,38 @@ async function ensureLocation() {
     $('#locLine').textContent = t('locFail'); $('#manualLoc').hidden = false; return null;
   }
 }
+async function refreshNearbyLocation() {
+  if (nearbyLocationLoading) return;
+  const button = $('#nearUseLocation');
+  const previous = pos;
+  nearbyLocationLoading = true;
+  button.disabled = true;
+  renderNearbyLocationStatus(t('nearLocationUpdating'));
+  try {
+    await locate();
+    nearbyLocationError = '';
+    if (!previous || hav(previous.lat, previous.lon, pos.lat, pos.lon) > 500) {
+      nearData = null;
+      store.set('nearby', null);
+    }
+    renderNearbyLocationStatus();
+    await loadNearby(true);
+  } catch (error) {
+    nearbyLocationError = error.message === 'insecure-context' ? 'insecure'
+      : error.code === 1 ? 'denied' : 'unavailable';
+    nearbyLocationChecked = true; nearbyLocationRefreshFailed = true;
+    renderNearbyLocationStatus();
+    if (pos) await loadNearby();
+    else {
+      nearLoading = false;
+      renderNear();
+    }
+  } finally {
+    nearbyLocationLoading = false;
+    button.disabled = false;
+  }
+}
+$('#nearUseLocation').onclick = refreshNearbyLocation;
 $('#useLocation').onclick = async () => {
   const button = $('#useLocation');
   button.disabled = true;
@@ -486,8 +708,14 @@ $('#geminiRun').onclick = async () => {
     status.textContent = t('geminiMatch', {title: match.title[lang]});
     openCard(match.id, true);
   } catch (error) {
-    status.textContent = /not configured/i.test(error.message)
-      ? t('geminiNotConfigured') : t('geminiUnavailable');
+    const message = error.message.toLowerCase();
+    status.textContent = /not configured/.test(message) ? t('geminiNotConfigured')
+      : /api key|key was rejected/.test(message) ? t('geminiKeyInvalid')
+      : /model.*unavailable/.test(message) ? t('geminiModelUnavailable')
+      : /rejected the request/.test(message) ? t('geminiRequestRejected')
+      : /busy/.test(message) ? t('geminiBusy')
+      : /timed out/.test(message) ? t('geminiTimedOut')
+      : t('geminiUnavailable');
   } finally {
     button.disabled = false;
   }
@@ -501,9 +729,11 @@ $('#placeGo').onclick = async () => {
     $('#placeRes').innerHTML = r.results.map((x, i) => `<button class="btn ghost wide" data-i2="${i}">${esc(x.name.slice(0, 90))}</button>`).join('') || '—';
     $('#placeRes').querySelectorAll('button').forEach(b => b.onclick = () => {
       const x = r.results[+b.dataset.i2]; pos = {lat: x.lat, lon: x.lon, manual: true, updatedAt: Date.now()};
+      nearbyLocationChecked = true;
       locationRequestStatus = '';
       store.set('lastpos', pos); locationPrompted = true; store.set('locationPrompted', true);
-      renderLocationIntro(); $('#manualLoc').hidden = true; $('#locLine').textContent = x.name.slice(0, 60); loadNearby(true);
+      renderLocationIntro(); renderNearbyLocationStatus(); $('#manualLoc').hidden = true;
+      $('#locLine').textContent = x.name.slice(0, 60); loadHomeNearby(true);
     });
   } catch (e) { $('#placeRes').textContent = e.message; }
 };
@@ -517,13 +747,30 @@ async function loadNearby(force) {
   }
   if (!pos) return renderNear();
   if (navigator.onLine === false) { nearError = true; nearLoading = false; return renderNear(); }
-  if (!force && nearData && Date.now() - nearData.at < 120000 && hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) < 500) return renderNear();
+  if (homeNearbyPromise || nearRestPromise) {
+    nearLoading = true;
+    renderNear();
+    if (homeNearbyPromise) await homeNearbyPromise;
+    if (nearRestPromise) await nearRestPromise;
+    nearLoading = false;
+  }
+  if (nearRestPromise) await nearRestPromise;
+  const hasAllNearbyTypes = nearData?.data?.fullNearbyFetched && nearData?.data?.results &&
+    ['hospital', 'clinic', 'pharmacy', 'police'].every(type => Array.isArray(nearData.data.results[type]));
+  if (!force && hasAllNearbyTypes && Date.now() - nearData.at < 120000 &&
+      hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) < 500) return renderNear();
   if (nearLoadPromise) return nearLoadPromise;
   nearLoading = true; nearError = false; renderNear();
   nearLoadPromise = (async () => {
     try {
-      const data = await api('/api/nearby', {lat: pos.lat, lon: pos.lon});
-      saveNearby(data);
+      const sameArea = nearData?.data?.center &&
+        hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) < 500;
+      const otherTypesCached = !force && sameArea && Date.now() - nearData.at < 120000 &&
+        ['clinic', 'pharmacy', 'police'].every(type => Array.isArray(nearData.data.results?.[type]));
+      const query = {lat: pos.lat, lon: pos.lon};
+      if (otherTypesCached) query.types = 'hospital';
+      const data = await api('/api/nearby', query);
+      saveNearby(data, true);
       nearError = !!data.stale;
     } catch {
       nearError = true;
@@ -533,7 +780,7 @@ async function loadNearby(force) {
   })();
   return nearLoadPromise;
 }
-function saveNearby(data) {
+function saveNearby(data, fullNearby = false) {
   const previous = nearData;
   const sameArea = previous?.data?.center &&
     hav(pos.lat, pos.lon, previous.data.center.lat, previous.data.center.lon) < 500;
@@ -542,8 +789,75 @@ function saveNearby(data) {
   const ageAnchor = sameArea ? Math.min(oldFetchedAt, fetchedAt) : fetchedAt;
   const results = sameArea ? {...previous.data.results, ...data.results} : {...data.results};
   const merged = {...(sameArea ? previous.data : {}), ...data, results, fetched_at: ageAnchor / 1000};
+  merged.fullNearbyFetched = fullNearby || (sameArea && previous.data.fullNearbyFetched === true);
   nearData = {at: ageAnchor, data: merged};
   store.set('nearby', nearData);
+  renderHomeNearby();
+}
+function renderHomeNearby() {
+  const section = $('#homeNearby');
+  if (!section) return;
+  section.hidden = !pos;
+  const status = $('#homeNearbyStatus');
+  const listEl = $('#homeNearbyList');
+  const actions = $('#homeNearbyActions');
+  if (!pos) return;
+  const sameArea = nearData?.data?.center &&
+    hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) < 500;
+  const hospitals = sameArea ? placesFor('hospital') : [];
+  if (sameArea) homeNearbySearched = true;
+  if (homeNearbyLoading && !hospitals.length) {
+    status.textContent = t('homeNearbyLoading');
+    listEl.innerHTML = '<div class="skeleton" aria-hidden="true"></div>';
+  } else if (hospitals.length) {
+    const mins = Math.max(0, Math.floor((Date.now() - nearData.at) / 60000));
+    const age = mins < 1 ? t('nearFresh') : t('savedList', {m: mins});
+    status.textContent = `${homeNearbyError ? `${t('homeNearbyError')} ` : ''}${age} ${t('osmWarn')}`;
+    listEl.innerHTML = hospitals.slice(0, 3).map(placeHTML).join('');
+  } else {
+    status.textContent = homeNearbyError ? t('homeNearbyError')
+      : homeNearbySearched ? t('homeNearbyEmpty') : t('homeNearbyPrompt');
+    listEl.innerHTML = '';
+  }
+  const call112 = !hospitals.length
+    ? `<a class="btn danger wide" href="tel:112" aria-label="${t('call112Label')}">📞 112</a>` : '';
+  actions.innerHTML = `${call112}<button id="homeNearbyRetry" class="btn ghost wide">${t('homeNearbyRetry')}</button><button id="homeNearbyAll" class="btn ghost wide">${t('homeNearbyAll')}</button>`;
+  if (homeNearbyError || (homeNearbySearched && !hospitals.length)) {
+    appendGoogleHospitalSearch(actions);
+    appendOsmMap(actions);
+  }
+  $('#homeNearbyRetry').disabled = homeNearbyLoading;
+  $('#homeNearbyRetry').onclick = () => loadHomeNearby(true);
+  $('#homeNearbyAll').onclick = () => showTab('near');
+}
+async function loadHomeNearby(force = false) {
+  if (!pos) return false;
+  const sameArea = nearData?.data?.center &&
+    hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) < 500;
+  if (!force && sameArea && Date.now() - nearData.at < 120000) {
+    homeNearbySearched = true;
+    renderHomeNearby();
+    const hasAllNearbyTypes = nearData.data.results && ['hospital', 'clinic', 'pharmacy', 'police']
+      .every(type => Array.isArray(nearData.data.results[type]));
+    if (!hasAllNearbyTypes) loadNearbyRest();
+    return true;
+  }
+  if (homeNearbyPromise) return homeNearbyPromise;
+  homeNearbyLoading = true;
+  homeNearbyError = false;
+  renderHomeNearby();
+  const request = (async () => {
+    const ok = await loadNearbyFast();
+    homeNearbySearched = true;
+    homeNearbyError = !ok;
+    homeNearbyLoading = false;
+    renderHomeNearby();
+    if (ok) loadNearbyRest();
+    return ok;
+  })();
+  homeNearbyPromise = request;
+  try { return await request; }
+  finally { if (homeNearbyPromise === request) homeNearbyPromise = null; }
 }
 async function loadNearbyFast() {
   if (!pos || navigator.onLine === false) return false;
@@ -557,40 +871,57 @@ async function loadNearbyFast() {
   }
 }
 async function loadNearbyRest() {
+  if (nearRestPromise) return nearRestPromise;
   if (!pos) return;
-  if (navigator.onLine === false) { nearError = true; nearLoading = false; renderNear(); return; }
-  nearLoading = true;
-  renderNear();
-  try {
-    const data = await api('/api/nearby', {lat: pos.lat, lon: pos.lon, types: 'clinic,pharmacy,police'});
-    saveNearby(data);
-    nearError = !!data.stale;
-  } catch {
-    nearError = true;
-  } finally {
-    nearLoading = false;
+  const request = (async () => {
+    if (navigator.onLine === false) { nearError = true; nearLoading = false; renderNear(); return; }
+    nearLoading = true;
     renderNear();
-  }
+    try {
+      const data = await api('/api/nearby', {lat: pos.lat, lon: pos.lon, types: 'clinic,pharmacy,police'});
+      saveNearby(data);
+      nearError = !!data.stale;
+    } catch {
+      nearError = true;
+    } finally {
+      nearLoading = false;
+      renderNear();
+    }
+  })();
+  nearRestPromise = request;
+  try { await request; }
+  finally { if (nearRestPromise === request) nearRestPromise = null; }
 }
 function placesFor(type) {
   if (!nearData) return [];
-  const list = (nearData.data.results[type] || []).map(p => ({...p}));
+  const types = type === 'essential' ? ['hospital', 'pharmacy'] : [type];
+  const list = types.flatMap(kind => nearData.data.results[kind] || []).map(p => ({...p}));
   if (pos) list.forEach(p => p.distance_m = Math.round(hav(pos.lat, pos.lon, p.lat, p.lon)));
   return list.sort((a, b) => a.distance_m - b.distance_m);
 }
+function refreshNearbyDistances() {
+  if (!nearData || $('#tab-near').hidden) return;
+  const list = placesFor(nearType);
+  const listEl = $('#nearList');
+  listEl.innerHTML = list.length ? list.map(placeHTML).join('')
+    : `<p class="note">${t(nearError ? 'nearErrorNoSavedType' : 'noResults')}</p>`;
+  if (!list.length) appendCall112(listEl);
+}
 function placeHTML(p) {
   const name = p.name || t('unnamed');
-  return `<div class="place"><div class="nm">${esc(name)}${p.emergency ? `<span class="badge">${t('emerg')}</span>` : ''}</div>
+  const type = nearType === 'essential' ? `<span class="badge">${t(p.type)}</span>` : '';
+  return `<div class="place"><div class="nm">${esc(name)}${type}${p.emergency ? `<span class="badge">${t('emerg')}</span>` : ''}</div>
     <div class="meta"><span class="dist">${fmtDist(p.distance_m)}</span> ${t('away')}${p.address ? ' · ' + esc(p.address) : ''}${p.hours ? ' · ' + esc(p.hours) : ''}</div>
     <div class="acts">${p.phone ? `<a class="btn call" href="tel:${esc(p.phone)}">${t('call')}</a>` : ''}
     <a class="btn dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}&travelmode=driving">${t('dir')}</a></div></div>`;
 }
 function renderNear() {
-  $('#typeTabs').innerHTML = ['hospital', 'clinic', 'pharmacy', 'police'].map(k =>
-    `<button class="chip ${k === nearType ? 'on' : ''}" data-k="${k}" aria-pressed="${k === nearType}">${t(k)}</button>`).join('');
+  $('#typeTabs').innerHTML = ['essential', 'hospital', 'pharmacy', 'clinic', 'police'].map(k =>
+    `<button class="chip ${k === nearType ? 'on' : ''}" data-k="${k}" aria-pressed="${k === nearType}">${t(k === 'essential' ? 'nearEssentials' : k)}</button>`).join('');
   $('#typeTabs').querySelectorAll('button').forEach(b => b.onclick = () => { nearType = b.dataset.k; renderNear(); });
   const meta = $('#nearMeta');
   const listEl = $('#nearList');
+  renderNearbyMap();
   meta.textContent = '';
   if (!nearData) {
     if (nearLoading) {
@@ -600,17 +931,155 @@ function renderNear() {
     }
     meta.textContent = pos ? t(nearError ? 'nearError' : 'loadFail') : t('locFail');
     if (nearError || !pos) appendCall112(meta);
+    if (nearError && pos) appendOsmMap(meta);
     listEl.innerHTML = '';
     return;
   }
   const mins = Math.max(0, Math.floor((Date.now() - nearData.at) / 60000));
   const age = mins < 1 ? t('nearFresh') : t('savedList', {m: mins});
   meta.textContent = `${nearError ? t('nearOffline', {m: mins}) : age} ${t('osmWarn')}`;
-  if (nearError) appendCall112(meta);
+  if (nearError) {
+    appendCall112(meta);
+    appendOsmMap(meta);
+  }
   const list = placesFor(nearType);
-  listEl.innerHTML = list.length ? list.map(placeHTML).join('') : `<p class="note">${t('noResults')}</p>`;
+  listEl.innerHTML = list.length ? list.map(placeHTML).join('')
+    : `<p class="note">${t(nearError ? 'nearErrorNoSavedType' : 'noResults')}</p>`;
   if (!list.length) appendCall112(listEl);
   if (nearLoading) meta.append(` ${t('nearLoading')}`);
+}
+function nearbyPopup(place) {
+  const content = document.createElement('div');
+  const name = document.createElement('strong');
+  name.textContent = place.name || t('unnamed');
+  content.append(name, document.createElement('br'));
+  const kind = document.createElement('span');
+  kind.textContent = t(place.type);
+  content.append(kind);
+  if (place.distance_m != null) {
+    const distance = document.createElement('span');
+    distance.textContent = ` · ${fmtDist(place.distance_m)} ${t('away')}`;
+    content.append(distance);
+  }
+  content.append(document.createElement('br'));
+  const directions = document.createElement('a');
+  directions.href = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}&travelmode=driving`;
+  directions.target = '_blank';
+  directions.rel = 'noopener';
+  directions.textContent = t('dir');
+  content.append(directions);
+  return content;
+}
+function renderNearbyMap() {
+  const status = $('#nearMapStatus');
+  if (!nearbyMapControlsBound) {
+    $('#nearMapGoogleBtn').onclick = () => setNearbyMapProvider('google');
+    $('#nearMapOsmBtn').onclick = () => setNearbyMapProvider('osm');
+    nearbyMapControlsBound = true;
+  }
+  const googleSelected = nearbyMapProvider === 'google';
+  $('#nearGoogleMap').hidden = !googleSelected;
+  $('#nearMap').hidden = googleSelected;
+  $('#nearMapGoogleBtn').classList.toggle('on', googleSelected);
+  $('#nearMapOsmBtn').classList.toggle('on', !googleSelected);
+  $('#nearMapLegend').hidden = googleSelected;
+  $('#nearMapCenter').hidden = googleSelected;
+  if (googleSelected) {
+    updateNearbyGoogleMap();
+    status.textContent = pos ? t('nearMapGoogleStatus') : t('nearMapNeedLocation');
+    return;
+  }
+  if (!window.L) {
+    status.textContent = t('nearMapUnavailable');
+    return;
+  }
+  if (!nearbyMap) {
+    nearbyMap = L.map('nearMap', {scrollWheelZoom: false}).setView(
+      pos ? [pos.lat, pos.lon] : [20.5937, 78.9629], pos ? 13 : 5
+    );
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(nearbyMap);
+    nearbyMapPlaces = L.layerGroup().addTo(nearbyMap);
+    nearbyMap.on('dragstart', () => { nearbyMapFollow = false; });
+    $('#nearMapCenter').onclick = () => {
+      nearbyMapFollow = true;
+      if (pos) nearbyMap.setView([pos.lat, pos.lon], Math.max(nearbyMap.getZoom(), 13));
+    };
+  }
+  $('#nearMap').setAttribute('aria-label', t('nearMapAria'));
+  $('#nearMapLegend').setAttribute('aria-label', t('nearMapLegend'));
+  if (!$('#tab-near').hidden) nearbyMap.invalidateSize();
+  const positionMoved = pos && (!nearbyMapLastPosition ||
+    hav(pos.lat, pos.lon, nearbyMapLastPosition.lat, nearbyMapLastPosition.lon) > 20);
+  if (pos) {
+    if (!nearbyMapLocation) {
+      nearbyMapLocation = L.circleMarker([pos.lat, pos.lon], {
+        radius: 10, color: '#fff', weight: 3, fillColor: '#111827', fillOpacity: 1
+      }).bindPopup(t('nearMapYou')).addTo(nearbyMap);
+      if (nearbyMapFollow) nearbyMap.setView([pos.lat, pos.lon], 13);
+    } else {
+      nearbyMapLocation.setLatLng([pos.lat, pos.lon]);
+      if (nearbyMapFollow && positionMoved) nearbyMap.panTo([pos.lat, pos.lon]);
+    }
+    if (positionMoved) nearbyMapLastPosition = {lat: pos.lat, lon: pos.lon};
+  }
+  nearbyMapPlaces.clearLayers();
+  const types = ['hospital', 'clinic', 'pharmacy', 'police'];
+  const colors = {hospital: '#c8102e', clinic: '#1a5fb4', pharmacy: '#147d47', police: '#7a3e9d'};
+  const places = types.flatMap(type => (nearData?.data?.results?.[type] || []).map(place => ({
+    ...place, type, distance_m: pos ? Math.round(hav(pos.lat, pos.lon, place.lat, place.lon)) : place.distance_m
+  })));
+  for (const place of places) {
+    if (!Number.isFinite(place.lat) || !Number.isFinite(place.lon)) continue;
+    L.circleMarker([place.lat, place.lon], {
+      radius: 8, color: '#fff', weight: 2, fillColor: colors[place.type], fillOpacity: 1
+    }).bindPopup(nearbyPopup(place)).addTo(nearbyMapPlaces);
+  }
+  const dataKey = nearData?.data?.results || null;
+  if (nearbyMapFollow && dataKey && dataKey !== nearbyMapDataKey) {
+    const points = places.filter(place => Number.isFinite(place.lat) && Number.isFinite(place.lon))
+      .map(place => [place.lat, place.lon]);
+    if (pos) points.push([pos.lat, pos.lon]);
+    if (points.length > 1) nearbyMap.fitBounds(L.latLngBounds(points), {padding: [24, 24], maxZoom: 14});
+    else if (pos) nearbyMap.setView([pos.lat, pos.lon], 13);
+    nearbyMapDataKey = dataKey;
+  }
+  status.textContent = !pos ? t('nearMapNeedLocation')
+    : !nearData ? t(nearLoading ? 'nearMapLoading' : 'nearMapNeedLocation')
+      : places.length ? t('nearMapPlaces', {n: places.length})
+        : t(nearLoading ? 'nearMapLoading' : 'nearMapNoPlaces');
+}
+function setNearbyMapProvider(provider) {
+  nearbyMapProvider = provider;
+  renderNearbyMap();
+  if (provider === 'osm') requestAnimationFrame(() => nearbyMap?.invalidateSize());
+}
+function updateNearbyGoogleMap() {
+  const frame = $('#nearGoogleMap');
+  if (!pos) return;
+  const moved = !nearbyGoogleMapPosition ||
+    hav(pos.lat, pos.lon, nearbyGoogleMapPosition.lat, nearbyGoogleMapPosition.lon) >= 30;
+  if (moved || frame.dataset.language !== lang) {
+    const coordinates = `${pos.lat.toFixed(6)},${pos.lon.toFixed(6)}`;
+    const embed = new URL('https://maps.google.com/maps');
+    embed.searchParams.set('q', `loc:${coordinates}`);
+    embed.searchParams.set('z', '16');
+    embed.searchParams.set('output', 'embed');
+    embed.searchParams.set('region', 'in');
+    embed.searchParams.set('hl', lang);
+    frame.src = embed.toString();
+    nearbyGoogleMapPosition = {lat: pos.lat, lon: pos.lon};
+    frame.dataset.language = lang;
+  }
+  const searchType = nearType === 'essential' ? 'hospitals and pharmacies' : t(nearType);
+  const query = `${searchType} near ${pos.lat.toFixed(5)},${pos.lon.toFixed(5)}, India`;
+  const search = new URL('https://www.google.com/maps/search/');
+  search.searchParams.set('api', '1');
+  search.searchParams.set('query', query);
+  search.searchParams.set('hl', lang);
+  search.searchParams.set('gl', 'in');
+  $('#nearMapGoogleOpen').href = search.toString();
 }
 function appendCall112(parent) {
   const link = document.createElement('a');
@@ -618,6 +1087,33 @@ function appendCall112(parent) {
   link.className = 'call-inline';
   link.setAttribute('aria-label', t('call112Label'));
   link.innerHTML = '<span aria-hidden="true">📞</span> 112';
+  parent.append(link);
+}
+function appendOsmMap(parent) {
+  const lat = Number(pos?.lat), lon = Number(pos?.lon);
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) return;
+  const link = document.createElement('a');
+  link.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.className = 'osm-map-link';
+  link.textContent = t('osmMapFallback');
+  parent.append(link);
+}
+function appendGoogleHospitalSearch(parent) {
+  const lat = Number(pos?.lat), lon = Number(pos?.lon);
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) return;
+  const search = new URL('https://www.google.com/maps/search/');
+  search.searchParams.set('api', '1');
+  search.searchParams.set('query', `hospitals near ${lat.toFixed(5)},${lon.toFixed(5)}, India`);
+  search.searchParams.set('hl', lang);
+  search.searchParams.set('gl', 'in');
+  const link = document.createElement('a');
+  link.href = search.toString();
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.className = 'osm-map-link';
+  link.textContent = t('homeNearbyGoogle');
   parent.append(link);
 }
 $('#nearRefresh').onclick = () => loadNearby(true);
@@ -637,10 +1133,38 @@ function openCard(id, scroll) {
   if (curCard && scroll) $('#card').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 function renderCard() {
-  $('#card').hidden = !curCard; if (!curCard) return;
+  $('#card').hidden = !curCard;
+  renderIncidentShare();
+  if (!curCard) return;
   $('#cardTitle').textContent = `${curCard.icon} ${curCard.title[lang]}`;
   $('#stepsList').innerHTML = curCard.steps[lang].map(s => `<li>${esc(s)}</li>`).join('');
   $('#dontsList').innerHTML = curCard.donts[lang].map(s => `<li>${esc(s)}</li>`).join('');
+}
+function whatsappContactButtons(attribute) {
+  return waContacts.map((c, i) =>
+    `<button class="btn wa wide" ${attribute}="${i}">${esc(t('waContactSend', {name: c.label}))}</button>`).join('');
+}
+function bindWhatsAppButtons(root, attribute) {
+  root.querySelectorAll(`[${attribute}]`).forEach(button => {
+    button.onclick = () => shareEmergencyWithContact(Number(button.getAttribute(attribute)), button);
+  });
+}
+function renderIncidentShare() {
+  const section = $('#incidentShare');
+  section.hidden = !curCard;
+  const buttons = $('#incidentShareButtons');
+  if (!curCard) { buttons.replaceChildren(); return; }
+  if (waContacts.length) {
+    buttons.innerHTML = whatsappContactButtons('data-incident-wa');
+    bindWhatsAppButtons(buttons, 'data-incident-wa');
+  } else {
+    buttons.innerHTML = `<p class="note">${t('incidentShareNoContacts')}</p><button id="incidentAddWa" class="btn ghost wide">${t('waAddContact')}</button>`;
+    $('#incidentAddWa').onclick = () => {
+      showTab('walk');
+      $('#whatsappContactsBox').scrollIntoView({behavior: 'smooth', block: 'start'});
+      $('#waContactName').focus();
+    };
+  }
 }
 let voices = [];
 const loadVoices = () => { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; };
@@ -707,6 +1231,42 @@ function openWA(text) {
   const u = 'https://wa.me/?text=' + encodeURIComponent(text);
   if (!window.open(u, '_blank')) location.href = u;
 }
+async function shareEmergencyWithContact(index, button) {
+  const contact = waContacts[index];
+  if (!contact) return;
+  const popup = window.open('about:blank', '_blank');
+  if (popup) popup.opener = null;
+  if (button) button.disabled = true;
+  const statusText = t('waPreparing');
+  for (const id of ['incidentShareStatus', 'sosWAStatus']) {
+    const status = document.getElementById(id);
+    if (status) { status.hidden = false; status.textContent = statusText; }
+  }
+  try {
+    const positionAge = pos?.updatedAt ? Date.now() - pos.updatedAt : Infinity;
+    const current = positionAge >= 0 && positionAge <= 60000 ? pos : await ensureLocation();
+    if (!current) {
+      popup?.close();
+      for (const id of ['incidentShareStatus', 'sosWAStatus']) {
+        const status = document.getElementById(id);
+        if (status) status.textContent = t('waLocationUnavailable');
+      }
+      return;
+    }
+    const map = `https://www.google.com/maps?q=${current.lat},${current.lon}`;
+    const event = curCard?.title[lang] || t('waGeneric');
+    const message = t('waMessage', {event, map});
+    const url = `https://wa.me/${contact.phone}?text=${encodeURIComponent(message)}`;
+    if (popup) popup.location.href = url;
+    else window.location.href = url;
+    for (const id of ['incidentShareStatus', 'sosWAStatus']) {
+      const status = document.getElementById(id);
+      if (status) status.textContent = t('waReady', {name: contact.label});
+    }
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
 function shareText() {
   const g = pos ? `https://www.google.com/maps?q=${pos.lat},${pos.lon}` : '';
   return `🆘 ${lang === 'hi' ? 'मुझे मदद चाहिए। मेरी लाइव लोकेशन:' : 'I need help. My live location:'} ${share ? share.url : g}\n${g}`;
@@ -736,13 +1296,41 @@ function renderSosPanel() {
     html += `<p class="note">${sosState.hospitalError ? t('hospitalUnavailable') : t('noResults')}</p>`;
   }
   html += `<a class="btn danger wide" href="tel:112" aria-label="${t('call112Label')}"><span aria-hidden="true">📞</span> 112</a>`;
-  html += `<button id="sosWA" class="btn wa wide">${t('sendWA')}</button>`;
+  html += `<p class="note">${t('emergencyPhoneShareExplain')}</p><button id="sosPhoneShare" class="btn ghost wide">${t('emergencyPhoneShare')}</button><p id="sosPhoneShareStatus" class="note" role="status" aria-live="polite" hidden></p>`;
+  if (waContacts.length) {
+    html += `<p class="note">${t('incidentShareExplain')}</p>${whatsappContactButtons('data-sos-wa')}<p id="sosWAStatus" class="note" role="status" aria-live="polite" hidden></p>`;
+  } else {
+    html += `<button id="sosWA" class="btn wa wide">${t('sendWA')}</button>`;
+  }
   const alertText = sosState.alertPending ? t('sendingAlert')
     : sosState.alertSent === null ? t('noContacts')
       : sosState.alertSent > 0 ? t('alertedN', {n: sosState.alertSent}) : t('alertFail');
   html += `<p class="note" role="status" aria-live="polite">${alertText}</p>`;
   panel.innerHTML = html;
-  $('#sosWA').onclick = () => openWA(shareText());
+  $('#sosPhoneShare')?.addEventListener('click', shareEmergencyFromPhone);
+  $('#sosWA')?.addEventListener('click', () => openWA(shareText()));
+  bindWhatsAppButtons(panel, 'data-sos-wa');
+}
+async function shareEmergencyFromPhone() {
+  const status = $('#sosPhoneShareStatus');
+  const map = pos ? `https://www.google.com/maps?q=${pos.lat},${pos.lon}` : '';
+  const event = curCard?.title[lang] || t('waGeneric');
+  const locationText = map || (lang === 'hi' ? 'लोकेशन उपलब्ध नहीं है' : 'Location unavailable');
+  const text = t('waMessage', {event, map: locationText});
+  try {
+    if (navigator.share) {
+      await navigator.share({title: t('appName'), text});
+      if (status) { status.hidden = true; status.textContent = ''; }
+      return;
+    }
+    openWA(text);
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    if (status) {
+      status.hidden = false;
+      status.textContent = t('emergencyPhoneShareUnavailable');
+    }
+  }
 }
 $('#sos').onclick = async () => {
   sosState = {locating: true, hospitalLoading: false, hospitalError: false, alertPending: false, alertSent: null};
@@ -761,11 +1349,10 @@ $('#sos').onclick = async () => {
   sosState.alertPending = codes.length > 0;
   renderSosPanel();
 
-  loadNearbyFast().then(ok => {
+  loadHomeNearby().then(ok => {
     sosState.hospitalLoading = false;
     sosState.hospitalError = !ok;
     renderSosPanel();
-    loadNearbyRest();
   });
 
   const trackPromise = startShare().then(result => result.token).catch(() => '');
@@ -779,6 +1366,81 @@ $('#sos').onclick = async () => {
 };
 
 /* ------------------------------------------------------------ safety contacts */
+function normalizeWhatsAppPhone(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw || !/^\+?[\d\s().-]+$/.test(raw)) return '';
+  let digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.length === 10) {
+    if (!/^[6-9]\d{9}$/.test(digits)) return '';
+    digits = `91${digits}`;
+  }
+  if (digits.length < 8 || digits.length > 15 || digits.startsWith('0')) return '';
+  return digits;
+}
+function renderWhatsappContacts() {
+  const list = $('#whatsappContactsList');
+  list.innerHTML = waContacts.length
+    ? waContacts.map((c, i) => `<div class="contact"><div><b>${esc(c.label)}</b><br><span class="note">+${esc(c.phone)}</span></div>
+        <div><button class="btn ghost" data-wa-edit="${i}">${t('waContactEdit')}</button>
+        <button class="btn ghost" data-wa-remove="${i}" aria-label="${esc(t('removeContact', {name: c.label}))}">✕</button></div></div>`).join('')
+    : `<p class="note">${t('waContactEmpty')}</p>`;
+  $('#waContactSave').textContent = t(editingWaContact === null ? 'waContactSave' : 'waContactUpdate');
+  $('#waContactCancel').hidden = editingWaContact === null;
+  list.querySelectorAll('[data-wa-edit]').forEach(button => button.onclick = () => {
+    editingWaContact = Number(button.dataset.waEdit);
+    const contact = waContacts[editingWaContact];
+    if (!contact) { editingWaContact = null; return; }
+    $('#waContactName').value = contact.label;
+    $('#waContactPhone').value = `+${contact.phone}`;
+    $('#waContactStatus').hidden = true;
+    renderWhatsappContacts();
+    $('#waContactName').focus();
+  });
+  list.querySelectorAll('[data-wa-remove]').forEach(button => button.onclick = () => {
+    const index = Number(button.dataset.waRemove);
+    const contact = waContacts[index];
+    if (!contact || !confirm(t('waRemoveConfirm', {name: contact.label}))) return;
+    waContacts.splice(index, 1);
+    if (editingWaContact === index) {
+      editingWaContact = null;
+      $('#whatsappContactForm').reset();
+    } else if (editingWaContact !== null && editingWaContact > index) editingWaContact--;
+    store.set('waContacts', waContacts);
+    $('#waContactStatus').hidden = false;
+    $('#waContactStatus').textContent = t('waContactRemoved');
+    renderWhatsappContacts();
+    renderCard();
+    if (!$('#sosPanel').hidden) renderSosPanel();
+  });
+}
+$('#whatsappContactForm').onsubmit = event => {
+  event.preventDefault();
+  const label = $('#waContactName').value.trim().slice(0, 40);
+  const phone = normalizeWhatsAppPhone($('#waContactPhone').value);
+  const status = $('#waContactStatus');
+  status.hidden = false;
+  if (!label || !phone) {
+    status.textContent = t('waContactInvalid');
+    return;
+  }
+  const contact = {label, phone};
+  if (editingWaContact === null) waContacts.push(contact);
+  else waContacts[editingWaContact] = contact;
+  store.set('waContacts', waContacts);
+  editingWaContact = null;
+  $('#whatsappContactForm').reset();
+  status.textContent = t('waContactSaved');
+  renderWhatsappContacts();
+  renderCard();
+  if (!$('#sosPanel').hidden) renderSosPanel();
+};
+$('#waContactCancel').onclick = () => {
+  editingWaContact = null;
+  $('#whatsappContactForm').reset();
+  $('#waContactStatus').hidden = true;
+  renderWhatsappContacts();
+};
 function renderContacts() {
   $('#contactsList').innerHTML = contacts.map(c => `<div class="contact"><div><b>${esc(c.label)}</b>
     <span class="pill ${c.joined ? 'ok' : 'wait'}">${c.joined ? t('joined') : c.inviteExpired ? t('inviteExpired') : t('pending')}</span></div>
@@ -886,20 +1548,23 @@ $('#deleteData').onclick = async () => {
     walkTimers.forEach(clearInterval); walkTimers = [];
     if (watchId !== null) navigator.geolocation?.clearWatch(watchId);
     watchId = null;
-    for (const key of ['contacts', 'share', 'walk', 'name', 'lastpos', 'nearby',
+    for (const key of ['contacts', 'waContacts', 'share', 'walk', 'name', 'lastpos', 'nearby',
       'demoSession', 'demoSessionExpires', 'deviceToken', 'locationPrompted']) {
       try { localStorage.removeItem(key); } catch {}
     }
-    contacts = []; share = null; walkSt = null; pos = null; nearData = null;
+    contacts = []; waContacts = []; editingWaContact = null; share = null; walkSt = null; pos = null; nearData = null;
+    homeNearbyLoading = false; homeNearbyError = false; homeNearbySearched = false;
     demoSession = ''; demoSessionExpires = 0; deviceToken = '';
     demoSessionChecked = false; locationPrompted = false; locationRequestStatus = '';
+    nearbyLocationChecked = false; nearbyLocationLoading = false; nearbyLocationError = '';
+    $('#whatsappContactForm').reset(); $('#waContactStatus').hidden = true;
     operatorRequestId++;
     operator = {open: false, pos: null, address: '', lookup: 'idle'};
     stopSpeak();
     $('#yourName').value = ''; $('#operatorPeople').value = ''; $('#operatorEvent').value = '';
     $('#locLine').textContent = '';
     $('#demoBox').hidden = true; $('#sosPanel').hidden = true;
-    renderContacts(); renderShare(); renderWalk(); renderLocationIntro(); renderOperator();
+    renderContacts(); renderWhatsappContacts(); renderCard(); renderShare(); renderWalk(); renderLocationIntro(); renderHomeNearby(); renderOperator();
     status.textContent = t('deleteSuccess');
   } catch {
     status.textContent = t('deleteFail');
