@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#b3122a">
+<title>Aapatkaal Saathi · आपातकाल साथी</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon.svg">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand" data-i="appName">आपातकाल साथी</div>
+  <button id="langBtn" class="lang" aria-label="Change language">EN</button>
+  <a id="call112" class="call112" href="tel:112" aria-label="Call emergency number 112"><span aria-hidden="true">📞</span> 112</a>
+</header>
+
+<main>
+  <section id="tab-help" class="tab">
+    <div class="sos-wrap">
+      <button id="sos" class="sos" aria-label="SOS"><span>SOS</span></button>
+      <p class="hint" data-i="sosHint"></p>
+      <p id="locLine" class="loc" role="status"></p>
+    </div>
+
+    <section id="locationIntro" class="box location-intro" aria-labelledby="locationTitle" hidden>
+      <h2 id="locationTitle" data-i="locationTitle"></h2>
+      <p class="note" data-i="locationReason"></p>
+      <div class="row">
+        <button id="useLocation" class="btn go" data-i="useLocation"></button>
+        <button id="skipLocation" class="btn ghost" data-i="skipLocation"></button>
+      </div>
+      <p id="locationIntroStatus" class="note" role="status" aria-live="polite" hidden></p>
+    </section>
+
+    <button id="operatorBtn" class="btn danger wide" data-i="operatorOpen"></button>
+    <article id="operatorCard" class="box operator-card" hidden>
+      <h2 data-i="operatorTitle"></h2>
+      <p class="note" data-i="operatorIntro"></p>
+      <label for="operatorPeople" data-i="operatorPeople"></label>
+      <input id="operatorPeople" type="number" min="0" max="99" inputmode="numeric">
+      <label for="operatorEvent" data-i="operatorEvent"></label>
+      <input id="operatorEvent" type="text" maxlength="100">
+      <p id="operatorLocation" class="note" role="status" aria-live="polite"></p>
+      <button id="operatorRetry" class="btn ghost wide" data-i="operatorRetry" hidden></button>
+      <div id="operatorScript" class="operator-script"></div>
+      <p id="operatorVoiceNote" class="note" hidden></p>
+      <div class="row">
+        <button id="operatorRead" class="btn" data-i="operatorRead"></button>
+        <button id="operatorStop" class="btn ghost" data-i="stop" hidden></button>
+      </div>
+      <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
+    </article>
+
+    <div id="manualLoc" class="box" hidden>
+      <label for="placeQ" data-i="searchPlace"></label>
+      <div class="row"><input id="placeQ" type="text"><button id="placeGo" class="btn" data-i="search"></button></div>
+      <div id="placeRes" role="status" aria-live="polite"></div>
+    </div>
+
+    <div id="sosPanel" class="box sospanel" role="region" hidden></div>
+
+    <section class="box" aria-labelledby="geminiTitle" aria-describedby="geminiExplain">
+      <h2 id="geminiTitle" data-i="geminiTitle"></h2>
+      <p id="geminiExplain" class="note" data-i="geminiExplain"></p>
+      <label for="geminiDescription" data-i="geminiInput"></label>
+      <textarea id="geminiDescription" rows="3" maxlength="500" autocomplete="off"></textarea>
+      <button id="geminiRun" class="btn go wide" data-i="geminiRun"></button>
+      <p id="geminiResult" class="note" role="status" aria-live="polite" hidden></p>
+      <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
+    </section>
+
+    <h2 data-i="whatHappened"></h2>
+    <div id="chips" class="chips"></div>
+
+    <article id="card" class="box card" hidden>
+      <div class="cardhead">
+        <h3 id="cardTitle"></h3>
+        <div class="voice">
+          <button id="voiceBtn" class="btn" data-i="read"></button>
+          <button id="stopBtn" class="btn ghost" data-i="stop" hidden></button>
+        </div>
+      </div>
+      <p class="note" data-i="medicalNotice"></p>
+      <p id="voiceNote" class="note" hidden></p>
+      <h4 data-i="stepsH"></h4>
+      <ol id="stepsList"></ol>
+      <h4 class="dont" data-i="dontsH"></h4>
+      <ul id="dontsList" class="donts"></ul>
+    </article>
+
+    <div class="box">
+      <button id="shareBtn" class="btn wa wide" data-i="shareLive"></button>
+      <p id="shareStatus" class="note" hidden></p>
+      <button id="shareStop" class="btn ghost wide" data-i="stopShare" hidden></button>
+    </div>
+  </section>
+
+  <section id="tab-near" class="tab" hidden>
+    <div id="typeTabs" class="chips small"></div>
+    <p id="nearMeta" class="note" role="status" aria-live="polite"></p>
+    <div id="nearList" aria-live="polite"></div>
+    <button id="nearRefresh" class="btn ghost wide" data-i="refresh"></button>
+  </section>
+
+  <section id="tab-walk" class="tab" hidden>
+    <h2 data-i="walkTitle"></h2>
+    <p class="note" data-i="walkExplain"></p>
+
+    <div class="box">
+      <label for="yourName" data-i="yourName"></label>
+      <input id="yourName" type="text" maxlength="40" autocomplete="name">
+    </div>
+
+    <div class="box">
+      <h3 data-i="contactsTitle"></h3>
+      <div id="contactsList"></div>
+      <button id="addContact" class="btn wide" data-i="addContact"></button>
+    </div>
+
+    <div id="walkSetup" class="box">
+      <div id="minChips" class="chips small"></div>
+      <button id="walkStart" class="btn go wide" data-i="startWalk"></button>
+    </div>
+
+    <div id="walkRun" class="box walkrun" hidden>
+      <div id="countdown" class="countdown" role="timer" aria-label="Time remaining">0:00</div>
+      <p id="walkMsg" class="note" role="status" aria-live="polite"></p>
+      <button id="btnSafe" class="btn go wide" data-i="imSafe"></button>
+      <div class="row">
+        <button id="btnExtend" class="btn ghost" data-i="plus10"></button>
+        <button id="btnPanic" class="btn danger" data-i="panic"></button>
+      </div>
+    </div>
+
+    <div id="demoBox" class="box demo" hidden>
+      <h4 data-i="demoTitle"></h4>
+      <div id="demoLog"></div>
+    </div>
+
+    <section class="box" aria-labelledby="privacyTitle">
+      <h3 id="privacyTitle" data-i="privacyTitle"></h3>
+      <p class="note" data-i="privacyNote"></p>
+      <button id="deleteData" class="btn danger wide" data-i="deleteData"></button>
+      <p id="deleteDataStatus" class="note" role="status" aria-live="polite" hidden></p>
+    </section>
+  </section>
+</main>
+
+<p class="foot" data-i="footer"></p>
+
+<nav class="tabs">
+  <button data-tab="help" class="on" aria-current="page"><span aria-hidden="true">🆘</span><b data-i="tabHelp"></b></button>
+  <button data-tab="near"><span aria-hidden="true">🏥</span><b data-i="tabNear"></b></button>
+  <button data-tab="walk"><span aria-hidden="true">🚶</span><b data-i="tabWalk"></b></button>
+</nav>
+<script src="/app.js"></script>
+</body>
+</html>

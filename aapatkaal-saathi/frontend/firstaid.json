@@ -1,0 +1,240 @@
+{
+  "version": 1,
+  "review_note": "Draft written from standard first-aid principles. Verify against Indian Red Cross, WHO and MoHFW/NDMA guidance before public use. No medicine doses are given on purpose.",
+  "cards": [
+    {
+      "id": "accident", "icon": "🚗",
+      "title": {"en": "Road accident", "hi": "सड़क दुर्घटना"},
+      "steps": {
+        "en": [
+          "Stop at a safe distance and switch on hazard lights. Check that the place is safe for you first.",
+          "Call 112 now. Give the exact place and say how many people are hurt.",
+          "Do not move the injured person unless there is danger, such as fire or oncoming traffic.",
+          "Check if they respond and are breathing. If not breathing, start hands-only CPR (see the CPR card).",
+          "Press a clean cloth firmly on any heavy bleeding.",
+          "Keep them warm and keep talking to them. Send someone to the roadside to guide the ambulance."
+        ],
+        "hi": [
+          "सुरक्षित दूरी पर रुकें और हैज़र्ड लाइट चालू करें। पहले देखें कि जगह आपके लिए सुरक्षित है।",
+          "तुरंत 112 पर कॉल करें। सही जगह बताएं और कितने लोग घायल हैं यह बताएं।",
+          "आग या सामने से आती गाड़ियों जैसा खतरा न हो तो घायल को न हिलाएं।",
+          "देखें कि वह जवाब दे रहा है और साँस ले रहा है या नहीं। साँस न हो तो सिर्फ़ छाती दबाकर CPR शुरू करें (CPR कार्ड देखें)।",
+          "ज़्यादा खून बह रहा हो तो साफ़ कपड़े से कसकर दबाएं।",
+          "उन्हें गर्म रखें और बात करते रहें। किसी को सड़क किनारे भेजें जो एम्बुलेंस को रास्ता दिखाए।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT remove a helmet.", "Do NOT pull the person out of the vehicle unless there is danger.", "Do NOT give water, food or tea.", "Do NOT let a crowd press around them."],
+        "hi": ["हेलमेट न उतारें।", "खतरा न हो तो व्यक्ति को गाड़ी से बाहर न खींचें।", "पानी, खाना या चाय न दें।", "भीड़ को उन्हें घेरने न दें।"]
+      }
+    },
+    {
+      "id": "chest", "icon": "💔",
+      "title": {"en": "Chest pain", "hi": "सीने में दर्द"},
+      "steps": {
+        "en": [
+          "Call 112 immediately. Do not wait for the pain to pass.",
+          "Make the person sit down and rest. Half-sitting with knees bent is usually most comfortable.",
+          "Loosen tight clothing around the neck and chest.",
+          "Stay with them and keep them calm. If their own doctor has prescribed heart medicine, help them take it as prescribed.",
+          "Unlock the door and send someone to guide the ambulance.",
+          "If they stop responding and are not breathing, start CPR (see the CPR card)."
+        ],
+        "hi": [
+          "तुरंत 112 पर कॉल करें। दर्द अपने आप ठीक होने का इंतज़ार न करें।",
+          "व्यक्ति को बैठाकर आराम कराएं। घुटने मोड़कर आधा बैठना आमतौर पर आरामदायक होता है।",
+          "गले और छाती के कसे कपड़े ढीले करें।",
+          "उनके साथ रहें और शांत रखें। अगर डॉक्टर ने दिल की दवा लिखी है तो उसी तरह लेने में मदद करें।",
+          "दरवाज़ा खोल दें और किसी को एम्बुलेंस को रास्ता दिखाने भेजें।",
+          "अगर वह जवाब देना बंद कर दे और साँस न ले, तो CPR शुरू करें (CPR कार्ड देखें)।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT let them walk or climb stairs.", "Do NOT dismiss it as gas or acidity.", "Do NOT give food or water.", "Do NOT leave them alone."],
+        "hi": ["उन्हें चलने या सीढ़ी चढ़ने न दें।", "इसे गैस या एसिडिटी समझकर न टालें।", "खाना या पानी न दें।", "उन्हें अकेला न छोड़ें।"]
+      }
+    },
+    {
+      "id": "cpr", "icon": "🫀",
+      "title": {"en": "Not breathing / CPR", "hi": "साँस नहीं / CPR"},
+      "steps": {
+        "en": [
+          "Shout and tap their shoulders. If there is no response and no normal breathing, act now.",
+          "Call 112, or tell someone to call and to bring an AED if there is one nearby.",
+          "Lay the person on their back on a firm, flat surface.",
+          "Put the heel of one hand on the centre of the chest, the other hand on top. Keep your arms straight.",
+          "Push hard and fast: about 5 to 6 cm deep, 100 to 120 pushes a minute. Let the chest rise fully each time.",
+          "Do not stop until help arrives or the person starts breathing. Swap with someone every 2 minutes if you are tired.",
+          "For a child or baby, push gently with one hand or two fingers and follow the 112 operator's instructions."
+        ],
+        "hi": [
+          "ज़ोर से आवाज़ दें और कंधे थपथपाएं। जवाब न मिले और साँस सामान्य न हो, तो तुरंत शुरू करें।",
+          "112 पर कॉल करें, या किसी को कॉल करने भेजें और पास में AED हो तो मंगवाएं।",
+          "व्यक्ति को सख़्त, सपाट जगह पर पीठ के बल लिटाएं।",
+          "एक हथेली की एड़ी छाती के बीच में रखें, दूसरा हाथ उसके ऊपर। बाहें सीधी रखें।",
+          "ज़ोर से और तेज़ दबाएं: लगभग 5 से 6 सेमी गहरा, एक मिनट में 100 से 120 बार। हर बार छाती को पूरी तरह ऊपर आने दें।",
+          "मदद आने तक या साँस शुरू होने तक न रुकें। थक जाएं तो हर 2 मिनट में किसी और से बदलें।",
+          "बच्चे या शिशु के लिए एक हाथ या दो उंगलियों से हल्के दबाएं और 112 ऑपरेटर की सलाह मानें।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT stop to check again and again.", "Do NOT be afraid of pushing hard. A cracked rib is far better than no help.", "Do NOT give water.", "Do NOT leave the person."],
+        "hi": ["बार-बार जाँचने के लिए न रुकें।", "ज़ोर से दबाने से न डरें। पसली चटकना बिना मदद से कहीं बेहतर है।", "पानी न दें।", "व्यक्ति को छोड़कर न जाएं।"]
+      }
+    },
+    {
+      "id": "snake", "icon": "🐍",
+      "title": {"en": "Snakebite", "hi": "साँप का काटना"},
+      "steps": {
+        "en": [
+          "Move away from the snake. Do not try to catch or kill it.",
+          "Call 112 and go to a hospital that has anti-snake venom at once. This is the only real treatment.",
+          "Keep the person calm and still. Fear and movement spread venom faster.",
+          "Take off rings, bangles, watch and tight clothes near the bite before swelling starts.",
+          "Keep the bitten limb still, about level with the heart. You may loosely splint it like a broken limb.",
+          "Note the time of the bite. If it is safe, remember what the snake looked like."
+        ],
+        "hi": [
+          "साँप से दूर हट जाएं। उसे पकड़ने या मारने की कोशिश न करें।",
+          "112 पर कॉल करें और तुरंत ऐसे अस्पताल जाएं जहाँ एंटी-स्नेक वेनम हो। यही असली इलाज है।",
+          "व्यक्ति को शांत और स्थिर रखें। डर और हिलने-डुलने से ज़हर तेज़ी से फैलता है।",
+          "सूजन आने से पहले काटी जगह के पास की अंगूठी, चूड़ी, घड़ी और कसे कपड़े उतार दें।",
+          "काटे हुए हाथ या पैर को स्थिर रखें, दिल के लगभग बराबर ऊँचाई पर। टूटी हड्डी की तरह ढीली पट्टी या खपच्ची लगा सकते हैं।",
+          "काटने का समय नोट करें। सुरक्षित हो तो याद रखें कि साँप कैसा दिखता था।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT cut the wound or suck out venom.", "Do NOT tie a tight band or tourniquet.", "Do NOT apply ice, herbs or turmeric.", "Do NOT waste time with a traditional healer.", "Do NOT give alcohol, food or drink."],
+        "hi": ["घाव को न काटें और ज़हर चूसने की कोशिश न करें।", "कसकर पट्टी या टूर्निकेट न बाँधें।", "बर्फ, जड़ी-बूटी या हल्दी न लगाएं।", "झाड़-फूँक या ओझा के पास समय बर्बाद न करें।", "शराब, खाना या पीने की चीज़ न दें।"]
+      }
+    },
+    {
+      "id": "burn", "icon": "🔥",
+      "title": {"en": "Burn", "hi": "जलना"},
+      "steps": {
+        "en": [
+          "Move away from the source. If clothes are on fire: stop, drop and roll. For an electric burn, switch off the power first.",
+          "Cool the burn under clean running tap water for 20 minutes. Do not stop early.",
+          "Gently take off rings, bangles and watch near the burn before it swells. Leave anything that is stuck.",
+          "Cover loosely with a clean, non-fluffy cloth or kitchen cling film.",
+          "Go to a hospital if the burn is large, deep, on the face, hands or private parts, or the person is a child, or it is a chemical or electric burn.",
+          "For a chemical burn, keep rinsing with plenty of water and remove soaked clothing."
+        ],
+        "hi": [
+          "जलने के स्रोत से दूर हटें। कपड़ों में आग लगी हो तो रुकें, ज़मीन पर लेटें और लोटें। बिजली से जलने पर पहले बिजली बंद करें।",
+          "जली जगह को साफ़ बहते नल के पानी के नीचे 20 मिनट तक ठंडा करें। जल्दी न रुकें।",
+          "सूजन आने से पहले जली जगह के पास की अंगूठी, चूड़ी और घड़ी धीरे से उतारें। जो चिपका हो उसे छोड़ दें।",
+          "साफ़, बिना रोएँ वाले कपड़े या क्लिंग फ़िल्म से ढीला ढक दें।",
+          "जलन बड़ी या गहरी हो, चेहरे, हाथों या गुप्तांगों पर हो, व्यक्ति बच्चा हो, या केमिकल या बिजली से जला हो, तो अस्पताल जाएं।",
+          "केमिकल से जलने पर खूब पानी से धोते रहें और भीगे कपड़े उतार दें।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT apply ice, toothpaste, butter, ghee, oil or turmeric.", "Do NOT burst blisters.", "Do NOT pull off clothing stuck to the skin.", "Do NOT use cotton wool on the burn."],
+        "hi": ["बर्फ, टूथपेस्ट, मक्खन, घी, तेल या हल्दी न लगाएं।", "फफोले न फोड़ें।", "त्वचा से चिपके कपड़े न खींचें।", "जली जगह पर रुई न रखें।"]
+      }
+    },
+    {
+      "id": "choking", "icon": "😮",
+      "title": {"en": "Choking", "hi": "गले में कुछ फँसना"},
+      "steps": {
+        "en": [
+          "If the person can cough, speak or breathe, tell them to keep coughing. Stay with them.",
+          "If they cannot cough, speak or breathe: lean them forward and give up to 5 firm back blows between the shoulder blades with the heel of your hand.",
+          "If still choking: stand behind them, make a fist above the belly button and pull sharply inward and upward, up to 5 times.",
+          "Keep alternating 5 back blows and 5 abdominal thrusts. Call 112 if it does not clear.",
+          "If they become unresponsive, lay them down and start CPR (see the CPR card).",
+          "Baby under 1 year: lay face down along your forearm, 5 back blows, then turn over and give 5 chest thrusts with two fingers. No belly thrusts for babies."
+        ],
+        "hi": [
+          "अगर व्यक्ति खाँस, बोल या साँस ले पा रहा है, तो उसे खाँसते रहने को कहें। उसके साथ रहें।",
+          "अगर वह खाँस, बोल या साँस नहीं ले पा रहा: उसे आगे झुकाएं और हथेली की एड़ी से कंधों के बीच 5 बार ज़ोर से थपकी दें।",
+          "फिर भी न निकले तो: पीछे खड़े होकर नाभि के ऊपर मुट्ठी रखें और अंदर तथा ऊपर की ओर झटके से खींचें, 5 बार तक।",
+          "5 थपकी और 5 पेट के झटके बारी-बारी से करते रहें। न निकले तो 112 पर कॉल करें।",
+          "अगर वह बेहोश हो जाए, तो लिटाकर CPR शुरू करें (CPR कार्ड देखें)।",
+          "1 साल से छोटा शिशु: उसे अपनी बाँह पर उल्टा लिटाएं, पीठ पर 5 थपकी दें, फिर पलटकर दो उंगलियों से छाती पर 5 बार दबाएं। शिशु के पेट पर झटके न दें।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT give water.", "Do NOT hit the back if they are coughing well.", "Do NOT put your fingers blindly into the mouth.", "Do NOT leave them alone."],
+        "hi": ["पानी न दें।", "अगर वह ठीक से खाँस रहा है तो पीठ पर न मारें।", "बिना देखे मुँह में उंगली न डालें।", "उन्हें अकेला न छोड़ें।"]
+      }
+    },
+    {
+      "id": "bleeding", "icon": "🩸",
+      "title": {"en": "Heavy bleeding", "hi": "ज़्यादा खून बहना"},
+      "steps": {
+        "en": [
+          "Press firmly and directly on the wound with a clean cloth or your hand. A plastic bag can protect your hand.",
+          "Keep pressing without lifting for at least 10 minutes.",
+          "If blood soaks through, add more cloth on top. Do not remove the first cloth.",
+          "Raise the injured arm or leg if you do not think it is broken.",
+          "Bandage firmly, but not so tight that fingers or toes turn blue.",
+          "Call 112 if bleeding is severe. Lay the person down and keep them warm."
+        ],
+        "hi": [
+          "साफ़ कपड़े या अपने हाथ से घाव को सीधे और कसकर दबाएं। हाथ बचाने के लिए प्लास्टिक की थैली लगा सकते हैं।",
+          "बिना हटाए कम से कम 10 मिनट तक दबाए रखें।",
+          "खून कपड़े से रिस जाए तो ऊपर और कपड़ा रखें। पहला कपड़ा न हटाएं।",
+          "हड्डी टूटी न लगे तो घायल हाथ या पैर को ऊपर उठाएं।",
+          "कसकर पट्टी बाँधें, पर इतनी नहीं कि उंगलियाँ नीली पड़ जाएं।",
+          "खून ज़्यादा बहे तो 112 पर कॉल करें। व्यक्ति को लिटाएं और गर्म रखें।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT pull out an object stuck in the wound. Press around it.", "Do NOT keep lifting the cloth to look.", "Do NOT put powder, turmeric or coffee on the wound.", "Do NOT use a tight tourniquet unless you are trained."],
+        "hi": ["घाव में फँसी चीज़ न निकालें। उसके आसपास दबाएं।", "देखने के लिए बार-बार कपड़ा न हटाएं।", "घाव पर पाउडर, हल्दी या कॉफ़ी न डालें।", "प्रशिक्षित न हों तो कसकर टूर्निकेट न बाँधें।"]
+      }
+    },
+    {
+      "id": "seizure", "icon": "⚡",
+      "title": {"en": "Seizure / fits", "hi": "दौरा पड़ना"},
+      "steps": {
+        "en": [
+          "Stay calm and note the time the seizure started.",
+          "Clear hard and sharp things away. Put something soft under their head.",
+          "Loosen anything tight around the neck.",
+          "When the jerking stops, turn them onto their side and check that they are breathing.",
+          "Stay until they are fully awake. Speak gently and calmly.",
+          "Call 112 if it lasts more than 5 minutes, repeats, it is their first seizure, they are hurt, pregnant, in water, or have trouble breathing afterwards."
+        ],
+        "hi": [
+          "शांत रहें और दौरा शुरू होने का समय नोट करें।",
+          "आसपास की सख़्त और नुकीली चीज़ें हटाएं। सिर के नीचे कुछ नरम रखें।",
+          "गले के कसे कपड़े ढीले करें।",
+          "झटके रुकने पर उन्हें करवट से लिटाएं और देखें कि साँस चल रही है।",
+          "पूरी तरह होश आने तक साथ रहें। धीरे और शांति से बात करें।",
+          "दौरा 5 मिनट से ज़्यादा चले, बार-बार आए, पहली बार हो, चोट लगी हो, महिला गर्भवती हो, पानी में हो, या बाद में साँस में दिक्कत हो, तो 112 पर कॉल करें।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT hold them down.", "Do NOT put anything in the mouth: no spoon, no fingers.", "Do NOT make them smell a shoe or onion.", "Do NOT give water or food until fully awake."],
+        "hi": ["उन्हें दबाकर न रखें।", "मुँह में कुछ न डालें: न चम्मच, न उंगली।", "जूता या प्याज़ न सुँघाएं।", "पूरे होश में आने तक पानी या खाना न दें।"]
+      }
+    },
+    {
+      "id": "stroke", "icon": "🧠",
+      "title": {"en": "Stroke signs", "hi": "स्ट्रोक के संकेत"},
+      "steps": {
+        "en": [
+          "Check FAST. Face: is one side drooping? Arms: can they lift both? Speech: is it slurred or strange? Time: if any sign, call 112 now.",
+          "Note the exact time the symptoms started. Doctors need this.",
+          "Keep them sitting or lying with the head slightly raised. Stay calm.",
+          "Go to a hospital with a CT scan and stroke care. Tell the 112 operator it may be a stroke.",
+          "If they become unresponsive and are not breathing, start CPR (see the CPR card)."
+        ],
+        "hi": [
+          "FAST जाँचें। चेहरा: क्या एक तरफ़ लटक रहा है? बाँहें: क्या दोनों उठा पाते हैं? बोली: क्या लड़खड़ा रही है? समय: कोई भी लक्षण हो तो तुरंत 112 पर कॉल करें।",
+          "लक्षण शुरू होने का सही समय नोट करें। डॉक्टर को यह चाहिए।",
+          "उन्हें बैठाएं या लिटाएं, सिर थोड़ा ऊँचा रखें। शांत रहें।",
+          "CT स्कैन और स्ट्रोक इलाज वाले अस्पताल जाएं। 112 ऑपरेटर को बताएं कि यह लकवा हो सकता है।",
+          "अगर वह बेहोश हो जाए और साँस न ले, तो CPR शुरू करें (CPR कार्ड देखें)।"
+        ]
+      },
+      "donts": {
+        "en": ["Do NOT wait to see if it passes.", "Do NOT give food, drink or pills. Swallowing may be unsafe.", "Do NOT let them sleep it off.", "Do NOT use home remedies."],
+        "hi": ["ठीक होने का इंतज़ार न करें।", "खाना, पानी या गोली न दें। निगलना सुरक्षित नहीं हो सकता।", "उन्हें सोकर ठीक होने के लिए न छोड़ें।", "घरेलू नुस्खे न आज़माएं।"]
+      }
+    }
+  ]
+}
