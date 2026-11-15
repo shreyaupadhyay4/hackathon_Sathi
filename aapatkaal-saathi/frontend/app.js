@@ -44,7 +44,7 @@ const TXT = {
     operatorVoiceUnavailable: 'Speech playback is not available on this phone.',
     operatorNoHindiVoice: 'No Hindi voice found. Add Hindi text-to-speech in phone settings.',
     geminiTitle: 'Ask Gemini for safe guidance',
-    geminiExplain: 'Ask about an emergency in Hindi or English. Your question is sent to Google Gemini; do not include names, phone numbers, or exact addresses. GPS is not sent. Gemini matches your question to an existing app card. If none fits, the app automatically shows general safety steps instead of guessing treatment. This is not a diagnosis. Call 112 in an emergency.',
+    geminiExplain: 'Ask about an emergency in Hindi or English. Your question is sent to Google Gemini; do not include names, phone numbers, or exact addresses. GPS is not sent. Gemini gives a short answer from a matching app card, or a limited question-specific safety answer if no card fits. AI answers can be wrong; call 112 in an emergency.',
     geminiInput: 'What happened, or what do you need help with?', geminiPlaceholder: 'For example: “My father has chest pain”',
     geminiRun: 'Get safe guidance', geminiWorking: 'Checking your question…',
     geminiShortInput: 'Add a few words about what happened, or choose a card below.',
@@ -52,7 +52,9 @@ const TXT = {
     offlineBanner: 'Offline: saved first-aid cards and nearby listings remain available. Fresh maps and contact alerts need internet; call 112 directly.',
     demoAlertSaved: 'Demo only: simulated alert saved in this app. No contact was notified.',
     geminiMatch: 'Gemini found a matching card: “{title}”. Read its steps below. This is not a diagnosis; call 112 in an emergency.',
-    geminiUnsure: 'No card safely matches your question. General safety steps are shown below.',
+    geminiUnsure: 'No app card covers this exact issue. Gemini’s general answer is below.',
+    geminiAnswerTitle: 'Gemini answer',
+    geminiAnswerDisclaimer: 'AI guidance can be wrong. Follow emergency operator instructions; call 112 if anyone is in immediate danger.',
     geminiFallbackTitle: 'General safety steps when no card fits:',
     geminiFallback1: 'Keep yourself and others away from immediate danger. Do not enter an unsafe area.',
     geminiFallback2: 'In India, call 112 for an emergency. Tell the operator your location and what you can observe.',
@@ -200,7 +202,7 @@ const TXT = {
     operatorVoiceUnavailable: 'इस फ़ोन पर सुनाने की सुविधा उपलब्ध नहीं है।',
     operatorNoHindiVoice: 'हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
     geminiTitle: 'Gemini से सुरक्षित मदद पूछें',
-    geminiExplain: 'आपातकाल के बारे में हिंदी या अंग्रेज़ी में पूछें। आपका सवाल Google Gemini को भेजा जाएगा; नाम, फ़ोन नंबर या पूरा पता न लिखें। GPS नहीं भेजा जाता। Gemini सवाल को ऐप के मौजूदा कार्ड से मिलाता है। मेल न मिलने पर ऐप इलाज का अनुमान लगाने की बजाय अपने सामान्य सुरक्षा कदम दिखाता है। यह बीमारी की पहचान नहीं है। आपातकाल में 112 पर कॉल करें।',
+    geminiExplain: 'आपातकाल के बारे में हिंदी या अंग्रेज़ी में पूछें। आपका सवाल Google Gemini को भेजा जाएगा; नाम, फ़ोन नंबर या पूरा पता न लिखें। GPS नहीं भेजा जाता। Gemini मिलते-जुलते ऐप कार्ड से छोटा जवाब देगा या कार्ड न मिलने पर सवाल से जुड़ी सीमित सुरक्षा जानकारी देगा। AI का जवाब गलत हो सकता है; आपातकाल में 112 पर कॉल करें।',
     geminiInput: 'क्या हुआ है या किस बात में मदद चाहिए?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
     geminiRun: 'सुरक्षित मदद देखें', geminiWorking: 'आपका सवाल समझ रहे हैं…',
     geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
@@ -208,7 +210,9 @@ const TXT = {
     offlineBanner: 'इंटरनेट नहीं है: सेव किए प्राथमिक उपचार कार्ड और पास की सूची दिख सकती है। नए नक्शे और संपर्क अलर्ट के लिए इंटरनेट चाहिए; 112 पर सीधे कॉल करें।',
     demoAlertSaved: 'केवल डेमो: नकली अलर्ट इस ऐप में सहेजा गया; किसी संपर्क को सूचना नहीं गई।',
     geminiMatch: 'Gemini को मिलता-जुलता कार्ड मिला: “{title}”। नीचे दिए कदम पढ़ें। यह बीमारी की पहचान नहीं है; आपातकाल में 112 पर कॉल करें।',
-    geminiUnsure: 'आपके सवाल से कोई कार्ड सुरक्षित रूप से मेल नहीं खाता। नीचे सामान्य सुरक्षा कदम दिए हैं।',
+    geminiUnsure: 'इस समस्या के लिए ऐप में खास कार्ड नहीं है। Gemini का सामान्य जवाब नीचे है।',
+    geminiAnswerTitle: 'Gemini का जवाब',
+    geminiAnswerDisclaimer: 'AI की सलाह गलत हो सकती है। आपातकालीन ऑपरेटर के निर्देश मानें; किसी को तत्काल खतरा हो तो 112 पर कॉल करें।',
     geminiFallbackTitle: 'कार्ड से मेल न मिलने पर सामान्य सुरक्षा कदम:',
     geminiFallback1: 'खुद को और दूसरों को तत्काल खतरे से दूर रखें। असुरक्षित जगह में न जाएँ।',
     geminiFallback2: 'आपातकाल में भारत में 112 पर कॉल करें। ऑपरेटर को अपनी जगह और जो दिख रहा है, बताएं।',
@@ -758,6 +762,8 @@ $('#geminiDescription').addEventListener('input', () => {
   const status = $('#geminiResult');
   status.hidden = true;
   status.textContent = '';
+  $('#geminiAnswer').hidden = true;
+  $('#geminiAnswerText').textContent = '';
   $('#geminiSafetyFallback').hidden = true;
 });
 $('#geminiRun').onclick = async () => {
@@ -765,7 +771,9 @@ $('#geminiRun').onclick = async () => {
   const status = $('#geminiResult');
   const button = $('#geminiRun');
   const fallback = $('#geminiSafetyFallback');
+  const answerBox = $('#geminiAnswer');
   fallback.hidden = true;
+  answerBox.hidden = true;
   status.hidden = false;
   if (description.length < 3) {
     status.textContent = t('geminiShortInput');
@@ -777,10 +785,11 @@ $('#geminiRun').onclick = async () => {
   status.textContent = t('geminiWorking');
   try {
     const result = await api('/api/gemini/route', {description, language: lang});
+    $('#geminiAnswerText').textContent = result.answer;
+    answerBox.hidden = false;
     const match = cards.find(card => card.id === result.card_id);
     if (!match || result.card_id === 'unsure') {
       status.textContent = t('geminiUnsure');
-      fallback.hidden = false;
       return;
     }
     status.textContent = t('geminiMatch', {title: match.title[lang]});
@@ -796,6 +805,7 @@ $('#geminiRun').onclick = async () => {
       : /cannot connect to google/.test(message) ? t('geminiConnectionError')
       : /provider returned http/.test(message) ? t('geminiProviderError')
       : t('geminiUnavailable');
+    answerBox.hidden = true;
     fallback.hidden = false;
   } finally {
     button.disabled = false;

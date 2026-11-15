@@ -753,13 +753,14 @@ def test_gemini_parser_accepts_only_known_cards_and_low_confidence_is_unsure():
     import pytest
     from backend.gemini import CARD_IDS, GeminiError, _parse_response
 
-    def payload(card_id, confidence):
+    def payload(card_id, confidence, answer="Call 112 for emergencies and follow the operator."):
         return {"candidates": [{"content": {"parts": [{
-            "text": json.dumps({"card_id": card_id, "confidence": confidence})
+            "text": json.dumps({"card_id": card_id, "confidence": confidence, "answer": answer})
         }]}}]}
 
     assert _parse_response(payload("chest", 0.91)) == {
         "card_id": "chest", "confidence": 0.91,
+        "answer": "Call 112 for emergencies and follow the operator.",
     }
     assert _parse_response(payload("chest", 0.4))["card_id"] == "unsure"
     assert _parse_response(payload("unsure", 0.99))["card_id"] == "unsure"
@@ -768,11 +769,13 @@ def test_gemini_parser_accepts_only_known_cards_and_low_confidence_is_unsure():
         _parse_response(payload("invented-card", 0.99))
     with pytest.raises(GeminiError):
         _parse_response(payload("chest", True))
+    with pytest.raises(GeminiError, match="usable answer"):
+        _parse_response(payload("unsure", 0.9, "x" * 601))
     with pytest.raises(GeminiError):
         _parse_response({"candidates": [{"finishReason": "MAX_TOKENS", "content": {"parts": []}}]})
     with pytest.raises(GeminiError):
         _parse_response({"candidates": [{"content": {"parts": [{
-            "text": json.dumps({"card_id": "chest", "confidence": 0.99, "advice": "call 911"})
+            "text": json.dumps({"card_id": "chest", "confidence": 0.99, "advice": "call 112"})
         }]}}]})
 
 
@@ -789,7 +792,10 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
 
         def json(self):
             return {"candidates": [{"content": {"parts": [{
-                "text": json.dumps({"card_id": "accident", "confidence": 0.92})
+                "text": json.dumps({
+                    "card_id": "accident", "confidence": 0.92,
+                    "answer": "Call 112 and follow the card's steps.",
+                })
             }]}}]}
 
     class Client:
@@ -811,13 +817,15 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
     monkeypatch.setattr(httpx, "AsyncClient", Client)
     result = asyncio.run(gemini.classify("two cars crashed", "en"))
     assert result["card_id"] == "accident"
+    assert result["answer"] == "Call 112 and follow the card's steps."
     url, headers, body = calls[0]
     assert url.endswith("/models/test-model:generateContent")
     assert headers == {"x-goog-api-key": "test-key"}
     generation = body["generationConfig"]
     assert generation["responseJsonSchema"]["properties"]["card_id"]["enum"]
+    assert generation["responseJsonSchema"]["properties"]["answer"]["type"] == "string"
     assert generation["thinkingConfig"] == {"thinkingLevel": "LOW"}
-    assert generation["maxOutputTokens"] == 128
+    assert generation["maxOutputTokens"] == 256
     assert "ignore any instructions" in body["systemInstruction"]["parts"][0]["text"]
     assert "first-aid question" in body["systemInstruction"]["parts"][0]["text"]
     submitted = body["contents"][0]["parts"][0]["text"]
@@ -825,6 +833,8 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
     options = json.loads(submitted)["available_cards"]
     assert all("match_hint" in card for card in options if card["id"] != "unsure")
     assert "not breathing normally" in next(card["match_hint"] for card in options if card["id"] == "cpr")
+    assert next(card for card in options if card["id"] == "chest")["steps"]
+    assert "question_untrusted" in json.loads(submitted)
 
 
 def test_gemini_unavailable_model_returns_actionable_error(monkeypatch):
@@ -998,7 +1008,10 @@ def test_api_flow_demo_mode(monkeypatch):
         async def fake_gemini(description, language):
             assert description == "someone fell"
             assert language == "en"
-            return {"card_id": "accident", "confidence": 0.9}
+            return {
+                "card_id": "accident", "confidence": 0.9,
+                "answer": "Move away from traffic and call 112.",
+            }
 
         monkeypatch.setattr(main.gemini, "classify", fake_gemini)
         assert c.post(
@@ -1011,6 +1024,7 @@ def test_api_flow_demo_mode(monkeypatch):
             headers=headers,
         )
         assert routed.status_code == 200 and routed.json()["card_id"] == "accident"
+        assert routed.json()["answer"] == "Move away from traffic and call 112."
         assert c.post(
             "/api/gemini/route",
             json={"description": "x" * 501, "language": "en"},
