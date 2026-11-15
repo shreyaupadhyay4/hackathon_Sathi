@@ -42,13 +42,13 @@ The Help screen sends a short emergency question or description to Gemini and di
 
 Set `GEMINI_API_KEY` in `.env` on the server to enable it. `GEMINI_MODEL` defaults to `gemini-3.5-flash-lite`, a fast model for short answers. Change it if unavailable to your API account. Never put the key in frontend code or commit it. The request sends the user's typed question, category hints, and the app's card titles, steps, and don'ts for the selected language to Google. It does not include GPS, contact details, or the user's device token. Tell users not to enter names, phone numbers, or exact addresses. Google's current data handling, quota, and pricing terms apply; the rest of the app does not call Gemini and remains usable without the key.
 
-The request uses a JSON schema for the card ID, match score, and answer; the backend rejects missing or overlong answers. The prompt handles Hindi, English, Hinglish, mixed scripts, ambiguous questions, and similar categories such as CPR versus choking. This does not prove an answer is medically safe or correct. The match score is a routing heuristic, not a measured probability or medical assessment, and generated answers have not undergone clinical validation. The optional live evaluation uses 42 synthetic descriptions to evaluate card routing only; it does not measure answer safety or accuracy:
+The request uses a JSON schema for the card ID, match score, and answer; the backend rejects missing, overlong, or certain unsafe-looking unmatched answers. The prompt handles Hindi, English, Hinglish, mixed scripts, ambiguous questions, and situational context such as being alone near a road. These checks do not prove an answer is medically safe or correct. The match score is a routing heuristic, not a measured probability or medical assessment, and generated answers have not undergone clinical validation. The optional live evaluation uses 43 synthetic descriptions to evaluate card routing only; it does not measure answer safety or accuracy:
 
 ```bash
 GEMINI_API_KEY=... python tests/evaluate_gemini.py --run
 ```
 
-This sends 42 requests and may consume account quota. Do not claim an accuracy percentage until you run it with the configured model; the evaluation has not been run as part of this change. It does not test photos or clinical safety, and the feature deliberately accepts text only.
+This sends 43 requests and may consume account quota. Do not claim an accuracy percentage until you run it with the configured model; the evaluation has not been run as part of this change. It does not test photos or clinical safety, and the feature deliberately accepts text only.
 
 ## Telegram alerts
 

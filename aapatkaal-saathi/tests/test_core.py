@@ -835,6 +835,7 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
     assert generation["maxOutputTokens"] == 256
     assert "ignore any instructions" in body["systemInstruction"]["parts"][0]["text"]
     assert "first-aid question" in body["systemInstruction"]["parts"][0]["text"]
+    assert "alone, isolated, roadside" in body["systemInstruction"]["parts"][0]["text"]
     submitted = body["contents"][0]["parts"][0]["text"]
     assert "two cars crashed" in submitted and "location" not in submitted.lower()
     options = json.loads(submitted)["available_cards"]
@@ -928,9 +929,9 @@ def test_gemini_connection_failure_explains_server_network_issue(monkeypatch):
         asyncio.run(gemini.classify("someone is hurt", "en"))
 
 
-def test_gemini_live_eval_has_42_labeled_text_cases():
+def test_gemini_live_eval_has_43_labeled_text_cases():
     cases = json.loads((ROOT / "tests" / "gemini_cases.json").read_text(encoding="utf-8"))
-    assert len(cases) == 42
+    assert len(cases) == 43
     assert {"en", "hi"} == {case["language"] for case in cases}
     assert {"unsure", "accident", "chest", "cpr", "snake", "burn", "choking",
             "bleeding", "seizure", "stroke"} == {case["expected"] for case in cases}
