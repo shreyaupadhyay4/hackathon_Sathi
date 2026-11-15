@@ -1967,7 +1967,8 @@ async function pollDemo() {
 setInterval(pollDemo, 6000);
 
 /* ------------------------------------------------------------ boot */
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', {updateViaCache: 'none'})
+  .then(registration => registration.update()).catch(() => {});
 loadCards(); applyLang(); pollDemo();
 renderOfflineBanner();
 if (share) runShare();
