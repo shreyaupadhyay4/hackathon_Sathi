@@ -36,3 +36,5 @@ Aapatkaal Saathi is a one-screen emergency helper for the first minutes of an in
 **What data leaves the phone?** Nearby and reverse lookup send coordinates to OpenStreetMap services; chosen SOS/Walk flows may send location to selected contacts. Gemini receives the entered question and the app's card text for the selected language, not GPS or contact details. WhatsApp numbers stay in browser storage.
 
 **What has not been clinically validated?** The first-aid cards require a qualified review before public use. We do not claim clinical validation or measured Gemini accuracy.
+
+See [`JUDGE_REVIEW.md`](JUDGE_REVIEW.md) for a fuller feature review, counter-questions, and remaining gaps.

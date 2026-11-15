@@ -53,7 +53,8 @@ const TXT = {
     demoAlertSaved: 'Demo only: simulated alert saved in this app. No contact was notified.',
     geminiMatch: 'Gemini found a matching card: “{title}”. Read its steps below. This is not a diagnosis; call 112 in an emergency.',
     geminiUnsure: 'No app card covers this exact issue. Gemini’s general answer is below.',
-    geminiAnswerTitle: 'Gemini answer',
+    geminiAnswerTitleCard: 'Gemini answer based on this app card',
+    geminiAnswerTitleGeneral: 'Gemini general answer (not covered by an app card)',
     geminiAnswerDisclaimer: 'AI guidance can be wrong. Follow emergency operator instructions; call 112 if anyone is in immediate danger.',
     geminiFallbackTitle: 'General safety steps when no card fits:',
     geminiFallback1: 'Keep yourself and others away from immediate danger. Do not enter an unsafe area.',
@@ -211,7 +212,8 @@ const TXT = {
     demoAlertSaved: 'केवल डेमो: नकली अलर्ट इस ऐप में सहेजा गया; किसी संपर्क को सूचना नहीं गई।',
     geminiMatch: 'Gemini को मिलता-जुलता कार्ड मिला: “{title}”। नीचे दिए कदम पढ़ें। यह बीमारी की पहचान नहीं है; आपातकाल में 112 पर कॉल करें।',
     geminiUnsure: 'इस समस्या के लिए ऐप में खास कार्ड नहीं है। Gemini का सामान्य जवाब नीचे है।',
-    geminiAnswerTitle: 'Gemini का जवाब',
+    geminiAnswerTitleCard: 'ऐप कार्ड पर आधारित Gemini का जवाब',
+    geminiAnswerTitleGeneral: 'Gemini का सामान्य जवाब (ऐप कार्ड में नहीं)',
     geminiAnswerDisclaimer: 'AI की सलाह गलत हो सकती है। आपातकालीन ऑपरेटर के निर्देश मानें; किसी को तत्काल खतरा हो तो 112 पर कॉल करें।',
     geminiFallbackTitle: 'कार्ड से मेल न मिलने पर सामान्य सुरक्षा कदम:',
     geminiFallback1: 'खुद को और दूसरों को तत्काल खतरे से दूर रखें। असुरक्षित जगह में न जाएँ।',
@@ -789,9 +791,11 @@ $('#geminiRun').onclick = async () => {
     answerBox.hidden = false;
     const match = cards.find(card => card.id === result.card_id);
     if (!match || result.card_id === 'unsure') {
+      $('#geminiAnswerTitle').textContent = t('geminiAnswerTitleGeneral');
       status.textContent = t('geminiUnsure');
       return;
     }
+    $('#geminiAnswerTitle').textContent = t('geminiAnswerTitleCard');
     status.textContent = t('geminiMatch', {title: match.title[lang]});
     openCard(match.id, true);
   } catch (error) {
