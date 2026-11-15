@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin">
 <meta name="theme-color" content="#b3122a">
 <title>Aapatkaal Saathi · आपातकाल साथी</title>
 <link rel="manifest" href="/manifest.json">
@@ -18,8 +19,11 @@
   <a id="call108" class="call108" href="tel:108" aria-label="Call ambulance number 108; availability varies by state"><span aria-hidden="true">🚑</span> 108</a>
 </header>
 
+<div id="demoBanner" class="demo-banner" role="status" hidden></div>
+<div id="offlineBanner" class="offline-banner" role="status" aria-live="polite" hidden></div>
+
 <main>
-  <section id="tab-help" class="tab">
+  <section id="tab-help" class="tab" aria-label="Emergency help">
     <div class="sos-wrap">
       <button id="sos" class="sos" aria-label="SOS"><span>SOS</span></button>
       <p class="hint" data-i="sosHint"></p>
@@ -57,7 +61,7 @@
 
     <article id="card" class="box card" hidden>
       <div class="cardhead">
-        <h3 id="cardTitle"></h3>
+        <h3 id="cardTitle" role="status" aria-live="polite"></h3>
         <div class="voice">
           <button id="voiceBtn" class="btn" data-i="read"></button>
           <button id="stopBtn" class="btn ghost" data-i="stop" hidden></button>
@@ -113,34 +117,35 @@
     </div>
   </section>
 
-  <section id="tab-near" class="tab" hidden>
+  <section id="tab-near" class="tab" aria-labelledby="nearTitle" hidden>
+    <h2 id="nearTitle" data-i="tabNear" tabindex="-1"></h2>
     <div id="typeTabs" class="chips small"></div>
     <button id="nearUseLocation" class="btn go wide" type="button" data-i="nearUseLocation"></button>
     <p id="nearLocationStatus" class="note" role="status" aria-live="polite"></p>
-    <div class="map-switch" role="group" aria-label="Map provider">
+    <div id="mapSwitch" class="map-switch" role="group">
       <button id="nearMapGoogleBtn" class="chip on" type="button" data-i="nearMapGoogle"></button>
       <button id="nearMapOsmBtn" class="chip" type="button" data-i="nearMapOsm"></button>
     </div>
-    <iframe id="nearGoogleMap" title="Google Maps nearby services" loading="lazy"
+    <iframe id="nearGoogleMap" loading="lazy"
       referrerpolicy="no-referrer-when-downgrade"></iframe>
     <div id="nearMap" role="application"></div>
     <a id="nearMapGoogleOpen" class="osm-map-link" target="_blank" rel="noopener" data-i="nearMapGoogleOpen"></a>
     <button id="nearMapCenter" class="btn ghost wide" type="button" data-i="nearMapCenter"></button>
     <p id="nearMapStatus" class="note" role="status" aria-live="polite"></p>
     <div id="nearMapLegend" class="map-legend">
-      <span><i class="map-dot current"></i><span data-i="nearMapYou"></span></span>
-      <span><i class="map-dot hospital"></i><span data-i="hospital"></span></span>
-      <span><i class="map-dot clinic"></i><span data-i="clinic"></span></span>
-      <span><i class="map-dot pharmacy"></i><span data-i="pharmacy"></span></span>
-      <span><i class="map-dot police"></i><span data-i="police"></span></span>
+      <span><i class="map-dot current" aria-hidden="true"></i><span data-i="nearMapYou"></span></span>
+      <span><i class="map-dot hospital" aria-hidden="true"></i><span data-i="hospital"></span></span>
+      <span><i class="map-dot clinic" aria-hidden="true"></i><span data-i="clinic"></span></span>
+      <span><i class="map-dot pharmacy" aria-hidden="true"></i><span data-i="pharmacy"></span></span>
+      <span><i class="map-dot police" aria-hidden="true"></i><span data-i="police"></span></span>
     </div>
     <p id="nearMeta" class="note" role="status" aria-live="polite"></p>
-    <div id="nearList" aria-live="polite"></div>
+    <div id="nearList" role="region" aria-live="polite"></div>
     <button id="nearRefresh" class="btn ghost wide" data-i="refresh"></button>
   </section>
 
-  <section id="tab-walk" class="tab" hidden>
-    <h2 data-i="walkTitle"></h2>
+  <section id="tab-walk" class="tab" aria-labelledby="walkTitle" hidden>
+    <h2 id="walkTitle" data-i="walkTitle" tabindex="-1"></h2>
     <p class="note" data-i="walkExplain"></p>
 
     <div class="box">
@@ -182,6 +187,8 @@
         <button id="btnExtend" class="btn ghost" data-i="plus10"></button>
         <button id="btnPanic" class="btn danger" data-i="panic"></button>
       </div>
+      <button id="btnDuress" class="btn ghost wide" data-i="duress"></button>
+      <p class="note" data-i="duressExplain"></p>
     </div>
 
     <div id="demoBox" class="box demo" hidden>
@@ -200,7 +207,7 @@
 
 <p class="foot" data-i="footer"></p>
 
-<nav class="tabs">
+<nav id="mainNav" class="tabs">
   <button data-tab="help" class="on" aria-current="page"><span aria-hidden="true">🆘</span><b data-i="tabHelp"></b></button>
   <button data-tab="near"><span aria-hidden="true">🏥</span><b data-i="tabNear"></b></button>
   <button data-tab="walk"><span aria-hidden="true">🚶</span><b data-i="tabWalk"></b></button>

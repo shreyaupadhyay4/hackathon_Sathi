@@ -99,10 +99,22 @@ async def send(
     try:
         async with httpx.AsyncClient(timeout=15) as c:
             r = await c.post(_api("sendMessage"), json={"chat_id": chat_id, "text": text})
-            ok = bool(r.json().get("ok"))
-            if ok and lat is not None and lon is not None:
-                await c.post(_api("sendLocation"), json={"chat_id": chat_id, "latitude": lat, "longitude": lon})
-            return ok
+            r.raise_for_status()
+            if not r.json().get("ok"):
+                return False
+            if lat is not None and lon is not None:
+                try:
+                    location = await c.post(
+                        _api("sendLocation"),
+                        json={"chat_id": chat_id, "latitude": lat, "longitude": lon},
+                    )
+                    location.raise_for_status()
+                    if not location.json().get("ok"):
+                        log.warning("Telegram accepted alert text but not its location pin")
+                except Exception as e:
+                    # The alert text already arrived; reporting failure would resend it.
+                    log.warning("Telegram location pin failed (%s)", type(e).__name__)
+            return True
     except Exception as e:
         log.warning("telegram send failed (%s)", type(e).__name__)
         return False
@@ -110,14 +122,14 @@ async def send(
 
 async def notify(codes: list[str], text: str, lat=None, lon=None, demo_session: str | None = None) -> int:
     """Send to every contact that has joined. Returns how many were reached."""
-    sent = 0
-    for code in dict.fromkeys(codes):  # unique, keep order
+    async def send_to(code: str) -> bool:
         c = db.get_contact(code)
-        if c and c["chat_id"] is not None and await send(
-            c["chat_id"], text, lat, lon, demo_session=demo_session
-        ):
-            sent += 1
-    return sent
+        if not c or c["chat_id"] is None:
+            return False
+        return await send(c["chat_id"], text, lat, lon, demo_session=demo_session)
+
+    results = await asyncio.gather(*(send_to(code) for code in dict.fromkeys(codes)))
+    return sum(results)
 
 
 async def _handle(update: dict) -> None:

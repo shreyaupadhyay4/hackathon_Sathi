@@ -53,7 +53,7 @@ def main() -> None:
     parser.add_argument(
         "--run",
         action="store_true",
-        help="send 30 synthetic requests; may consume Gemini API quota",
+        help="send 42 synthetic requests; may consume Gemini API quota",
     )
     args = parser.parse_args()
     if not args.run:

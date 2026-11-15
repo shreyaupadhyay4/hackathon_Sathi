@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS contacts(
   invite_expires REAL, owner TEXT);
 CREATE TABLE IF NOT EXISTS tracks(
   token TEXT PRIMARY KEY, key TEXT, lat REAL, lon REAL, updated REAL, label TEXT, expires REAL,
-  owner TEXT);
+  owner TEXT, battery INTEGER);
 CREATE TABLE IF NOT EXISTS walks(
   id TEXT PRIMARY KEY, track TEXT, name TEXT, deadline REAL, status TEXT,
   codes TEXT, base TEXT, sent INTEGER DEFAULT 0, created REAL, demo_session TEXT,
@@ -41,6 +41,8 @@ def _migrate(c: sqlite3.Connection) -> None:
     track_columns = {row["name"] for row in c.execute("PRAGMA table_info(tracks)")}
     if "owner" not in track_columns:
         c.execute("ALTER TABLE tracks ADD COLUMN owner TEXT")
+    if "battery" not in track_columns:
+        c.execute("ALTER TABLE tracks ADD COLUMN battery INTEGER")
 
     walk_columns = {row["name"] for row in c.execute("PRAGMA table_info(walks)")}
     if "demo_session" not in walk_columns:
@@ -160,8 +162,11 @@ def extend_track_expiry(token: str, expires: float) -> None:
     run("UPDATE tracks SET expires=MAX(expires,?) WHERE token=?", (expires, token))
 
 
-def update_track(token: str, lat: float, lon: float) -> None:
-    run("UPDATE tracks SET lat=?, lon=?, updated=? WHERE token=?", (lat, lon, time.time(), token))
+def update_track(token: str, lat: float, lon: float, battery: int | None = None) -> None:
+    run(
+        "UPDATE tracks SET lat=?, lon=?, updated=?, battery=COALESCE(?,battery) WHERE token=?",
+        (lat, lon, time.time(), battery, token),
+    )
 
 
 def get_track(token: str) -> dict | None:
@@ -213,4 +218,15 @@ def delete_owner_data(owner: str) -> dict[str, int]:
 
 
 def purge() -> None:
-    run("DELETE FROM tracks WHERE expires<?", (time.time() - 3600,))
+    now = time.time()
+    # Keep rows for one cleanup interval after public access expires so a
+    # recently overdue Walk can still be diagnosed during restart recovery.
+    run(
+        "DELETE FROM tracks WHERE expires<? AND NOT EXISTS "
+        "(SELECT 1 FROM walks WHERE walks.track=tracks.token AND status IN ('active','alerting'))",
+        (now - 60 * 60,),
+    )
+    run(
+        "DELETE FROM walks WHERE status IN ('safe','alerted') AND deadline<?",
+        (now - 24 * 60 * 60,),
+    )

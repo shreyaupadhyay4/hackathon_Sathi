@@ -69,10 +69,18 @@ async def fire_alert(w: dict, reason: str) -> int:
     t = db.get_track(w["track"]) or {}
     lat, lon = t.get("lat"), t.get("lon")
     who = w["name"] or "Your contact"
-    why = "pressed the PANIC button" if reason == "panic" else "did not check in on time"
+    why = {
+        "panic": "pressed the PANIC button",
+        "duress": "sent a discreet safety alert",
+        "timer": "did not check in on time",
+    }.get(reason, "needs a safety check")
+    battery = (
+        f"\nLast reported battery: {t['battery']}% (may be out of date)."
+        if t.get("battery") is not None else ""
+    )
     text = (f"🚨 SAFETY ALERT\n{who} {why}.\n"
             f"Last known location: {maps_link(lat, lon)}\n"
-            f"Live location page: {w['base']}/t/{w['track']}\n\n"
+            f"Live location page: {w['base']}/t/{w['track']}{battery}\n\n"
             "Please call them now. If you cannot reach them, call 112.")
     codes = json.loads(w["codes"])
     has_targets = any(

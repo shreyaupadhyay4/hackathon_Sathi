@@ -9,12 +9,16 @@ def _load_env() -> None:
     p = ROOT / ".env"
     if not p.exists():
         return
-    for line in p.read_text(encoding="utf-8").splitlines():
+    # utf-8-sig also handles a BOM added by some Windows editors.
+    for line in p.read_text(encoding="utf-8-sig").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        key = k.strip()
+        # An empty exported variable should not mask a configured value in .env.
+        if not os.environ.get(key, "").strip():
+            os.environ[key] = v.strip().strip('"').strip("'")
 
 
 _load_env()
@@ -29,7 +33,14 @@ class Settings:
         os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
     )
     # Public https URL of your deployment (used in alert links). Auto-detected if empty.
-    public_base_url: str = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
+    public_base_url: str = (
+        os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
+        or os.environ.get("RENDER_EXTERNAL_URL", "").strip().rstrip("/")
+        or (
+            f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME'].strip()}"
+            if os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip() else ""
+        )
+    )
     # Overpass/Nominatim usage policies ask apps to identify themselves. Put a real contact here.
     contact: str = os.environ.get("CONTACT_EMAIL", "you@example.com")
     db_path: str = os.environ.get("DB_PATH", str(ROOT / "data" / "app.db"))

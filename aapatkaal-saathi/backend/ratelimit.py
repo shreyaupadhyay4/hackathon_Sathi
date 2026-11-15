@@ -15,7 +15,14 @@ def _consume(buckets: OrderedDict, key: str, max_calls: int, per_seconds: int) -
         hits = buckets.get(key)
         if hits is None:
             if len(buckets) >= MAX_BUCKETS:
-                buckets.popitem(last=False)
+                stale = [
+                    bucket_key for bucket_key, bucket in buckets.items()
+                    if not bucket or bucket[-1] <= now - per_seconds
+                ]
+                for bucket_key in stale:
+                    del buckets[bucket_key]
+            if len(buckets) >= MAX_BUCKETS:
+                raise HTTPException(429, "Too many request sources. Please wait a moment.")
             hits = deque()
             buckets[key] = hits
         else:

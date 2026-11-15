@@ -12,8 +12,10 @@ const TXT = {
   en: {
     appName: 'Aapatkaal Saathi', sosHint: 'Tap in an emergency', locating: 'Finding your location…',
     locOk: 'Location found (±{m} m)', locSaved: 'Using your last saved location', locFail: 'Could not get your location. Search for a place instead.',
-    changeLanguage: 'Change language', sosLabel: 'Emergency help',
-    locationTitle: 'Use location', locationReason: 'Location finds nearby listed hospitals and can be shared with your contacts. You can call 112 without it.',
+    changeLanguage: 'Change language', mainNavigation: 'Main navigation', mapProvider: 'Map provider', nearbyList: 'Nearby places list',
+    call108Label: 'Call ambulance number 108; availability varies by state', googleMapTitle: 'Google Maps nearby services',
+    sosLabel: 'Emergency help',
+    locationTitle: 'Use location', locationReason: 'Location finds nearby listed hospitals; you can still call 112 without it.',
     useLocation: 'Use my location', skipLocation: 'Not now',
     locationRequesting: 'Getting your location…',
     locationPermissionDenied: 'Could not get location. Search for a place instead; calling 112 still works.',
@@ -45,6 +47,10 @@ const TXT = {
     geminiExplain: 'Describe the situation in Hindi or English. After you tap, your description is sent to Google Gemini. Do not include names, phone numbers, or exact addresses; GPS is not sent. Gemini can only match an existing reviewed card; it does not diagnose or give instructions. Check the card. Call 112 in an emergency.',
     geminiInput: 'What is happening?', geminiPlaceholder: 'For example: “My father has chest pain”',
     geminiRun: 'Find a reviewed card', geminiWorking: 'Checking for a matching reviewed card…',
+    geminiShortInput: 'Add a few words about what happened, or choose a card below.',
+    demoBanner: 'Demo mode: alerts are simulated here; no contacts are notified.',
+    offlineBanner: 'Offline: saved first-aid cards and nearby listings remain available. Fresh maps and contact alerts need internet; call 112 directly.',
+    demoAlertSaved: 'Demo only: simulated alert saved in this app. No contact was notified.',
     geminiMatch: 'Gemini suggests “{title}”. This is not a diagnosis. Check the card and call 112.',
     geminiUnsure: 'No clear card match. Choose a card below or call 112.',
     geminiNotConfigured: 'Gemini is not configured. Choose a card below; the app works without a Gemini key.',
@@ -63,6 +69,8 @@ const TXT = {
     homeNearbyRetry: 'Retry hospital search',
     homeNearbyAll: 'See all nearby services',
     homeNearbyGoogle: 'Search nearby hospitals on Google Maps',
+    emergencyRankNote: 'Hospitals tagged emergency=yes in OpenStreetMap appear first. The tag may be outdated; services and opening status are not confirmed.',
+    snakebiteHospitalNote: 'For a snakebite, call 112 and ask which hospital has anti-snake venom. OpenStreetMap cannot confirm stock or availability.',
     incidentShareTitle: 'Share this emergency',
     incidentShareExplain: 'Choose a contact to open WhatsApp with this incident and your location map link. WhatsApp receives the prefilled draft; it is not delivered to the contact until you tap Send. Gemini does not receive your location.',
     incidentShareNoContacts: 'Add a WhatsApp contact in the Walk tab first.',
@@ -132,11 +140,14 @@ const TXT = {
     refresh: 'Refresh', loadFail: 'Map service is busy. Call 112 or try again.',
     nearest: 'Nearest hospital', alertedN: 'Alert sent to {n} contact(s).', noContacts: 'No safety contacts yet. Add them in the Walk tab.',
     sendWA: 'Send my location on WhatsApp', alertFail: 'Could not reach your contacts. Call someone now.',
-    walkTitle: 'Walk with me', walkExplain: 'Set a timer. If you do not tap “I’m safe” in time, your contacts get an alert with your last location. The timer runs on the server, so it works even if your phone dies.',
+    walkTitle: 'Walk with me', walkExplain: 'Set a timer. If you do not tap “I’m safe” in time, your contacts get an alert with your last location. The timer runs on the server, so it works even if your phone dies. A one-time beep and vibration may remind you at one minute; browser support varies.',
     yourName: 'Your name (shown in alerts)', contactsTitle: 'Safety contacts', addContact: '+ Add contact', askLabel: 'Contact name (e.g. Mom)',
     joined: 'Joined', pending: 'Waiting', invite: 'Send invite', inviteText: 'Please be my safety contact. Open this link and press Start in Telegram: ',
-    min: 'min', demo1: '1 min (demo)', startWalk: 'Start walk', imSafe: '✅ I’m safe', plus10: '+10 min', panic: '🚨 Alert now',
-    walkOn: 'Walk in progress. Your contacts are alerted when this reaches 0:00.', walkAlerted: 'Alert sent to {n} contact(s). Call 112 if you need help.',
+    min: 'min', demo1: '1 min (demo)', startWalk: 'Start walk', imSafe: '✅ I’m safe', plus10: '+10 min', panic: '🚨 Alert now', duress: 'Send discreet alert',
+    duressExplain: 'Sends the safety alert without an alarm sound from this app. The screen will show the alert state; device visibility and recipient notifications depend on their settings.',
+    duressDelivered: 'Discreet alert delivered to {n} contact(s). The alert is visible on this screen.',
+    duressDemo: 'Demo only: simulated discreet alert saved here; no contact was notified.',
+    walkOn: 'Walk in progress. Your contacts are alerted when this reaches 0:00.', walkAlerting: 'The alert is still being delivered…', walkAlerted: 'Alert delivered to {n} contact(s). Call 112 if you need help.', walkNoRecipients: 'No contacts received the alert. Call 112 if you need help.', walkDemoAlert: 'Demo only: simulated alert saved in this app; no contact was notified.',
     walkSafe: 'Checked in. Stay safe!', noJoined: 'No contact has joined yet, so nobody would get the alert. Start anyway?',
     demoTitle: 'Demo mode: messages that would go to contacts on Telegram', needLoc: 'Location is needed first.',
     footer: 'General guidance, not medical advice. This app does not call an ambulance. In an emergency, always call 112.',
@@ -150,8 +161,10 @@ const TXT = {
   hi: {
     appName: 'आपातकाल साथी', sosHint: 'आपातकाल में दबाएं', locating: 'आपकी लोकेशन खोज रहे हैं…',
     locOk: 'लोकेशन मिली (±{m} मी)', locSaved: 'पिछली सेव लोकेशन इस्तेमाल हो रही है', locFail: 'लोकेशन नहीं मिली। कोई जगह खोजें।',
-    changeLanguage: 'भाषा बदलें', sosLabel: 'आपातकाल में मदद लें',
-    locationTitle: 'लोकेशन दें', locationReason: 'लोकेशन से पास के दर्ज अस्पताल खोजे जाएंगे और आप इसे संपर्कों से साझा कर सकते हैं। 112 पर बिना लोकेशन भी कॉल कर सकते हैं।',
+    changeLanguage: 'भाषा बदलें', mainNavigation: 'मुख्य मेन्यू', mapProvider: 'नक्शा चुनें', nearbyList: 'पास की जगहों की सूची',
+    call108Label: 'एम्बुलेंस नंबर 108 पर कॉल करें; उपलब्धता राज्य के अनुसार बदलती है', googleMapTitle: 'पास की सेवाओं का Google Maps नक्शा',
+    sosLabel: 'आपातकाल में मदद लें',
+    locationTitle: 'लोकेशन दें', locationReason: 'पास के दर्ज अस्पताल खोजने के लिए लोकेशन दें; 112 पर कॉल करने के लिए यह ज़रूरी नहीं।',
     useLocation: 'मेरी लोकेशन लें', skipLocation: 'अभी नहीं',
     locationRequesting: 'आपकी लोकेशन ले रहे हैं…',
     locationPermissionDenied: 'लोकेशन नहीं मिली। जगह खोजें; 112 पर कॉल कर सकते हैं।',
@@ -183,6 +196,10 @@ const TXT = {
     geminiExplain: 'स्थिति हिंदी या अंग्रेज़ी में लिखें। बटन दबाने पर आपका लिखा Google Gemini को भेजा जाएगा। नाम, फ़ोन नंबर या पूरा पता न लिखें; GPS लोकेशन नहीं भेजी जाती। Gemini केवल पहले से जाँचे गए कार्ड में से चुनता है; बीमारी नहीं बताता और निर्देश नहीं देता। कार्ड पढ़ें। आपातकाल में 112 पर कॉल करें।',
     geminiInput: 'क्या हो रहा है?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
     geminiRun: 'जाँचा हुआ कार्ड खोजें', geminiWorking: 'मिलता-जुलता जाँचा हुआ कार्ड खोज रहे हैं…',
+    geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
+    demoBanner: 'डेमो मोड: अलर्ट केवल इस ऐप में दिखते हैं; किसी संपर्क को संदेश नहीं जाता।',
+    offlineBanner: 'इंटरनेट नहीं है: सेव किए प्राथमिक उपचार कार्ड और पास की सूची दिख सकती है। नए नक्शे और संपर्क अलर्ट के लिए इंटरनेट चाहिए; 112 पर सीधे कॉल करें।',
+    demoAlertSaved: 'केवल डेमो: नकली अलर्ट इस ऐप में सहेजा गया; किसी संपर्क को सूचना नहीं गई।',
     geminiMatch: 'Gemini ने “{title}” कार्ड चुना है। यह बीमारी की पहचान नहीं है। कार्ड पढ़ें और 112 पर कॉल करें।',
     geminiUnsure: 'कोई साफ़ मेल नहीं मिला। नीचे कार्ड चुनें या 112 पर कॉल करें।',
     geminiNotConfigured: 'Gemini चालू नहीं है। नीचे कार्ड चुनें; बिना Gemini key के भी ऐप काम करता है।',
@@ -201,6 +218,8 @@ const TXT = {
     homeNearbyRetry: 'अस्पताल फिर खोजें',
     homeNearbyAll: 'पास की सभी सेवाएं देखें',
     homeNearbyGoogle: 'Google Maps पर पास के अस्पताल खोजें',
+    emergencyRankNote: 'OpenStreetMap में emergency=yes टैग वाले अस्पताल पहले दिखते हैं। टैग पुराना हो सकता है; सेवा या खुला होना पुष्ट नहीं है।',
+    snakebiteHospitalNote: 'साँप के काटने पर 112 पर कॉल करें और पूछें कि किस अस्पताल में एंटी-स्नेक वेनम उपलब्ध है। OpenStreetMap इसका स्टॉक नहीं बताता।',
     incidentShareTitle: 'यह आपातकालीन संदेश भेजें',
     incidentShareExplain: 'संपर्क चुनें। WhatsApp में घटना और आपकी लोकेशन का नक्शा लिंक भरा हुआ खुलेगा। WhatsApp को संदेश मिलेगा, लेकिन संपर्क तक तभी जाएगा जब आप भेजें दबाएंगे। आपकी लोकेशन Gemini को नहीं जाती।',
     incidentShareNoContacts: 'पहले "साथ चलें" टैब में WhatsApp संपर्क जोड़ें।',
@@ -270,11 +289,14 @@ const TXT = {
     refresh: 'फिर से लें', loadFail: 'मैप सेवा व्यस्त है। 112 पर कॉल करें या फिर कोशिश करें।',
     nearest: 'पास का अस्पताल', alertedN: '{n} संपर्कों को अलर्ट भेजा गया।', noContacts: 'अभी कोई भरोसेमंद संपर्क नहीं। "साथ चलें" टैब में जोड़ें।',
     sendWA: 'WhatsApp पर मेरी लोकेशन भेजें', alertFail: 'संपर्कों तक अलर्ट नहीं पहुँचा। अभी किसी को फ़ोन करें।',
-    walkTitle: 'साथ चलें', walkExplain: 'टाइमर लगाएं। समय पर “मैं सुरक्षित हूँ” न दबाया, तो आपके संपर्कों को आख़िरी लोकेशन के साथ अलर्ट जाएगा। टाइमर सर्वर पर चलता है, इसलिए फ़ोन बंद होने पर भी चलेगा।',
+    walkTitle: 'साथ चलें', walkExplain: 'टाइमर लगाएं। समय पर “मैं सुरक्षित हूँ” न दबाया, तो आपके संपर्कों को आख़िरी लोकेशन के साथ अलर्ट जाएगा। टाइमर सर्वर पर चलता है, इसलिए फ़ोन बंद होने पर भी चलेगा। एक मिनट बाकी होने पर फ़ोन बज सकता है या कंपन कर सकता है; यह सुविधा हर ब्राउज़र में काम नहीं करती।',
     yourName: 'आपका नाम (अलर्ट में दिखेगा)', contactsTitle: 'भरोसेमंद संपर्क', addContact: '+ संपर्क जोड़ें', askLabel: 'संपर्क का नाम (जैसे माँ)',
     joined: 'जुड़ गए', pending: 'इंतज़ार में', invite: 'निमंत्रण भेजें', inviteText: 'कृपया मेरे भरोसेमंद संपर्क बनें। यह लिंक खोलें और Telegram में Start दबाएं: ',
-    min: 'मिनट', demo1: '1 मिनट (डेमो)', startWalk: 'चलना शुरू करें', imSafe: '✅ मैं सुरक्षित हूँ', plus10: '+10 मिनट', panic: '🚨 अभी अलर्ट भेजें',
-    walkOn: 'टाइमर चालू है। समय खत्म होने पर संपर्कों को अलर्ट जाएगा।', walkAlerted: '{n} संपर्कों को अलर्ट भेजा गया। मदद चाहिए तो 112 पर कॉल करें।',
+    min: 'मिनट', demo1: '1 मिनट (डेमो)', startWalk: 'चलना शुरू करें', imSafe: '✅ मैं सुरक्षित हूँ', plus10: '+10 मिनट', panic: '🚨 अभी अलर्ट भेजें', duress: 'चुपचाप सुरक्षा अलर्ट भेजें',
+    duressExplain: 'ऐप से बिना अलार्म की आवाज़ किए सुरक्षा संदेश भेजा जाएगा। स्क्रीन पर अलर्ट दिखेगा; फ़ोन पर दिखना और संपर्कों को सूचना मिलना उनकी सेटिंग पर निर्भर है।',
+    duressDelivered: '{n} संपर्कों तक चुपचाप सुरक्षा अलर्ट पहुँचा। यह अलर्ट इस स्क्रीन पर दिखेगा।',
+    duressDemo: 'केवल डेमो: चुपचाप भेजा जाने वाला नकली अलर्ट यहाँ सेव हुआ; किसी संपर्क को सूचना नहीं गई।',
+    walkOn: 'टाइमर चालू है। समय खत्म होने पर संपर्कों को अलर्ट जाएगा।', walkAlerting: 'अलर्ट भेजने की कोशिश जारी है…', walkAlerted: '{n} संपर्कों को अलर्ट पहुँचाया गया। मदद चाहिए तो 112 पर कॉल करें।', walkNoRecipients: 'किसी संपर्क को अलर्ट नहीं पहुँचा। मदद चाहिए तो 112 पर कॉल करें।', walkDemoAlert: 'केवल डेमो: नकली अलर्ट इस ऐप में सहेजा गया; किसी संपर्क को सूचना नहीं गई।',
     walkSafe: 'चेक-इन हो गया। सुरक्षित रहें!', noJoined: 'अभी कोई संपर्क जुड़ा नहीं है, इसलिए अलर्ट किसी को नहीं जाएगा। फिर भी शुरू करें?',
     demoTitle: 'डेमो मोड: संपर्कों को भेजे जाने वाले संदेश', needLoc: 'पहले लोकेशन दें।',
     footer: 'यह सामान्य जानकारी है, चिकित्सा सलाह नहीं। यह ऐप एम्बुलेंस नहीं भेजता। आपातकाल में 112 पर कॉल करें।',
@@ -334,6 +356,7 @@ async function ensureDemoSession() {
       if (!r.ok) throw new Error(r.statusText || 'Could not start a demo session.');
       const d = await r.json();
       demoMode = d.demo_mode;
+      renderDemoBanner();
       demoSession = d.token || '';
       demoSessionExpires = d.expires_at ? d.expires_at * 1000 : 0;
       demoSessionChecked = true;
@@ -412,6 +435,7 @@ const joinedCodes = () => contacts.filter(c => c.joined).map(c => c.code);
 /* ------------------------------------------------------------ static text + tabs */
 function applyLang() {
   document.documentElement.lang = lang;
+  document.title = t('appName');
   $('#voiceNote').hidden = true;
   $('#operatorVoiceNote').hidden = true;
   document.querySelectorAll('[data-i]').forEach(e => { e.textContent = t(e.dataset.i); });
@@ -419,6 +443,12 @@ function applyLang() {
   $('#langBtn').setAttribute('aria-label', t('changeLanguage'));
   $('#sos').setAttribute('aria-label', t('sosLabel'));
   $('#call112').setAttribute('aria-label', t('call112Label'));
+  $('#call108').setAttribute('aria-label', t('call108Label'));
+  $('#mainNav').setAttribute('aria-label', t('mainNavigation'));
+  $('#tab-help').setAttribute('aria-label', t('tabHelp'));
+  $('#mapSwitch').setAttribute('aria-label', t('mapProvider'));
+  $('#nearGoogleMap').title = t('googleMapTitle');
+  $('#nearList').setAttribute('aria-label', t('nearbyList'));
   $('#sosPanel').setAttribute('aria-label', t('sosStatus'));
   $('#countdown').setAttribute('aria-label', t('countdownLabel'));
   $('#placeQ').placeholder = t('placePH');
@@ -428,8 +458,29 @@ function applyLang() {
   $('#waContactName').placeholder = t('waContactNamePH');
   $('#waContactPhone').placeholder = t('waContactPhonePH');
   $('#yourName').value = store.get('name', '');
-  renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator();
+  renderDemoBanner(); renderOfflineBanner(); renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator();
 }
+function renderDemoBanner() {
+  const banner = $('#demoBanner');
+  if (!banner) return;
+  banner.hidden = !demoMode;
+  banner.textContent = demoMode ? t('demoBanner') : '';
+}
+function renderOfflineBanner() {
+  const banner = $('#offlineBanner');
+  if (!banner) return;
+  const offline = navigator.onLine === false;
+  banner.hidden = !offline;
+  banner.textContent = offline ? t('offlineBanner') : '';
+}
+window.addEventListener('online', renderOfflineBanner);
+window.addEventListener('offline', () => {
+  renderOfflineBanner();
+  nearError = true;
+  homeNearbyError = true;
+  renderHomeNearby();
+  renderNear();
+});
 $('#langBtn').onclick = () => { lang = lang === 'hi' ? 'en' : 'hi'; store.set('lang', lang); stopSpeak(); applyLang(); };
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 function showTab(n) {
@@ -441,6 +492,8 @@ function showTab(n) {
     else b.removeAttribute('aria-current');
   });
   window.scrollTo(0, 0);
+  const focusTarget = n === 'help' ? $('#sos') : n === 'near' ? $('#nearTitle') : $('#walkTitle');
+  requestAnimationFrame(() => focusTarget?.focus({preventScroll: true}));
   if (n === 'near') {
     if (!nearbyLocationChecked) refreshNearbyLocation();
     else loadNearby();
@@ -687,16 +740,23 @@ $('#operatorRead').onclick = () => {
 };
 $('#operatorStop').onclick = stopSpeak;
 
+$('#geminiDescription').addEventListener('input', () => {
+  const status = $('#geminiResult');
+  status.hidden = true;
+  status.textContent = '';
+});
 $('#geminiRun').onclick = async () => {
   const description = $('#geminiDescription').value.trim();
   const status = $('#geminiResult');
   const button = $('#geminiRun');
   status.hidden = false;
   if (description.length < 3) {
-    status.textContent = t('geminiUnsure');
+    status.textContent = t('geminiShortInput');
     return;
   }
   button.disabled = true;
+  $('#geminiDescription').disabled = true;
+  status.setAttribute('aria-busy', 'true');
   status.textContent = t('geminiWorking');
   try {
     const result = await api('/api/gemini/route', {description, language: lang});
@@ -718,6 +778,8 @@ $('#geminiRun').onclick = async () => {
       : t('geminiUnavailable');
   } finally {
     button.disabled = false;
+    $('#geminiDescription').disabled = false;
+    status.removeAttribute('aria-busy');
   }
 };
 
@@ -852,7 +914,7 @@ async function loadHomeNearby(force = false) {
     homeNearbyError = !ok;
     homeNearbyLoading = false;
     renderHomeNearby();
-    if (ok) loadNearbyRest();
+    loadNearbyRest();
     return ok;
   })();
   homeNearbyPromise = request;
@@ -878,14 +940,24 @@ async function loadNearbyRest() {
     nearLoading = true;
     renderNear();
     try {
-      const data = await api('/api/nearby', {lat: pos.lat, lon: pos.lon, types: 'clinic,pharmacy,police'});
+      const data = await api('/api/nearby', {lat: pos.lat, lon: pos.lon, types: 'hospital,clinic,pharmacy,police'});
       saveNearby(data);
       nearError = !!data.stale;
+      homeNearbyError = nearError;
+      homeNearbySearched = true;
+      renderHomeNearby();
     } catch {
       nearError = true;
+      homeNearbyError = true;
+      renderHomeNearby();
     } finally {
       nearLoading = false;
       renderNear();
+      if (!$('#sosPanel').hidden) {
+        sosState.hospitalLoading = false;
+        sosState.hospitalError = nearError;
+        renderSosPanel();
+      }
     }
   })();
   nearRestPromise = request;
@@ -897,7 +969,13 @@ function placesFor(type) {
   const types = type === 'essential' ? ['hospital', 'pharmacy'] : [type];
   const list = types.flatMap(kind => nearData.data.results[kind] || []).map(p => ({...p}));
   if (pos) list.forEach(p => p.distance_m = Math.round(hav(pos.lat, pos.lon, p.lat, p.lon)));
-  return list.sort((a, b) => a.distance_m - b.distance_m);
+  return list.sort((a, b) => {
+    if (type === 'hospital' && ['chest', 'stroke', 'accident', 'snake', 'burn'].includes(curCard?.id)) {
+      const emergencyRank = Number(!!b.emergency) - Number(!!a.emergency);
+      if (emergencyRank) return emergencyRank;
+    }
+    return a.distance_m - b.distance_m;
+  });
 }
 function refreshNearbyDistances() {
   if (!nearData || $('#tab-near').hidden) return;
@@ -943,8 +1021,12 @@ function renderNear() {
     appendOsmMap(meta);
   }
   const list = placesFor(nearType);
-  listEl.innerHTML = list.length ? list.map(placeHTML).join('')
-    : `<p class="note">${t(nearError ? 'nearErrorNoSavedType' : 'noResults')}</p>`;
+  let emergencyNote = '';
+  if (nearType === 'hospital' && curCard && ['chest', 'stroke', 'accident', 'snake', 'burn'].includes(curCard.id)) {
+    emergencyNote = `<p class="note">${curCard.id === 'snake' ? t('snakebiteHospitalNote') : t('emergencyRankNote')}</p>`;
+  }
+  listEl.innerHTML = emergencyNote + (list.length ? list.map(placeHTML).join('')
+    : `<p class="note">${t(nearError ? 'nearErrorNoSavedType' : 'noResults')}</p>`);
   if (!list.length) appendCall112(listEl);
   if (nearLoading) meta.append(` ${t('nearLoading')}`);
 }
@@ -1287,6 +1369,9 @@ function renderSosPanel() {
   } else if (sosState.hospitalLoading) {
     html += `<p class="note">${t('findingHospital')}</p><div class="skeleton" aria-hidden="true"></div>`;
   } else if (best) {
+    if (['chest', 'stroke', 'accident', 'snake', 'burn'].includes(curCard?.id)) {
+      html += `<p class="note">${curCard.id === 'snake' ? t('snakebiteHospitalNote') : t('emergencyRankNote')}</p>`;
+    }
     html += placeHTML(best);
     const mins = nearData ? Math.max(0, Math.floor((Date.now() - nearData.at) / 60000)) : 0;
     if (sosState.hospitalError || mins > 0) {
@@ -1304,7 +1389,8 @@ function renderSosPanel() {
   }
   const alertText = sosState.alertPending ? t('sendingAlert')
     : sosState.alertSent === null ? t('noContacts')
-      : sosState.alertSent > 0 ? t('alertedN', {n: sosState.alertSent}) : t('alertFail');
+      : sosState.alertSent > 0 ? demoMode ? t('demoAlertSaved') : t('alertedN', {n: sosState.alertSent})
+        : t('alertFail');
   html += `<p class="note" role="status" aria-live="polite">${alertText}</p>`;
   panel.innerHTML = html;
   $('#sosPhoneShare')?.addEventListener('click', shareEmergencyFromPhone);
@@ -1336,14 +1422,15 @@ $('#sos').onclick = async () => {
   sosState = {locating: true, hospitalLoading: false, hospitalError: false, alertPending: false, alertSent: null};
   renderSosPanel();
   $('#sosPanel').scrollIntoView({behavior: 'smooth'});
-  if (!await ensureLocation()) {
+  const hasLocation = !!(await ensureLocation());
+  const codes = joinedCodes();
+  if (!hasLocation && !codes.length) {
     sosState.locating = false;
     sosState.hospitalError = true;
     renderSosPanel();
     return;
   }
 
-  const codes = joinedCodes();
   sosState.locating = false;
   sosState.hospitalLoading = true;
   sosState.alertPending = codes.length > 0;
@@ -1355,10 +1442,13 @@ $('#sos').onclick = async () => {
     renderSosPanel();
   });
 
-  const trackPromise = startShare().then(result => result.token).catch(() => '');
   if (codes.length) {
+    const trackPromise = pos
+      ? startShare().then(result => result.token).catch(() => '')
+      : Promise.resolve('');
     trackPromise.then(track => api('/api/sos', {
-      codes, lat: pos.lat, lon: pos.lon, emergency: curCard ? curCard.title.en : '', name: myName(), track,
+      codes, lat: pos?.lat ?? null, lon: pos?.lon ?? null,
+      emergency: curCard ? curCard.title.en : '', name: myName(), track,
     })).then(result => { sosState.alertSent = result.sent; })
       .catch(() => { sosState.alertSent = 0; })
       .finally(() => { sosState.alertPending = false; renderSosPanel(); });
@@ -1484,6 +1574,33 @@ $('#yourName').oninput = e => store.set('name', e.target.value);
 
 /* ------------------------------------------------------------ walk with me */
 let walkMin = store.get('walkMin', 30);
+let walkAudioContext = null;
+let walkBattery = null;
+if (navigator.getBattery) navigator.getBattery().then(battery => { walkBattery = battery; }).catch(() => {});
+function unlockWalkReminderAudio() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  try {
+    if (!walkAudioContext) walkAudioContext = new AudioContext();
+    walkAudioContext.resume().catch(() => {});
+  } catch {}
+}
+document.addEventListener('pointerdown', unlockWalkReminderAudio, {once: true});
+function playWalkReminderSound() {
+  if (!walkAudioContext || walkAudioContext.state !== 'running') return;
+  try {
+    const oscillator = walkAudioContext.createOscillator();
+    const gain = walkAudioContext.createGain();
+    oscillator.frequency.value = 880;
+    gain.gain.value = 0.07;
+    oscillator.connect(gain); gain.connect(walkAudioContext.destination);
+    oscillator.start(); oscillator.stop(walkAudioContext.currentTime + 0.18);
+  } catch {}
+}
+function batteryPercent() {
+  return walkBattery && Number.isFinite(walkBattery.level)
+    ? Math.max(0, Math.min(100, Math.round(walkBattery.level * 100))) : null;
+}
 function renderMinChips() {
   const opts = [1, 15, 30, 60, 120];
   $('#minChips').innerHTML = opts.map(m =>
@@ -1491,26 +1608,31 @@ function renderMinChips() {
   $('#minChips').querySelectorAll('button').forEach(b => b.onclick = () => { walkMin = +b.dataset.m; store.set('walkMin', walkMin); renderMinChips(); });
 }
 $('#walkStart').onclick = async () => {
+  unlockWalkReminderAudio();
   if (!pos) await ensureLocation(); if (!pos) return alert(t('needLoc'));
   if (!joinedCodes().length && !confirm(t('noJoined'))) return;
   try {
-    const w = await api('/api/walk', {minutes: walkMin, codes: joinedCodes(), lat: pos.lat, lon: pos.lon, name: myName()});
-    walkSt = {id: w.id, track: w.track, deadline: Date.now() + w.remaining_s * 1000, status: 'active', sent: 0};
+    const w = await api('/api/walk', {minutes: walkMin, codes: joinedCodes(), lat: pos.lat, lon: pos.lon, name: myName(), battery: batteryPercent()});
+    walkSt = {id: w.id, track: w.track, deadline: w.deadline * 1000, status: 'active', sent: 0, reminderDone: false};
     store.set('walk', walkSt); runWalk(); renderWalk();
     try { await navigator.wakeLock?.request('screen'); } catch {}
   } catch (e) { alert(e.message); }
 };
 function runWalk() {
   walkTimers.forEach(clearInterval); walkTimers = [];
-  if (!walkSt || walkSt.status !== 'active') return;
+  if (!walkSt || !['active', 'alerting'].includes(walkSt.status)) return;
   walkTimers.push(setInterval(renderWalk, 1000));
-  walkTimers.push(setInterval(() => { if (pos && walkSt) api(`/api/walk/${walkSt.id}/ping`, {lat: pos.lat, lon: pos.lon}).then(syncWalk).catch(() => {}); }, 20000));
+  walkTimers.push(setInterval(() => { if (pos && walkSt?.status === 'active') api(`/api/walk/${walkSt.id}/ping`, {lat: pos.lat, lon: pos.lon, battery: batteryPercent()}).then(syncWalk).catch(() => {}); }, 20000));
   walkTimers.push(setInterval(() => walkSt && api(`/api/walk/${walkSt.id}`, undefined, 'GET').then(syncWalk).catch(() => {}), 8000));
 }
 function syncWalk(w) {
   if (!walkSt) return;
-  walkSt.status = w.status; walkSt.sent = w.sent; walkSt.deadline = Date.now() + w.remaining_s * 1000; store.set('walk', walkSt);
-  if (w.status !== 'active') { walkTimers.forEach(clearInterval); walkTimers = []; }
+  const deadline = w.deadline * 1000;
+  if (walkSt.deadline !== deadline) walkSt.reminderDone = false;
+  walkSt.status = w.status; walkSt.sent = w.sent; walkSt.deadline = deadline;
+  walkSt.alertReason = w.alert_reason || '';
+  store.set('walk', walkSt);
+  if (!['active', 'alerting'].includes(w.status)) { walkTimers.forEach(clearInterval); walkTimers = []; }
   renderWalk(); if (w.status === 'alerted') pollDemo();
 }
 function renderWalk() {
@@ -1519,23 +1641,44 @@ function renderWalk() {
   const mm = Math.floor(left / 60), ss = String(left % 60).padStart(2, '0');
   $('#countdown').textContent = walkSt.status === 'active' ? `${mm}:${ss}` : walkSt.status === 'safe' ? '✅' : '🚨';
   $('#walkRun').classList.toggle('alerted', walkSt.status === 'alerted');
-  $('#walkMsg').textContent = walkSt.status === 'active' ? t('walkOn') : walkSt.status === 'safe' ? t('walkSafe') : t('walkAlerted', {n: walkSt.sent});
-  $('#btnSafe').textContent = walkSt.status === 'active' ? t('imSafe') : t('dismissWalk');
-  $('#btnSafe').setAttribute('aria-label', walkSt.status === 'active' ? t('imSafe') : t('dismissWalk'));
-  $('#btnExtend').hidden = $('#btnPanic').hidden = walkSt.status !== 'active';
-  if (walkSt.status === 'active' && left > 0 && left <= 60 && left % 5 === 0 && navigator.vibrate) navigator.vibrate(250);
+  $('#walkMsg').textContent = walkSt.status === 'active' ? t('walkOn')
+    : walkSt.status === 'safe' ? t('walkSafe')
+      : walkSt.status === 'alerting' ? t('walkAlerting')
+        : walkSt.sent === 0 ? t('walkNoRecipients')
+          : walkSt.alertReason === 'duress' ? demoMode ? t('duressDemo') : t('duressDelivered', {n: walkSt.sent})
+            : demoMode ? t('walkDemoAlert') : t('walkAlerted', {n: walkSt.sent});
+  $('#btnSafe').textContent = walkSt.status === 'active' ? t('imSafe')
+    : walkSt.status === 'alerting' ? t('walkAlerting') : t('dismissWalk');
+  $('#btnSafe').setAttribute('aria-label', $('#btnSafe').textContent);
+  $('#btnSafe').disabled = walkSt.status === 'alerting';
+  $('#btnExtend').hidden = $('#btnPanic').hidden = $('#btnDuress').hidden = walkSt.status !== 'active';
+  if (walkSt.status === 'active' && left > 0 && left <= 60 && !walkSt.reminderDone) {
+    walkSt.reminderDone = true;
+    store.set('walk', walkSt);
+    if (navigator.vibrate) navigator.vibrate([250, 120, 250]);
+    playWalkReminderSound();
+  }
   if (walkSt.status === 'active' && left === 0) setTimeout(() => walkSt && api(`/api/walk/${walkSt.id}`, undefined, 'GET').then(syncWalk).catch(() => {}), 6000);
 }
 async function walkAct(action, body) {
   if (!walkSt) return;
-  try { syncWalk(await api(`/api/walk/${walkSt.id}/${action}`, body || {})); } catch (e) { alert(e.message); }
+  try {
+    const state = await api(`/api/walk/${walkSt.id}/${action}`, body || {});
+    syncWalk(state);
+    return state;
+  } catch (e) { alert(e.message); return null; }
 }
 $('#btnSafe').onclick = async () => {
-  if (walkSt && walkSt.status === 'active') await walkAct('safe');
+  if (walkSt?.status === 'alerting') return;
+  if (walkSt && walkSt.status === 'active') {
+    const state = await walkAct('safe');
+    if (!state || state.status === 'active' || state.status === 'alerting') return;
+  }
   walkSt = null; store.set('walk', null); walkTimers.forEach(clearInterval); renderWalk();
 };
 $('#btnExtend').onclick = () => walkAct('extend', {minutes: 10});
 $('#btnPanic').onclick = () => walkAct('panic');
+$('#btnDuress').onclick = () => walkAct('duress');
 
 $('#deleteData').onclick = async () => {
   if (!confirm(t('deleteConfirm'))) return;
@@ -1575,6 +1718,7 @@ $('#deleteData').onclick = async () => {
 async function pollDemo() {
   try {
     const d = await api('/api/demo-log', undefined, 'GET'); demoMode = d.demo_mode;
+    renderDemoBanner();
     $('#demoBox').hidden = !d.demo_mode;
     $('#demoLog').innerHTML = d.messages.slice().reverse().map(m => `<div class="msg">${esc(m.text)}</div>`).join('');
   } catch {}
@@ -1584,7 +1728,8 @@ setInterval(pollDemo, 6000);
 /* ------------------------------------------------------------ boot */
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 loadCards(); applyLang(); pollDemo();
+renderOfflineBanner();
 if (share) runShare();
-if (walkSt) { if (walkSt.status === 'active') { runWalk(); api(`/api/walk/${walkSt.id}`, undefined, 'GET').then(syncWalk).catch(() => {}); } }
+if (walkSt && ['active', 'alerting'].includes(walkSt.status)) { runWalk(); api(`/api/walk/${walkSt.id}`, undefined, 'GET').then(syncWalk).catch(() => {}); }
 if (pos) $('#locLine').textContent = t('locSaved');
 if (navigator.permissions) navigator.permissions.query({name: 'geolocation'}).then(p => { if (p.state === 'granted') locate().catch(() => {}); }).catch(() => {});

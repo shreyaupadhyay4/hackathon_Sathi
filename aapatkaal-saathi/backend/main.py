@@ -6,6 +6,7 @@ import secrets
 import time
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
+from urllib.parse import urlsplit
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -53,7 +54,23 @@ app = FastAPI(title="Aapatkaal Saathi", lifespan=lifespan)
 
 
 def base_url(request: Request) -> str:
-    return settings.public_base_url or str(request.base_url).rstrip("/")
+    if settings.public_base_url:
+        parsed = urlsplit(settings.public_base_url)
+        local_host = parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+        if (
+            not parsed.hostname
+            or (parsed.scheme != "https" and not local_host)
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise HTTPException(503, "PUBLIC_BASE_URL must be a trusted HTTPS URL without credentials or query data.")
+        return settings.public_base_url
+    host = (request.url.hostname or "").lower()
+    if host in {"localhost", "127.0.0.1", "::1", "testserver"}:
+        return str(request.base_url).rstrip("/")
+    raise HTTPException(503, "Set PUBLIC_BASE_URL to the trusted public HTTPS address before creating share links.")
 
 
 def _require_demo_session(request: Request) -> str | None:
@@ -277,8 +294,8 @@ async def delete_contact(code: BoundedToken, request: Request):
 
 class SOS(BaseModel):
     codes: list[BoundedToken] = Field(default_factory=list, max_length=10)
-    lat: float = Lat
-    lon: float = Lon
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
     emergency: str = Field("", max_length=60)
     name: str = Field("", max_length=40)
     track: str = Field("", max_length=128)
@@ -300,8 +317,13 @@ async def sos(body: SOS, request: Request):
         if not live_track or live_track["owner"] != owner:
             raise HTTPException(404, "Live location link not found for this device.")
     live = f"\nLive location page: {base_url(request)}/t/{track}" if track else ""
+    location = (
+        f"\nLocation: {walk.maps_link(body.lat, body.lon)}"
+        if body.lat is not None and body.lon is not None
+        else "\nLocation unavailable; call them to confirm where they are."
+    )
     text = (f"🆘 EMERGENCY\n{who} needs help" + (f" ({emergency})." if emergency else ".") +
-            f"\nLocation: {walk.maps_link(body.lat, body.lon)}{live}\n\nPlease call them now and call 112.")
+            f"{location}{live}\n\nPlease call them now and call 112.")
     sent = await telegram.notify(body.codes, text, body.lat, body.lon, demo_session=demo_session)
     return {"sent": sent}
 
@@ -319,8 +341,9 @@ class NewTrack(BaseModel):
 )
 async def new_track(body: NewTrack, request: Request):
     owner = _require_device(request)
+    public_url = base_url(request)
     token, key = db.create_track(body.lat, body.lon, _single_line(body.label, 40), owner=owner)
-    return {"token": token, "key": key, "url": f"{base_url(request)}/t/{token}"}
+    return {"token": token, "key": key, "url": f"{public_url}/t/{token}"}
 
 
 class TrackUpdate(BaseModel):
@@ -390,11 +413,13 @@ class WalkStart(BaseModel):
     lat: float = Lat
     lon: float = Lon
     name: str = Field("", max_length=40)
+    battery: int | None = Field(default=None, ge=0, le=100)
 
 
 class Ping(BaseModel):
     lat: float = Lat
     lon: float = Lon
+    battery: int | None = Field(default=None, ge=0, le=100)
 
 
 class Extend(BaseModel):
@@ -403,7 +428,8 @@ class Extend(BaseModel):
 
 def _view(w: dict) -> dict:
     return {"id": w["id"], "status": w["status"], "deadline": w["deadline"], "sent": w["sent"],
-            "remaining_s": max(0, int(w["deadline"] - time.time())), "track": w["track"]}
+            "remaining_s": max(0, int(w["deadline"] - time.time())), "track": w["track"],
+            "alert_reason": w.get("alert_reason")}
 
 
 def _need(wid: BoundedToken, owner: str) -> dict:
@@ -426,6 +452,8 @@ async def walk_start(body: WalkStart, request: Request):
         name, body.minutes, body.codes, body.lat, body.lon, base_url(request),
         demo_session=demo_session, owner=owner,
     )
+    if body.battery is not None:
+        db.update_track(w["track"], body.lat, body.lon, body.battery)
     who = name or "Your contact"
     await telegram.notify(
         body.codes,
@@ -458,7 +486,7 @@ async def walk_status(wid: BoundedToken, request: Request):
 async def walk_ping(wid: BoundedToken, body: Ping, request: Request):
     w = _need(wid, _require_device(request))
     if w["status"] == "active":
-        db.update_track(w["track"], body.lat, body.lon)
+        db.update_track(w["track"], body.lat, body.lon, body.battery)
     return _view(w)
 
 
@@ -472,8 +500,11 @@ async def walk_ping(wid: BoundedToken, body: Ping, request: Request):
 )
 async def walk_safe(wid: BoundedToken, request: Request):
     w = _need(wid, _require_device(request))
-    if w["status"] == "active":
-        db.run("UPDATE walks SET status='safe' WHERE id=?", (wid,))
+    changed = db.run(
+        "UPDATE walks SET status='safe' WHERE id=? AND owner=? AND status='active'",
+        (wid, w["owner"]),
+    )
+    if changed:
         await telegram.notify(
             json.loads(w["codes"]),
             f"✅ {w['name'] or 'Your contact'} checked in: reached safely.",
@@ -494,8 +525,12 @@ async def walk_extend(wid: BoundedToken, body: Extend, request: Request):
     w = _need(wid, _require_device(request))
     if w["status"] == "active":
         deadline = max(w["deadline"], time.time()) + body.minutes * 60
-        db.run("UPDATE walks SET deadline=? WHERE id=?", (deadline, wid))
-        db.extend_track_expiry(w["track"], deadline + 2 * 60 * 60)
+        changed = db.run(
+            "UPDATE walks SET deadline=? WHERE id=? AND owner=? AND status='active'",
+            (deadline, wid, w["owner"]),
+        )
+        if changed:
+            db.extend_track_expiry(w["track"], deadline + 2 * 60 * 60)
     return _view(_need(wid, _require_device(request)))
 
 
@@ -511,6 +546,21 @@ async def walk_panic(wid: BoundedToken, request: Request):
     w = _need(wid, _require_device(request))
     if w["status"] == "active":
         await walk.fire_alert(w, "panic")
+    return _view(_need(wid, _require_device(request)))
+
+
+@app.post(
+    "/api/walk/{wid}/duress",
+    dependencies=[
+        Depends(limiter(30, 60)),
+        Depends(token_limiter(30, 60, param="wid")),
+        Depends(token_limiter(30, 60, header="x-device-token")),
+    ],
+)
+async def walk_duress(wid: BoundedToken, request: Request):
+    w = _need(wid, _require_device(request))
+    if w["status"] == "active":
+        await walk.fire_alert(w, "duress")
     return _view(_need(wid, _require_device(request)))
 
 

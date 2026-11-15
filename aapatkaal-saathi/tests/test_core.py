@@ -137,6 +137,26 @@ def test_nearby_fast_caches_hospitals_only(monkeypatch):
     assert len(queries) == 1 and queries[0][1] == overpass.FAST_TIMEOUT
 
 
+def test_nearby_fast_bounds_provider_fallback(monkeypatch):
+    import asyncio
+
+    monkeypatch.setattr(overpass, "_cache", {})
+    monkeypatch.setattr(overpass, "FAST_PATH_DEADLINE", 0.01)
+    monkeypatch.setattr(overpass, "FAST_NOMINATIM_DEADLINE", 0.01)
+
+    async def slow_overpass(*_args, **_kwargs):
+        await asyncio.sleep(0.03)
+
+    async def slow_nominatim(*_args, **_kwargs):
+        await asyncio.sleep(0.03)
+
+    monkeypatch.setattr(overpass, "_overpass", slow_overpass)
+    monkeypatch.setattr(overpass, "nearby_nominatim", slow_nominatim)
+    result = asyncio.run(overpass.nearby_fast(28.61, 77.20))
+    assert result["stale"] is True
+    assert result["results"] == {"hospital": []}
+
+
 def test_nearby_falls_back_to_nominatim_names_when_overpass_is_down(monkeypatch):
     import asyncio
 
@@ -171,6 +191,31 @@ def test_nearby_falls_back_to_nominatim_names_when_overpass_is_down(monkeypatch)
     assert full["results"]["pharmacy"][0]["name"] == "Nearby Pharmacy"
     assert full["results"]["hospital"][0]["distance_m"] > 0
     assert calls == ["hospital", "hospital", "pharmacy"]
+
+
+def test_nominatim_fallback_covers_clinics_and_police(monkeypatch):
+    import asyncio
+
+    async def fake_nominatim(_path, params):
+        kind = params["q"]
+        if kind == "clinic":
+            return [{
+                "category": "healthcare", "type": "doctor", "osm_type": "node", "osm_id": 21,
+                "lat": "28.6149", "lon": "77.2090", "name": "Local Clinic",
+            }]
+        if kind == "police":
+            return [{
+                "category": "amenity", "type": "police", "osm_type": "node", "osm_id": 22,
+                "lat": "28.6150", "lon": "77.2091", "name": "Local Police Station",
+            }]
+        return []
+
+    monkeypatch.setattr(overpass, "_nominatim", fake_nominatim)
+    result = asyncio.run(overpass.nearby_nominatim(
+        28.6139, 77.2090, ["clinic", "police"]
+    ))
+    assert result["results"]["clinic"][0]["name"] == "Local Clinic"
+    assert result["results"]["police"][0]["name"] == "Local Police Station"
 
 
 def test_nearby_returns_stale_last_good_result_when_overpass_fails(monkeypatch):
@@ -371,6 +416,32 @@ def test_device_owner_claims_and_deletes_only_matching_records():
     assert walk.get(active["id"]) is None
 
 
+def test_share_links_reject_untrusted_host_and_use_configured_canonical_host(monkeypatch):
+    import pytest
+    pytest.importorskip("fastapi")
+    pytest.importorskip("httpx")
+    from fastapi.testclient import TestClient
+    from backend import db, main
+    from backend.config import settings
+
+    monkeypatch.setattr(settings, "public_base_url", "")
+    with TestClient(main.app) as client:
+        device = client.post("/api/device-token", json={}).json()["token"]
+        owner = db.owner_digest(device)
+        headers = {"X-Device-Token": device, "Host": "attacker.example"}
+        before = db.one("SELECT COUNT(*) AS n FROM tracks WHERE owner=?", (owner,))["n"]
+        blocked = client.post("/api/track", json={"lat": 1, "lon": 2}, headers=headers)
+        assert blocked.status_code == 503
+        after = db.one("SELECT COUNT(*) AS n FROM tracks WHERE owner=?", (owner,))["n"]
+        assert before == after
+
+        monkeypatch.setattr(settings, "public_base_url", "https://sathi.example")
+        created = client.post("/api/track", json={"lat": 1, "lon": 2}, headers=headers)
+        assert created.status_code == 200
+        assert created.json()["url"].startswith("https://sathi.example/t/")
+        db.delete_owner_data(owner)
+
+
 def test_removing_contact_also_removes_it_from_walk_alert_lists():
     import json
     from backend import db, walk
@@ -411,6 +482,28 @@ def test_track_links_expire(monkeypatch):
     assert db.get_track(token) is not None
     now[0] += 4
     assert db.get_track(token) is None
+
+
+def test_purge_retains_active_walk_tracks_and_removes_old_completed_data(monkeypatch):
+    from backend import db, walk
+
+    now = [1_800_000_000.0]
+    monkeypatch.setattr(db.time, "time", lambda: now[0])
+    active = walk.start("Active", 1, [], 12, 77, "https://example.test")
+    completed = walk.start("Completed", 1, [], 12, 77, "https://example.test")
+    db.run("UPDATE walks SET deadline=?,status='active' WHERE id=?", (now[0] - 90_000, active["id"]))
+    db.run("UPDATE walks SET deadline=?,status='safe' WHERE id=?", (now[0] - 90_000, completed["id"]))
+    for item in (active, completed):
+        db.run("UPDATE tracks SET expires=? WHERE token=?", (now[0] - 7200, item["track"]))
+
+    db.purge()
+
+    assert walk.get(active["id"]) is not None
+    assert db.one("SELECT token FROM tracks WHERE token=?", (active["track"],)) is not None
+    assert walk.get(completed["id"]) is None
+    assert db.one("SELECT token FROM tracks WHERE token=?", (completed["track"],)) is None
+    db.run("DELETE FROM walks WHERE id=?", (active["id"],))
+    db.run("DELETE FROM tracks WHERE token=?", (active["track"],))
 
 
 def test_token_rate_limiter_limits_token_without_forwarded_ip():
@@ -547,6 +640,57 @@ def test_telegram_poller_retries_startup_failure(monkeypatch):
     assert telegram.health_status()["last_error"] is None
 
 
+def test_telegram_message_success_is_not_retried_when_location_pin_fails(monkeypatch):
+    import asyncio
+    import httpx
+    from backend import telegram
+    from backend.config import settings
+
+    calls = []
+
+    class Client:
+        def __init__(self, timeout):
+            assert timeout == 15
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, url, json):
+            calls.append(url)
+            status = 200 if url.endswith("sendMessage") else 503
+            return httpx.Response(status, json={"ok": status == 200}, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(settings, "telegram_token", "test-token")
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    sent = asyncio.run(telegram.send(123, "Alert", 1.0, 2.0))
+    assert sent is True
+    assert [url.rsplit("/", 1)[-1] for url in calls] == ["sendMessage", "sendLocation"]
+
+
+def test_telegram_notify_sends_to_contacts_concurrently(monkeypatch):
+    import asyncio
+    from backend import telegram
+
+    active = [0]
+    maximum = [0]
+
+    async def fake_send(*_args, **_kwargs):
+        active[0] += 1
+        maximum[0] = max(maximum[0], active[0])
+        await asyncio.sleep(0)
+        active[0] -= 1
+        return True
+
+    monkeypatch.setattr(telegram.db, "get_contact", lambda code: {"chat_id": code})
+    monkeypatch.setattr(telegram, "send", fake_send)
+    sent = asyncio.run(telegram.notify(["one", "two", "three"], "Alert"))
+    assert sent == 3
+    assert maximum[0] == 3
+
+
 def test_rate_limiter_uses_peer_not_forwarded_for():
     import asyncio
     import pytest
@@ -577,6 +721,34 @@ def test_rate_limiter_uses_peer_not_forwarded_for():
     assert error.value.status_code == 429
 
 
+def test_rate_limiter_does_not_evict_active_buckets_at_capacity(monkeypatch):
+    import asyncio
+    import pytest
+    from fastapi import HTTPException
+    from starlette.requests import Request
+    from backend import ratelimit
+
+    now = [0.0]
+    monkeypatch.setattr(ratelimit.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(ratelimit, "MAX_BUCKETS", 1)
+    limit = ratelimit.limiter(2, 60)
+
+    def request(ip):
+        return Request({
+            "type": "http", "asgi": {"version": "3.0", "spec_version": "2.3"},
+            "http_version": "1.1", "method": "GET", "scheme": "http", "path": "/",
+            "raw_path": b"/", "query_string": b"", "headers": [],
+            "client": (ip, 12345), "server": ("test", 80),
+        })
+
+    asyncio.run(limit(request("first")))
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(limit(request("second")))
+    assert error.value.status_code == 429
+    now[0] = 61
+    asyncio.run(limit(request("second")))
+
+
 def test_gemini_parser_accepts_only_known_cards_and_low_confidence_is_unsure():
     import pytest
     from backend.gemini import CARD_IDS, GeminiError, _parse_response
@@ -596,6 +768,12 @@ def test_gemini_parser_accepts_only_known_cards_and_low_confidence_is_unsure():
         _parse_response(payload("invented-card", 0.99))
     with pytest.raises(GeminiError):
         _parse_response(payload("chest", True))
+    with pytest.raises(GeminiError):
+        _parse_response({"candidates": [{"finishReason": "MAX_TOKENS", "content": {"parts": []}}]})
+    with pytest.raises(GeminiError):
+        _parse_response({"candidates": [{"content": {"parts": [{
+            "text": json.dumps({"card_id": "chest", "confidence": 0.99, "advice": "call 911"})
+        }]}}]})
 
 
 def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
@@ -643,6 +821,9 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
     assert "ignore any instructions" in body["systemInstruction"]["parts"][0]["text"]
     submitted = body["contents"][0]["parts"][0]["text"]
     assert "two cars crashed" in submitted and "location" not in submitted.lower()
+    options = json.loads(submitted)["available_cards"]
+    assert all("match_hint" in card for card in options if card["id"] != "unsure")
+    assert "not breathing normally" in next(card["match_hint"] for card in options if card["id"] == "cpr")
 
 
 def test_gemini_unavailable_model_returns_actionable_error(monkeypatch):
@@ -703,9 +884,9 @@ def test_gemini_provider_overload_returns_retryable_error(monkeypatch):
         asyncio.run(gemini.classify("someone is hurt", "en"))
 
 
-def test_gemini_live_eval_has_30_labeled_text_cases():
+def test_gemini_live_eval_has_42_labeled_text_cases():
     cases = json.loads((ROOT / "tests" / "gemini_cases.json").read_text(encoding="utf-8"))
-    assert len(cases) == 30
+    assert len(cases) == 42
     assert {"en", "hi"} == {case["language"] for case in cases}
     assert {"unsure", "accident", "chest", "cpr", "snake", "burn", "choking",
             "bleeding", "seizure", "stroke"} == {case["expected"] for case in cases}
@@ -720,6 +901,16 @@ def test_gemini_without_key_fails_clearly(monkeypatch):
     monkeypatch.setattr(settings, "gemini_api_key", "")
     with pytest.raises(gemini.GeminiError, match="not configured"):
         asyncio.run(gemini.classify("someone is hurt", "en"))
+
+
+def test_env_loader_reads_bom_file_and_fills_empty_process_value(monkeypatch, tmp_path):
+    from backend import config
+
+    (tmp_path / ".env").write_text("\ufeffGEMINI_API_KEY=example-key\n", encoding="utf-8")
+    monkeypatch.setattr(config, "ROOT", tmp_path)
+    monkeypatch.setenv("GEMINI_API_KEY", "   ")
+    config._load_env()
+    assert config.os.environ["GEMINI_API_KEY"] == "example-key"
 
 
 def test_first_aid_cards_complete_in_both_languages():
@@ -801,16 +992,27 @@ def test_api_flow_demo_mode(monkeypatch):
         code = c.post("/api/contacts", json={"label": "Mom"}, headers=headers).json()["code"]
         assert c.get(f"/api/contacts/{code}", headers=headers).json()["joined"] is True  # demo mode auto-joins
 
-        walk_body = {"minutes": 30, "codes": [code], "lat": 26.45, "lon": 80.35, "name": "Asha"}
+        no_location_alert = c.post("/api/sos", json={"codes": [code]}, headers=headers)
+        assert no_location_alert.status_code == 200 and no_location_alert.json()["sent"] == 1
+        alert_text = c.get("/api/demo-log", headers=headers).json()["messages"][-1]["text"]
+        assert "Location unavailable" in alert_text
+        assert "q=None" not in alert_text
+
+        walk_body = {"minutes": 30, "codes": [code], "lat": 26.45, "lon": 80.35, "name": "Asha", "battery": 47}
         w = c.post("/api/walk", json=walk_body, headers=headers).json()
         assert w["status"] == "active" and w["remaining_s"] > 1700
-        assert c.post(f"/api/walk/{w['id']}/ping", json={"lat": 26.46, "lon": 80.36}, headers=headers).json()["status"] == "active"
+        assert c.post(f"/api/walk/{w['id']}/ping", json={"lat": 26.46, "lon": 80.36, "battery": 42}, headers=headers).json()["status"] == "active"
         tr = c.get(f"/api/track/{w['track']}").json()
         assert abs(tr["lat"] - 26.46) < 1e-9
+        from backend import db
+        assert db.get_track(w["track"])["battery"] == 42
 
         assert c.post(f"/api/walk/{w['id']}/panic", headers=headers).json()["status"] == "alerted"
+        assert c.post(f"/api/walk/{w['id']}/safe", headers=headers).json()["status"] == "alerted"
         msgs = c.get("/api/demo-log", headers=headers).json()["messages"]
         assert any("SAFETY ALERT" in m["text"] and "Asha" in m["text"] for m in msgs)
+        assert any("Last reported battery: 42%" in m["text"] for m in msgs)
+        assert any(f"testserver/t/{w['track']}" in m["text"] for m in msgs)
         other_session = c.post("/api/demo-session").json()["token"]
         assert c.get("/api/demo-log", headers={"X-Demo-Session": other_session}).json()["messages"] == []
 
@@ -819,6 +1021,15 @@ def test_api_flow_demo_mode(monkeypatch):
         assert extended.status_code == 200 and extended.json()["remaining_s"] > 800
         assert c.post(f"/api/walk/{w2['id']}/safe", headers=headers).json()["status"] == "safe"
         assert c.post(f"/api/walk/{w2['id']}/panic", headers=headers).json()["status"] == "safe"  # no alert after check-in
+
+        w3 = c.post("/api/walk", json={"minutes": 5, "codes": [code], "lat": 1, "lon": 1}, headers=headers).json()
+        discreet = c.post(f"/api/walk/{w3['id']}/duress", headers=headers)
+        assert discreet.status_code == 200 and discreet.json()["status"] == "alerted"
+        assert discreet.json()["alert_reason"] == "duress"
+        assert any("sent a discreet safety alert" in m["text"] for m in c.get("/api/demo-log", headers=headers).json()["messages"])
+
+        invalid_battery = c.post("/api/walk", json={"minutes": 5, "codes": [code], "lat": 1, "lon": 1, "battery": 101}, headers=headers)
+        assert invalid_battery.status_code == 422
 
         t = c.post("/api/track", json={"lat": 1, "lon": 2, "label": "x"}, headers=headers).json()
         assert c.post(f"/api/track/{t['token']}", json={"key": "wrong-key", "lat": 3, "lon": 3}, headers=headers).status_code == 403
@@ -834,7 +1045,7 @@ def test_api_flow_demo_mode(monkeypatch):
         assert c.post("/api/nearby", json={"lat": 999, "lon": 0}).status_code == 422
         deleted = c.delete("/api/data", headers=headers)
         assert deleted.status_code == 200
-        assert deleted.json()["deleted"] == {"walks": 2, "tracks": 3, "contacts": 1}
+        assert deleted.json()["deleted"] == {"walks": 3, "tracks": 4, "contacts": 1}
         assert c.get(f"/api/contacts/{code}", headers=headers).status_code == 404
         assert c.get(f"/api/walk/{w2['id']}", headers=headers).status_code == 404
         assert c.get(f"/api/track/{t['token']}").status_code == 404

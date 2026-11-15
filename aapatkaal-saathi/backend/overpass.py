@@ -12,9 +12,17 @@ TYPE_FILTERS = {
     "pharmacy": ['["amenity"="pharmacy"]', '["healthcare"="pharmacy"]'],
     "police": ['["amenity"="police"]'],
 }
+NOMINATIM_TYPE_MATCHES = {
+    "hospital": {"hospital"},
+    "clinic": {"clinic", "doctors", "doctor"},
+    "pharmacy": {"pharmacy"},
+    "police": {"police"},
+}
 ALL_TYPES = list(TYPE_FILTERS)
 RADII = [3000, 8000, 20000]  # metres; widen only if too few results
 FAST_TIMEOUT = 3.0
+FAST_PATH_DEADLINE = 2.2
+FAST_NOMINATIM_DEADLINE = 0.55
 NOMINATIM_NEARBY_RADIUS = 20000
 HEALTH_TTL = 60
 
@@ -162,7 +170,8 @@ async def nearby_nominatim(
     west, east = max(-180, center_lon - lon_delta), min(180, center_lon + lon_delta)
     viewbox = f"{west:.5f},{north:.5f},{east:.5f},{south:.5f}"
     elements = []
-    for kind in ("hospital", "pharmacy"):
+    # Keep a useful fallback for every filter shown in the Nearby screen.
+    for kind in ("hospital", "pharmacy", "clinic", "police"):
         if kind not in types:
             continue
         data = await _nominatim("/search", {
@@ -178,7 +187,8 @@ async def nearby_nominatim(
             raise RuntimeError("Nominatim nearby search returned an invalid response")
         for place in data:
             category = place.get("category") or place.get("class")
-            if category not in ("amenity", "healthcare") or place.get("type") != kind:
+            place_type = place.get("type")
+            if category not in ("amenity", "healthcare") or place_type not in NOMINATIM_TYPE_MATCHES[kind]:
                 continue
             try:
                 place_lat, place_lon = float(place["lat"]), float(place["lon"])
@@ -189,7 +199,7 @@ async def nearby_nominatim(
             address = place.get("address") or {}
             extra = place.get("extratags") or {}
             tags = {
-                category: kind,
+                category: place_type,
                 "name": place.get("name") or str(place.get("display_name", "")).split(",")[0],
                 "phone": extra.get("phone") or extra.get("contact:phone"),
                 "opening_hours": extra.get("opening_hours"),
@@ -198,6 +208,11 @@ async def nearby_nominatim(
                 "addr:suburb": address.get("suburb") or address.get("neighbourhood"),
                 "addr:city": address.get("city") or address.get("town") or address.get("village"),
             }
+            # Preserve explicit OSM tags when Nominatim supplies them; they help
+            # keep clinic and healthcare=doctor results classified correctly.
+            for tag in ("amenity", "healthcare"):
+                if extra.get(tag):
+                    tags[tag] = extra[tag]
             elements.append({
                 "type": place.get("osm_type", "node"),
                 "id": place.get("osm_id"),
@@ -229,13 +244,28 @@ async def nearby_fast(lat: float, lon: float) -> dict:
                 timeout=FAST_TIMEOUT,
                 backoff_base=0.05,
             ),
-            timeout=9.5,
+            timeout=FAST_PATH_DEADLINE,
         )
     except (RuntimeError, asyncio.TimeoutError):
         stale = _cache.get(key)
         if stale:
             return {**stale[1], "cached": True, "stale": True}
-        return await nearby_nominatim(lat, lon, ["hospital"], radius_m=3000)
+        try:
+            # Keep Nominatim as a quick fallback, but never let it hold up SOS.
+            return await asyncio.wait_for(
+                nearby_nominatim(lat, lon, ["hospital"], radius_m=3000),
+                timeout=FAST_NOMINATIM_DEADLINE,
+            )
+        except Exception:
+            return {
+                "center": {"lat": lat, "lon": lon},
+                "radius_m": 3000,
+                "results": {"hospital": []},
+                "source": "OpenStreetMap services temporarily unavailable",
+                "fetched_at": time.time(),
+                "cached": False,
+                "stale": True,
+            }
     result = parse_elements(data.get("elements", []), lat, lon)
     payload = {
         "center": {"lat": lat, "lon": lon},
@@ -291,7 +321,7 @@ async def health() -> dict:
     try:
         await asyncio.wait_for(
             _overpass("[out:json][timeout:2];node(0);out;", timeout=3.0, backoff_base=0.05),
-            timeout=9.5,
+            timeout=2.5,
         )
         status = {"reachable": True, "checked_at": time.time()}
     except (RuntimeError, asyncio.TimeoutError):
