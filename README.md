@@ -1,22 +1,31 @@
 # Aapatkaal Saathi · आपातकाल साथी
 
-A bilingual (Hindi and English) emergency helper for the first minutes after an accident or medical emergency. It brings reviewed first-aid cards, emergency calling, nearby services, and optional safety-contact tools together in one mobile-friendly app.
+A bilingual Hindi and English emergency helper for the first minutes after an accident or medical emergency. It brings emergency calling, first-aid cards, nearby mapped services, and optional safety-contact tools together in a mobile-friendly app.
 
 > **In an emergency in India, call 112.** This app does not contact emergency dispatch or replace professional medical care.
 
 ## Features
 
-- **SOS and emergency calls:** Find nearby mapped hospitals, keep a direct 112 call action available, and show 108 as an ambulance option where available.
-- **Reviewed first-aid cards:** Nine bilingual cards cover accidents, chest pain, CPR, snakebite, burns, choking, bleeding, seizures, and stroke. Each card includes actions to take and actions to avoid.
-- **Gemini card routing (optional):** Describe an incident in Hindi or English and Gemini can select an existing reviewed card—or return “unsure.” Gemini does not diagnose, assess urgency, or generate first-aid instructions.
-- **Nearby services and maps:** Browse hospitals, clinics, pharmacies, and police services using OpenStreetMap data. Map providers and external listings may be unavailable or incomplete.
-- **Safety contacts:** Optional Telegram alerts and a server-timed “Walk with me” feature. WhatsApp messages are prefilled for review; you choose whether to send them.
-- **Live location sharing:** Share a link with a live map and nearby services.
-- **Offline support:** The app shell, first-aid cards, and last saved nearby list can be available offline.
+- **SOS and emergency calls:** Keep a direct 112 call action available and find nearby places listed in OpenStreetMap. An ambulance call option may also be available depending on the state.
+- **Bilingual first-aid cards:** Browse concise Hindi and English cards with steps and “Do NOT do this” guidance. Cards are general information and need qualified review before public use.
+- **Optional Gemini routing:** Describe an incident in Hindi, English, or Hinglish to find a matching existing card. Gemini does not write first-aid instructions, diagnose, or assess urgency.
+- **Nearby services and maps:** View mapped hospitals, pharmacies, clinics, and police stations. Listings may be incomplete or out of date.
+- **Safety contacts and live location:** Use the optional Walk feature to check in or alert contacts. Real Telegram alerts require a configured bot and contacts who have started it.
+- **Offline basics:** The app shell, first-aid cards, and last saved nearby list can remain available offline. Fresh maps and alerts need connectivity.
 
 ## Run locally
 
-From the repository root:
+The application is in the `aapatkaal-saathi` folder.
+
+**Windows PowerShell**
+
+```powershell
+cd aapatkaal-saathi
+Copy-Item .env.example .env
+.\run.ps1
+```
+
+**macOS or Linux**
 
 ```bash
 cd aapatkaal-saathi
@@ -24,55 +33,47 @@ cp .env.example .env
 ./run.sh
 ```
 
-Open [http://localhost:8000](http://localhost:8000). The run script creates a virtual environment, installs backend requirements, and starts the app. You can run it without API keys; optional integrations remain unavailable until configured.
+Open the local address printed by the run script. To use Gemini, add your `GEMINI_API_KEY` to `aapatkaal-saathi/.env` and restart the app. Keep `.env` private and never commit API keys.
 
-## Optional configuration
+Without a Telegram bot token, the app shows a demo-mode banner and simulates alerts in the browser; it does not notify contacts.
 
-Edit `aapatkaal-saathi/.env`:
+## HTTPS and deployment
 
-| Variable | Purpose |
-|---|---|
-| `GEMINI_API_KEY` | Enables Gemini's reviewed-card routing. Keep the key on the server; never put it in frontend code or commit it. |
-| `GEMINI_MODEL` | Gemini model ID. Defaults to `gemini-3.5-flash-lite`. |
-| `TELEGRAM_BOT_TOKEN` | Enables real Telegram alerts. Without it, the app uses demo mode. |
-| `CONTACT_EMAIL` | Contact included in the OpenStreetMap service User-Agent. Set a real email for deployed use. |
-| `PUBLIC_BASE_URL` | Public HTTPS URL used in links shared by the app. |
-| `FORWARDED_ALLOW_IPS` | Exact trusted reverse-proxy IPs. Do not set this to `*`. |
+Phone browsers generally require **HTTPS** for GPS. For a phone demo, use an HTTPS tunnel or deploy the included Docker app. The project includes a Render Blueprint at `aapatkaal-saathi/render.yaml`; configure `CONTACT_EMAIL` when deploying.
 
-Copying `.env.example` creates a local `.env`, which is ignored by Git. Never commit API keys, bot tokens, or other credentials.
+The included free Render configuration has no persistent disk. Its SQLite data may be lost on restart, redeploy, or spin-down, and the first request after inactivity may take about a minute. Treat it as a demo deployment.
 
-### Gemini privacy and safety
+## Checks
 
-Gemini routing is opt-in. The incident description and reviewed-card labels are sent to Google; GPS, contacts, and device tokens are not included. Do not enter names, phone numbers, or exact addresses. Gemini can only return an ID from the app's reviewed first-aid cards, and the app displays the unchanged card. Its confidence value is a routing heuristic, not a medical assessment.
-
-### Using on a phone
-
-Browsers generally require HTTPS for GPS on phones. For a temporary demo, run a trusted HTTPS tunnel to the local server and set `PUBLIC_BASE_URL` to that public HTTPS address. See the [detailed app guide](aapatkaal-saathi/README.md) for deployment, Telegram setup, reverse-proxy configuration, privacy details, and demo checks.
-
-## Tests
-
-With the project's virtual environment activated from `aapatkaal-saathi/`:
+From the `aapatkaal-saathi` folder, run:
 
 ```bash
+python -m pip install -r backend/requirements.txt pytest ruff
 python -m pytest -q
+python -m compileall -q backend tests
+ruff check backend tests --select E4,E7,E9,F
 ```
 
-The optional live Gemini evaluation sends 30 synthetic descriptions and may use API quota:
+After starting the app, run the HTTP smoke check:
+
+```bash
+python tests/smoke.py http://127.0.0.1:8000
+```
+
+An optional Gemini evaluator sends synthetic incident descriptions to the configured model and may use API quota:
 
 ```bash
 GEMINI_API_KEY=... python tests/evaluate_gemini.py --run
 ```
 
-Do not treat that evaluation as evidence of clinical safety or medical accuracy.
+## Privacy and limitations
 
-## Project layout
+Gemini receives the description entered for routing and card labels, not GPS or contact details. Do not enter names, phone numbers, or exact addresses. Nearby and reverse-geocoding features send location to map services; SOS and Walk share location only through the options the user chooses.
 
-```text
-aapatkaal-saathi/
-  backend/    FastAPI app, Gemini routing, OpenStreetMap, Telegram, SQLite
-  frontend/   Mobile web app, reviewed cards, maps, offline support
-  tests/      Automated tests and optional synthetic Gemini evaluation
-  run.sh      Local development launcher
-```
+OpenStreetMap listings can be incomplete or stale. The app cannot confirm that a facility is open, has beds, or can treat a particular emergency. Live location updates only while the sender’s page remains open. Telegram messages only reach contacts who have started the bot.
 
-Map data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) (ODbL).
+First-aid cards are general information, not diagnosis or medical advice. They require qualified review before public use.
+
+## Project details
+
+See [`aapatkaal-saathi/README.md`](aapatkaal-saathi/README.md) for full setup, feature behavior, privacy details, and the three-minute demo guide. See [`aapatkaal-saathi/PITCH.md`](aapatkaal-saathi/PITCH.md) for the judge brief and likely questions.
