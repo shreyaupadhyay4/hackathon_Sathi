@@ -44,8 +44,13 @@ const TXT = {
     operatorVoiceUnavailable: 'Speech playback is not available on this phone.',
     operatorNoHindiVoice: 'No Hindi voice found. Add Hindi text-to-speech in phone settings.',
     geminiTitle: 'Ask Gemini for safe guidance',
-    geminiExplain: 'Ask about an emergency in Hindi or English. Your question is sent to Google Gemini; do not include names, phone numbers, or exact addresses. GPS is not sent. Gemini gives a short answer from a matching app card, or a limited question-specific safety answer if no card fits. AI answers can be wrong; call 112 in an emergency.',
+    geminiExplain: 'Ask or speak about an emergency in Hindi or English. Browser speech recognition may process audio through its provider; the recognized text is then sent to Gemini. Do not include names, phone numbers, or exact addresses. GPS is not sent. Gemini gives a short answer from a matching card or limited general guidance. AI can be wrong; call 112 in an emergency.',
     geminiInput: 'What happened, or what do you need help with?', geminiPlaceholder: 'For example: “My father has chest pain”',
+    geminiVoice: '🎙️ Speak your question or say “Call 112” / “Alert my contacts”',
+    voiceUnavailable: 'Voice input is not supported in this browser. Type your question instead.',
+    voiceCallConfirm: 'Open the phone dialer to call 112 now?',
+    voiceAlertConfirm: 'Send an emergency alert to your saved safety contacts? Location may be shared if available.',
+    voiceError: 'Voice input failed. Type your question or use the call button.',
     geminiRun: 'Get safe guidance', geminiWorking: 'Checking your question…',
     geminiShortInput: 'Add a few words about what happened, or choose a card below.',
     demoBanner: 'Demo mode: alerts are simulated here; no contacts are notified.',
@@ -198,8 +203,13 @@ const TXT = {
     operatorVoiceUnavailable: 'इस फ़ोन पर सुनाने की सुविधा उपलब्ध नहीं है।',
     operatorNoHindiVoice: 'हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
     geminiTitle: 'Gemini से सुरक्षित मदद पूछें',
-    geminiExplain: 'आपातकाल के बारे में हिंदी या अंग्रेज़ी में पूछें। आपका सवाल Google Gemini को भेजा जाएगा; नाम, फ़ोन नंबर या पूरा पता न लिखें। GPS नहीं भेजा जाता। Gemini मिलते-जुलते ऐप कार्ड से छोटा जवाब देगा या कार्ड न मिलने पर सवाल से जुड़ी सीमित सुरक्षा जानकारी देगा। AI का जवाब गलत हो सकता है; आपातकाल में 112 पर कॉल करें।',
+    geminiExplain: 'आपातकाल के बारे में हिंदी या अंग्रेज़ी में पूछें या बोलें। ब्राउज़र का आवाज़ पहचानने वाला फीचर ऑडियो अपने सेवा प्रदाता को भेज सकता है; पहचाना गया सवाल Gemini को भेजा जाता है। नाम, फ़ोन नंबर या पूरा पता न लिखें। GPS नहीं भेजा जाता। Gemini कार्ड से जवाब या सीमित सामान्य सुरक्षा जानकारी देगा। AI गलत हो सकता है; आपातकाल में 112 पर कॉल करें।',
     geminiInput: 'क्या हुआ है या किस बात में मदद चाहिए?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
+    geminiVoice: '🎙️ बोलकर पूछें या कहें “112 पर कॉल” / “मेरे संपर्कों को अलर्ट”',
+    voiceUnavailable: 'इस ब्राउज़र में आवाज़ से पूछना उपलब्ध नहीं है। सवाल टाइप करें।',
+    voiceCallConfirm: 'क्या अभी 112 कॉल करने के लिए फ़ोन डायलर खोलें?',
+    voiceAlertConfirm: 'क्या सेव किए सुरक्षा संपर्कों को आपातकालीन अलर्ट भेजें? उपलब्ध होने पर लोकेशन साझा हो सकती है।',
+    voiceError: 'आवाज़ नहीं समझ पाए। सवाल टाइप करें या कॉल बटन दबाएँ।',
     geminiRun: 'सुरक्षित मदद देखें', geminiWorking: 'आपका सवाल समझ रहे हैं…',
     geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
     demoBanner: 'डेमो मोड: अलर्ट केवल इस ऐप में दिखते हैं; किसी संपर्क को संदेश नहीं जाता।',
@@ -757,6 +767,46 @@ $('#geminiDescription').addEventListener('input', () => {
   $('#geminiAnswer').hidden = true;
   $('#geminiAnswerText').textContent = '';
 });
+let geminiVoiceRequest = false;
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRecognitionAPI) $('#geminiVoice').hidden = true;
+$('#geminiVoice').onclick = () => {
+  if (!SpeechRecognitionAPI) {
+    $('#geminiResult').hidden = false;
+    $('#geminiResult').textContent = t('voiceUnavailable');
+    return;
+  }
+  const recognition = new SpeechRecognitionAPI();
+  recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onresult = event => {
+    const spoken = event.results?.[0]?.[0]?.transcript?.trim();
+    if (!spoken) return;
+    const normalized = spoken.toLowerCase().replace(/[.,!?।]/g, ' ').replace(/\s+/g, ' ').trim();
+    const asksToCall = /\b(call|dial)\s*112\b/.test(normalized) || /112\s*(पर|pe|par)\s*(कॉल|call|फोन)/.test(normalized);
+    const asksToAlert = /\b(alert|message|notify)\s+(my\s+)?(contacts|safety contacts)\b/.test(normalized)
+      || /(मेरे संपर्कों को|contacts ko).*(अलर्ट|संदेश|alert|message)/.test(normalized);
+    if (asksToCall) {
+      if (window.confirm(t('voiceCallConfirm'))) window.location.href = 'tel:112';
+      return;
+    }
+    if (asksToAlert) {
+      if (window.confirm(t('voiceAlertConfirm'))) $('#sos').click();
+      return;
+    }
+    $('#geminiDescription').value = spoken.slice(0, 500);
+    $('#geminiDescription').dispatchEvent(new Event('input', {bubbles: true}));
+    geminiVoiceRequest = true;
+    $('#geminiRun').click();
+  };
+  recognition.onerror = () => {
+    $('#geminiResult').hidden = false;
+    $('#geminiResult').textContent = t('voiceError');
+  };
+  try { recognition.start(); }
+  catch { $('#geminiResult').hidden = false; $('#geminiResult').textContent = t('voiceError'); }
+};
 $('#geminiRun').onclick = async () => {
   const description = $('#geminiDescription').value.trim();
   const status = $('#geminiResult');
@@ -776,6 +826,8 @@ $('#geminiRun').onclick = async () => {
     const result = await api('/api/gemini/route', {description, language: lang});
     $('#geminiAnswerText').textContent = result.answer;
     answerBox.hidden = false;
+    if (geminiVoiceRequest) speak([result.answer]);
+    geminiVoiceRequest = false;
     const match = cards.find(card => card.id === result.card_id);
     if (!match || result.card_id === 'unsure') {
       $('#geminiAnswerTitle').textContent = t('geminiAnswerTitleGeneral');
@@ -797,6 +849,7 @@ $('#geminiRun').onclick = async () => {
       : /provider returned http/.test(message) ? t('geminiProviderError')
       : t('geminiUnavailable');
     answerBox.hidden = true;
+    geminiVoiceRequest = false;
   } finally {
     button.disabled = false;
     $('#geminiDescription').disabled = false;
