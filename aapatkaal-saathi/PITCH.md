@@ -8,7 +8,7 @@ Aapatkaal Saathi is a one-screen emergency helper for the first minutes of an in
 
 1. Open the app and point out the persistent demo banner. Explain that without a Telegram bot token, every alert is simulated inside this browser and no contact is notified.
 2. Tap SOS. Show the direct 112 action, nearest mapped hospital (if available), source/age wording, and the fallback when GPS or map services are unavailable.
-3. Open Help, show its short steps, **Do NOT** list, and visible medical notice. Type a non-identifying emergency question into Gemini. Show the short response and matching card, or the question-specific general safety response when no card fits.
+3. Open Help, show its short steps, **Do NOT** list, and visible medical notice. Type a non-identifying emergency question into Gemini. If HTTPS and microphone access are available, demonstrate “Call 112” opening the phone dialer; the user may still need to tap Call. A saved contact's spoken name is matched on-device, but its audio is sent to Gemini for transcription.
 4. Open **What to tell 112**. Add the event and people count locally, show the approximate mapped place if lookup succeeds, then read the script aloud. The app does not call the operator.
 5. Open Walk, add a demo contact, start the short demo timer, and show the simulated alert log. In production, Telegram reaches only contacts who started the bot; it is not a 112 dispatch service.
 6. Finish on Nearby and show the OpenStreetMap source and the “listed, not confirmed open” limitation.
@@ -33,7 +33,7 @@ Aapatkaal Saathi is a one-screen emergency helper for the first minutes of an in
 
 **What happens without internet or GPS?** The cached app and first-aid cards remain usable, 112 can still be dialed, and saved map listings may be shown with their age. Live location, fresh place lookup, and remote alerts need connectivity; location sharing is optional.
 
-**What data leaves the phone?** Nearby and reverse lookup send coordinates to OpenStreetMap services; chosen SOS/Walk flows may send location to selected contacts. Gemini receives the entered question and the app's card text for the selected language, not GPS or contact details. WhatsApp numbers stay in browser storage.
+**What data leaves the phone?** Nearby and reverse lookup send coordinates to OpenStreetMap services; the Nearby Google Maps view receives a location rounded to roughly 100 metres. Chosen SOS/Walk flows may send location to selected contacts. Gemini receives typed questions and app card text; voice audio, including any spoken contact label, is sent to Gemini for transcription. The saved phone number stays in browser storage, and the typed-question route does not send GPS or contact details.
 
 **What has not been clinically validated?** The first-aid cards require a qualified review before public use. We do not claim clinical validation or measured Gemini accuracy.
 

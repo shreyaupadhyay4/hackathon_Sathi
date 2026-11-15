@@ -109,6 +109,11 @@
       <button id="liveStart" class="btn ghost wide" type="button" data-i="liveStart"></button>
       <button id="liveStop" class="btn ghost wide" type="button" data-i="liveStop" hidden></button>
       <p id="liveStatus" class="note" role="status" aria-live="polite"></p>
+      <p id="voiceFallback" class="note" role="status" hidden></p>
+      <div id="voiceFallbackActions" class="row" hidden>
+        <button id="voiceAlertContacts" class="btn wa" type="button" data-i="voiceAlertContacts"></button>
+        <a class="btn danger" href="tel:112" data-i="voiceCall112"></a>
+      </div>
       <button id="geminiRun" class="btn go wide" data-i="geminiRun"></button>
       <p id="geminiResult" class="note" role="status" aria-live="polite" hidden></p>
       <div id="geminiAnswer" class="box" role="status" aria-live="polite" hidden>
@@ -235,6 +240,6 @@
   <button data-tab="walk"><span aria-hidden="true">🚶</span><b data-i="tabWalk"></b></button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/app.js?v=33-live-transcription"></script>
+<script src="/app.js?v=36-rounded-map-location"></script>
 </body>
 </html>

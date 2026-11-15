@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from backend import gemini
+from backend import gemini  # noqa: E402
 
 CASES = Path(__file__).with_name("gemini_cases.json")
 

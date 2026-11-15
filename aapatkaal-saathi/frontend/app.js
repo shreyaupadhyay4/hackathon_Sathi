@@ -44,14 +44,18 @@ const TXT = {
     operatorVoiceUnavailable: 'Speech playback is not available on this phone.',
     operatorNoHindiVoice: 'No Hindi voice found. Add Hindi text-to-speech in phone settings.',
     geminiTitle: 'Find a reviewed card with Gemini',
-    geminiExplain: 'Describe the situation in Hindi or English by typing or using Gemini Live voice input. Your description and voice audio are sent through this app server to Google Gemini; this app does not store the audio. Do not include names, phone numbers, or exact addresses; GPS is not sent. Gemini tries to match an existing reviewed card. If no card fits, it may give brief general emergency guidance. It does not diagnose or recommend medicines, doses, or risky procedures. Check any guidance carefully and call 112 in an emergency.',
+    geminiExplain: 'Describe the situation in Hindi or English by typing or using Gemini Live voice input. Say “call 112” or “call [saved WhatsApp contact name]” to open your phone dialer; your phone may ask you to tap Call. Say “alert my contacts” to request a contact alert; the app asks you to confirm first. Voice audio is sent through this app server to Google Gemini and is not stored by this app. A contact name spoken for a call is included in that audio; the saved phone number stays on this device. Avoid sharing other names, phone numbers, or exact addresses; GPS is not sent. Gemini tries to match an existing reviewed card. If no card fits, it may give brief general emergency guidance. It does not diagnose or recommend medicines, doses, or risky procedures. Check any guidance carefully and call 112 in an emergency.',
     geminiInput: 'What is happening?', geminiPlaceholder: 'For example: “My father has chest pain”',
     geminiVoice: '🎙️ Ask by voice with Gemini Live',
     voiceUnavailable: 'Voice input is not supported in this browser. Type your question instead.',
     voiceNoSpeech: 'Gemini did not detect speech. Check microphone permission and try again, or type your question.',
     voiceNoMicrophone: 'No microphone was detected. Connect or enable one, then try again; or type your question.',
-    voiceCallConfirm: 'Open the phone dialer to call 112 now?',
     voiceAlertConfirm: 'Send an emergency alert to your saved safety contacts? Location may be shared if available.',
+    voiceCallContactNotFound: 'No matching saved WhatsApp contact. Save the number in Walk > WhatsApp contacts and try again.',
+    voiceCallContactAmbiguous: 'More than one saved WhatsApp contact has that name. Give contacts unique names and try again.',
+    voiceFallback: 'Voice input failed. Type your question below, alert your saved safety contacts, or call 112.',
+    voiceAlertContacts: 'Alert safety contacts',
+    voiceCall112: '📞 Call 112',
     voiceProcessing: 'Checking your spoken question…',
     geminiRun: 'Find a reviewed card', geminiWorking: 'Checking for a matching card…',
     liveStart: '🎙️ Start Gemini Live voice help', liveStop: 'Stop Gemini Live', liveStarting: 'Preparing Gemini Live…', liveMicPermission: 'Allow microphone access in your browser…', liveConnecting: 'Connecting audio to Gemini Live…', liveSetupTimeout: 'Gemini Live did not finish connecting. Check your connection and try again.', liveListening: 'Listening. Speak naturally; say “stop” or tap stop to end.', liveUnavailable: 'Live voice could not start. Check microphone permission and Gemini configuration.', liveHttpsRequired: 'Your browser requires HTTPS to use the microphone here. Open the secure app link.', liveNoMicrophone: 'No microphone was found. Connect or enable a microphone, then try again.', liveSocketClosed: 'Gemini Live closed the connection before it was ready. Check the app link and Gemini access, then retry.', liveSocketError: 'Your browser could not connect to Gemini Live. Check internet access or a firewall that may block WebSockets, then retry.', liveUnsupported: 'This browser does not support microphone capture. Try a current version of Chrome, Edge, or Safari.', livePlaybackError: 'Gemini replied, but this browser could not play the audio. Check the selected speaker and try again.', micDenied: 'Microphone access was denied. Allow microphone access in your browser settings, then try again.',
@@ -170,7 +174,7 @@ const TXT = {
     away: 'away', del: 'Remove', removeContact: 'Remove {name}', countdownLabel: 'Time remaining',
     call112Label: 'Call emergency number 112', sosStatus: 'Emergency help status', dismissWalk: 'Close walk status',
     inviteExpired: 'Invite expired. Remove and add again.',
-    privacyTitle: 'Privacy and your data', privacyNote: 'Your saved location, nearby list, and WhatsApp numbers stay on this device. Nearby searches send coordinates to OpenStreetMap services; the Google Maps embed also receives your location and selected service type. SOS, live sharing, and Walk send your location to the contacts or link you choose. Live links expire automatically; use Delete my data to end sharing now. Deleting cannot recall messages already delivered.',
+    privacyTitle: 'Privacy and your data', privacyNote: 'Your saved location, nearby list, and WhatsApp numbers stay on this device. Nearby searches send coordinates to OpenStreetMap services; the Google Maps embed receives a location rounded to roughly 100 metres and the selected service type. SOS, live sharing, and Walk send your location to the contacts or link you choose. Live links expire automatically; use Delete my data to end sharing now. Deleting cannot recall messages already delivered.',
     deleteData: 'Delete my data from this device', deleteConfirm: 'Delete this device’s saved contacts, WhatsApp numbers, live links, walks, and demo messages? This cannot recall messages already delivered.',
     deleteSuccess: 'Your device data was deleted.', deleteFail: 'Could not delete server data. Check your connection and try again.', deletingData: 'Deleting your data…',
   },
@@ -209,14 +213,18 @@ const TXT = {
     operatorVoiceUnavailable: 'इस फ़ोन पर सुनाने की सुविधा उपलब्ध नहीं है।',
     operatorNoHindiVoice: 'हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
     geminiTitle: 'Gemini से जाँचा हुआ कार्ड खोजें',
-    geminiExplain: 'टाइप करके या Gemini Live से बोलकर हिंदी या अंग्रेज़ी में बताएँ। आपका विवरण और आवाज़ इस ऐप के सर्वर से Google Gemini को भेजे जाते हैं; ऐप आवाज़ सेव नहीं करता। नाम, फ़ोन नंबर या पूरा पता न लिखें; GPS नहीं भेजा जाता। Gemini पहले मौजूदा जाँचे हुए कार्ड से मिलान करता है। कोई कार्ड न मिले तो यह सीमित सामान्य आपातकालीन जानकारी दे सकता है। यह बीमारी की पहचान, दवा/खुराक की सलाह या जोखिम भरे तरीके नहीं बताता। जानकारी ध्यान से देखें और आपातकाल में 112 पर कॉल करें।',
+    geminiExplain: 'टाइप करके या Gemini Live से बोलकर हिंदी या अंग्रेज़ी में बताएँ। “112 पर कॉल करें” या “[संपर्क का नाम] को कॉल करें” बोलने पर फ़ोन डायलर खुलेगा; कॉल करने के लिए फ़ोन पर Call दबाना पड़ सकता है। WhatsApp संपर्क का नाम और नंबर पहले “साथ चलें” टैब में सेव करें। “मेरे संपर्कों को अलर्ट करें” बोलने पर ऐप पहले पुष्टि पूछेगा। आवाज़ Google Gemini को भेजी जाती है और ऐप में सेव नहीं होती। कॉल के लिए बोला गया संपर्क नाम भी आवाज़ में शामिल होगा; सेव किया फ़ोन नंबर इसी फ़ोन में रहता है। इसके अलावा नाम, फ़ोन नंबर या पूरा पता न बोलें; GPS नहीं भेजा जाता। Gemini पहले मौजूदा जाँचे हुए कार्ड से मिलान करता है। कोई कार्ड न मिले तो यह सीमित सामान्य आपातकालीन जानकारी दे सकता है। यह बीमारी की पहचान, दवा/खुराक की सलाह या जोखिम भरे तरीके नहीं बताता। जानकारी ध्यान से देखें और आपातकाल में 112 पर कॉल करें।',
     geminiInput: 'क्या हो रहा है?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
     geminiVoice: '🎙️ Gemini Live से बोलकर पूछें',
     voiceUnavailable: 'इस ब्राउज़र में आवाज़ से पूछना उपलब्ध नहीं है। सवाल टाइप करें।',
     voiceNoSpeech: 'Gemini को आवाज़ नहीं मिली। माइक्रोफ़ोन की अनुमति जाँचें और फिर बोलें, या सवाल लिखें।',
     voiceNoMicrophone: 'माइक्रोफ़ोन नहीं मिला। इसे चालू करें या सवाल लिखें।',
-    voiceCallConfirm: 'क्या अभी 112 कॉल करने के लिए फ़ोन डायलर खोलें?',
     voiceAlertConfirm: 'क्या सेव किए सुरक्षा संपर्कों को आपातकालीन अलर्ट भेजें? उपलब्ध होने पर लोकेशन साझा हो सकती है।',
+    voiceCallContactNotFound: 'इस नाम का सेव WhatsApp संपर्क नहीं मिला। साथ चलें > WhatsApp संपर्क में नंबर सेव करके फिर कोशिश करें।',
+    voiceCallContactAmbiguous: 'इस नाम के एक से ज़्यादा WhatsApp संपर्क हैं। संपर्कों के अलग नाम रखें और फिर कोशिश करें।',
+    voiceFallback: 'आवाज़ से सवाल नहीं हो पाया। नीचे सवाल लिखें, सेव किए सुरक्षा संपर्कों को अलर्ट करें या 112 पर कॉल करें।',
+    voiceAlertContacts: 'सेव किए सुरक्षा संपर्कों को अलर्ट करें',
+    voiceCall112: '📞 112 पर कॉल करें',
     voiceProcessing: 'आपका बोला सवाल जाँच रहे हैं…',
     geminiRun: 'जाँचा हुआ कार्ड खोजें', geminiWorking: 'मिलता-जुलता कार्ड देख रहे हैं…',
     liveStart: '🎙️ Gemini Live से बात करें', liveStop: 'Gemini Live बंद करें', liveStarting: 'Gemini Live तैयार कर रहे हैं…', liveMicPermission: 'ब्राउज़र में माइक्रोफ़ोन की अनुमति दें…', liveConnecting: 'Gemini Live से आवाज़ जोड़ रहे हैं…', liveSetupTimeout: 'Gemini Live जुड़ नहीं पाया। इंटरनेट जाँचें और फिर कोशिश करें।', liveListening: 'सुन रहे हैं। बोलें; रोकने के लिए “stop” कहें या बटन दबाएँ।', liveUnavailable: 'Live आवाज़ शुरू नहीं हुई। माइक्रोफ़ोन अनुमति और Gemini सेटिंग जाँचें।', liveHttpsRequired: 'इस पते पर माइक्रोफ़ोन के लिए HTTPS ज़रूरी है। सुरक्षित ऐप लिंक खोलें।', liveNoMicrophone: 'माइक्रोफ़ोन नहीं मिला। माइक्रोफ़ोन जोड़ें या चालू करें और फिर कोशिश करें।', liveSocketClosed: 'Gemini Live जुड़ने से पहले कनेक्शन बंद हो गया। ऐप लिंक और Gemini सेटिंग जाँचें।', liveSocketError: 'ब्राउज़र Gemini Live से नहीं जुड़ पाया। इंटरनेट या WebSocket रोकने वाले फ़ायरवॉल को जाँचें।', liveUnsupported: 'इस ब्राउज़र में माइक्रोफ़ोन नहीं चल रहा। Chrome, Edge या Safari का नया संस्करण आज़माएँ।', livePlaybackError: 'Gemini ने जवाब दिया, लेकिन ब्राउज़र आवाज़ नहीं चला पाया। स्पीकर जाँचें और फिर कोशिश करें।', micDenied: 'माइक्रोफ़ोन की अनुमति नहीं मिली। ब्राउज़र सेटिंग में अनुमति दें और फिर कोशिश करें।',
@@ -335,7 +343,7 @@ const TXT = {
     away: 'दूर', del: 'हटाएं', removeContact: '{name} को हटाएं', countdownLabel: 'बाकी समय',
     call112Label: 'आपातकालीन नंबर 112 पर कॉल करें', sosStatus: 'आपातकालीन मदद की स्थिति', dismissWalk: 'वॉक की स्थिति बंद करें',
     inviteExpired: 'निमंत्रण की अवधि खत्म। हटाकर फिर जोड़ें।',
-    privacyTitle: 'आपकी निजता और डेटा', privacyNote: 'सेव की हुई लोकेशन, पास की सूची और WhatsApp नंबर इसी फ़ोन में रहते हैं। पास की जगह खोजने पर निर्देशांक OpenStreetMap सेवाओं को भेजे जाते हैं; Google Maps एम्बेड को भी आपकी लोकेशन और चुनी हुई सेवा का प्रकार मिलता है। SOS, लाइव लोकेशन और “साथ चलें” में आपकी लोकेशन चुने हुए संपर्कों या लिंक पर भेजी जाती है। लाइव लिंक अपने-आप खत्म होते हैं; शेयरिंग तुरंत रोकने के लिए मेरा डेटा हटाएं। पहले भेजे संदेश वापस नहीं लिए जा सकते।',
+    privacyTitle: 'आपकी निजता और डेटा', privacyNote: 'सेव की हुई लोकेशन, पास की सूची और WhatsApp नंबर इसी फ़ोन में रहते हैं। पास की जगह खोजने पर निर्देशांक OpenStreetMap सेवाओं को भेजे जाते हैं; Google Maps को करीब 100 मीटर के दायरे में गोल किया हुआ स्थान और चुनी हुई सेवा का प्रकार भेजा जाता है। SOS, लाइव लोकेशन और “साथ चलें” में आपकी लोकेशन चुने हुए संपर्कों या लिंक पर भेजी जाती है। लाइव लिंक अपने-आप खत्म होते हैं; शेयरिंग तुरंत रोकने के लिए मेरा डेटा हटाएं। पहले भेजे संदेश वापस नहीं लिए जा सकते।',
     deleteData: 'इस डिवाइस से मेरा डेटा हटाएं', deleteConfirm: 'इस डिवाइस के सेव संपर्क, WhatsApp नंबर, लाइव लिंक, वॉक और डेमो संदेश हटाएं? पहले भेजे संदेश वापस नहीं लिए जा सकते।',
     deleteSuccess: 'इस डिवाइस का डेटा हटा दिया गया।', deleteFail: 'सर्वर से डेटा नहीं हट सका। इंटरनेट जांचकर फिर कोशिश करें।', deletingData: 'आपका डेटा हटाया जा रहा है…',
   },
@@ -791,22 +799,52 @@ function finishSpokenInput() {
   const spoken = liveTranscript.trim();
   stopLive();
   liveActiveMode = 'conversation';
-  if (spoken) { $('#geminiResult').hidden = false; $('#geminiResult').textContent = t('voiceProcessing'); submitSpokenQuestion(spoken); }
-  else { $('#geminiResult').hidden = false; $('#geminiResult').textContent = t('voiceNoSpeech'); }
+  if (spoken) {
+    $('#voiceFallback').hidden = true;
+    $('#voiceFallbackActions').hidden = true;
+    $('#geminiResult').hidden = false;
+    $('#geminiResult').textContent = t('voiceProcessing');
+    submitSpokenQuestion(spoken);
+  } else {
+    $('#geminiResult').hidden = false;
+    $('#geminiResult').textContent = t('voiceNoSpeech');
+    showVoiceFallback();
+  }
+}
+function showVoiceFallback() {
+  $('#voiceFallback').textContent = t('voiceFallback');
+  $('#voiceFallback').hidden = false;
+  $('#voiceFallbackActions').hidden = false;
 }
 function submitSpokenQuestion(spoken) {
-  const normalized = spoken.toLowerCase().replace(/[.,!?]/g, ' ').replace(/\s+/g, ' ').trim();
+  const normalizeVoiceText = value => String(value).normalize('NFKC').toLocaleLowerCase()
+    .replace(/[.,!?،؛:।]/gu, ' ').replace(/\s+/g, ' ').trim();
+  const normalized = normalizeVoiceText(spoken);
   const asksToCall = /\b(call|dial)\s*112\b/.test(normalized) || /\b112\s*(pe|par)\s*(call|phone)\b/.test(normalized)
     || /112\s*पर\s*(कॉल|फोन)/u.test(spoken);
-  const asksToAlert = /\b(alert|message|notify)\s+(my\s+)?(contacts|safety contacts)\b/.test(normalized)
-    || /\bcontacts\s+ko\b.*\b(alert|message)\b/.test(normalized)
-    || /मेरे\s*संपर्कों\s*को.*(अलर्ट|संदेश)/u.test(spoken);
+  const asksToAlert = /\b(alert|message|notify)\s+(my\s+)?(safety\s+)?contacts?\b/.test(normalized)
+    || /\bcontacts?\s+ko\b.*\b(alert|message)\b/.test(normalized)
+    || /मेरे\s*संपर्कों?\s*को.*(अलर्ट|संदेश)/u.test(spoken);
   if (asksToCall) {
-    if (window.confirm(t('voiceCallConfirm'))) window.location.href = 'tel:112';
+    window.location.href = 'tel:112';
     return;
   }
   if (asksToAlert) {
     if (window.confirm(t('voiceAlertConfirm'))) $('#sos').click();
+    return;
+  }
+  const callByName = normalized.match(/^(?:call|dial)\s+(.+?)(?:\s+(?:please|now))?$/)
+    || normalized.match(/^(.+?)\s+(?:ko|को)\s+(?:call|phone|कॉल|फोन)(?:\s+(?:karo|kijiye|करें|करो))?$/u);
+  if (callByName) {
+    const name = callByName[1].trim();
+    const matches = waContacts.filter(contact => normalizeVoiceText(contact.label) === name);
+    if (matches.length !== 1) {
+      $('#geminiAnswer').hidden = true;
+      $('#geminiResult').hidden = false;
+      $('#geminiResult').textContent = matches.length ? t('voiceCallContactAmbiguous') : t('voiceCallContactNotFound');
+      return;
+    }
+    window.location.href = `tel:+${matches[0].phone}`;
     return;
   }
   $('#geminiDescription').value = spoken.slice(0, 500);
@@ -817,6 +855,8 @@ function submitSpokenQuestion(spoken) {
 $('#geminiVoice').onclick = () => {
   liveStartMode = 'transcribe';
   liveTranscript = '';
+  $('#voiceFallback').hidden = true;
+  $('#voiceFallbackActions').hidden = true;
   $('#liveStart').click();
 };
 $('#geminiRun').onclick = async () => {
@@ -1236,10 +1276,11 @@ function setNearbyMapProvider(provider) {
 function updateNearbyGoogleMap() {
   const frame = $('#nearGoogleMap');
   if (!pos) return;
-  const moved = !nearbyGoogleMapPosition ||
-    hav(pos.lat, pos.lon, nearbyGoogleMapPosition.lat, nearbyGoogleMapPosition.lon) >= 30;
+  const mapPosition = {lat: Number(pos.lat.toFixed(3)), lon: Number(pos.lon.toFixed(3))};
+  const moved = !nearbyGoogleMapPosition || mapPosition.lat !== nearbyGoogleMapPosition.lat
+    || mapPosition.lon !== nearbyGoogleMapPosition.lon;
   if (moved || frame.dataset.language !== lang) {
-    const coordinates = `${pos.lat.toFixed(6)},${pos.lon.toFixed(6)}`;
+    const coordinates = `${mapPosition.lat.toFixed(3)},${mapPosition.lon.toFixed(3)}`;
     const embed = new URL('https://maps.google.com/maps');
     embed.searchParams.set('q', `loc:${coordinates}`);
     embed.searchParams.set('z', '16');
@@ -1247,11 +1288,11 @@ function updateNearbyGoogleMap() {
     embed.searchParams.set('region', 'in');
     embed.searchParams.set('hl', lang);
     frame.src = embed.toString();
-    nearbyGoogleMapPosition = {lat: pos.lat, lon: pos.lon};
+    nearbyGoogleMapPosition = mapPosition;
     frame.dataset.language = lang;
   }
   const searchType = nearType === 'essential' ? 'hospitals and pharmacies' : t(nearType);
-  const query = `${searchType} near ${pos.lat.toFixed(5)},${pos.lon.toFixed(5)}, India`;
+  const query = `${searchType} near ${mapPosition.lat.toFixed(3)},${mapPosition.lon.toFixed(3)}, India`;
   const search = new URL('https://www.google.com/maps/search/');
   search.searchParams.set('api', '1');
   search.searchParams.set('query', query);
@@ -1283,7 +1324,7 @@ function appendGoogleHospitalSearch(parent) {
   if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) return;
   const search = new URL('https://www.google.com/maps/search/');
   search.searchParams.set('api', '1');
-  search.searchParams.set('query', `hospitals near ${lat.toFixed(5)},${lon.toFixed(5)}, India`);
+  search.searchParams.set('query', `hospitals near ${lat.toFixed(3)},${lon.toFixed(3)}, India`);
   search.searchParams.set('hl', lang);
   search.searchParams.set('gl', 'in');
   const link = document.createElement('a');
@@ -1377,7 +1418,7 @@ $('#voiceBtn').onclick = () => {
 $('#stopBtn').onclick = stopSpeak;
 
 /* Gemini Live voice, medicine label reading, and grounded opening lookup */
-let liveSocket = null, liveStream = null, liveContext = null, liveProcessor = null, liveSource = null, liveNextAudioTime = 0, liveSetupTimer = null;
+let liveSocket = null, liveStream = null, liveContext = null, liveProcessor = null, liveSource = null, liveNextAudioTime = 0, liveSetupTimer = null, liveNoSpeechTimer = null;
 function pcmBase64(float32, sourceRate) {
   const step = sourceRate / 16000, count = Math.floor(float32.length / step), pcm = new Int16Array(count);
   for (let i = 0; i < count; i++) { const sample = float32[Math.floor(i * step)] || 0; pcm[i] = Math.max(-1, Math.min(1, sample)) * 32767; }
@@ -1387,6 +1428,7 @@ function pcmBase64(float32, sourceRate) {
 }
 function stopLive() {
   clearTimeout(liveSetupTimer); liveSetupTimer = null;
+  clearTimeout(liveNoSpeechTimer); liveNoSpeechTimer = null;
   if (liveProcessor) liveProcessor.disconnect(); if (liveSource) liveSource.disconnect();
   if (liveStream) liveStream.getTracks().forEach(track => track.stop());
   if (liveSocket && liveSocket.readyState < 2) liveSocket.close();
@@ -1396,12 +1438,14 @@ function stopLive() {
 }
 $('#liveStop').onclick = () => liveActiveMode === 'transcribe' ? finishSpokenInput() : stopLive();
 $('#liveStart').onclick = async () => {
+  $('#voiceFallback').hidden = true;
+  $('#voiceFallbackActions').hidden = true;
   $('#liveStatus').textContent = t('liveStarting'); $('#liveStart').disabled = true;
   liveActiveMode = liveStartMode;
   liveStartMode = 'conversation';
   try {
     const localHost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-    if (!window.isSecureContext && !localHost) { $('#liveStatus').textContent = t('liveHttpsRequired'); return; }
+    if (!window.isSecureContext && !localHost) { $('#liveStatus').textContent = t('liveHttpsRequired'); showVoiceFallback(); return; }
     if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext || !window.WebSocket) throw new Error('unsupported');
     // Resume audio synchronously from the user gesture, before network or permission awaits.
     liveContext = new AudioContext();
@@ -1418,17 +1462,49 @@ $('#liveStart').onclick = async () => {
     const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     liveSocket = new WebSocket(`${wsProtocol}//${location.host}/api/gemini/live`);
     $('#liveStatus').textContent = t('liveConnecting');
-    liveSetupTimer = setTimeout(() => { if (liveSocket && $('#liveStop').hidden) { $('#liveStatus').textContent = t('liveSetupTimeout'); stopLive(); } }, 15000);
+    liveSetupTimer = setTimeout(() => {
+      if (liveSocket && $('#liveStop').hidden) {
+        stopLive();
+        $('#liveStatus').textContent = t('liveSetupTimeout');
+        showVoiceFallback();
+      }
+    }, 15000);
     liveSocket.onopen = () => liveSocket.send(JSON.stringify({start: {device_token: liveDevice, language: lang, mode: liveActiveMode}}));
     liveSocket.onmessage = async event => {
       try {
         const msg = JSON.parse(event.data);
-        if (msg.setupComplete) { clearTimeout(liveSetupTimer); liveSetupTimer = null; liveSource.connect(liveProcessor); liveProcessor.connect(liveContext.destination); $('#liveStatus').textContent = t('liveListening'); $('#liveStart').hidden = true; $('#liveStop').hidden = false; return; }
-        if (msg.error) { $('#liveStatus').textContent = msg.error.message || t('liveUnavailable'); stopLive(); return; }
+        if (msg.setupComplete) {
+          clearTimeout(liveSetupTimer);
+          liveSetupTimer = null;
+          liveSource.connect(liveProcessor);
+          liveProcessor.connect(liveContext.destination);
+          $('#liveStatus').textContent = t('liveListening');
+          $('#liveStart').hidden = true;
+          $('#liveStop').hidden = false;
+          if (liveActiveMode === 'transcribe') {
+            liveNoSpeechTimer = setTimeout(() => {
+              if (!liveTranscript.trim()) {
+                stopLive();
+                $('#geminiResult').hidden = false;
+                $('#geminiResult').textContent = t('voiceNoSpeech');
+                showVoiceFallback();
+              }
+            }, 15000);
+          }
+          return;
+        }
+        if (msg.error) {
+          $('#liveStatus').textContent = msg.error.message || t('liveUnavailable');
+          stopLive();
+          showVoiceFallback();
+          return;
+        }
         const content = msg.serverContent || {};
         if (liveActiveMode === 'transcribe') {
           const inputText = content.inputTranscription?.text?.trim();
           if (inputText) {
+            clearTimeout(liveNoSpeechTimer);
+            liveNoSpeechTimer = null;
             liveTranscript = !liveTranscript || inputText.startsWith(liveTranscript) ? inputText
               : liveTranscript.endsWith(inputText) ? liveTranscript : `${liveTranscript} ${inputText}`;
             $('#liveStatus').textContent = liveTranscript.slice(-250);
@@ -1451,16 +1527,30 @@ $('#liveStart').onclick = async () => {
           liveNextAudioTime = Math.max(liveNextAudioTime, liveContext.currentTime); output.start(liveNextAudioTime); liveNextAudioTime += buffer.duration;
         }
         if (/\bstop\b|बंद करो|रोकें/.test(transcript || '')) stopLive();
-      } catch { $('#liveStatus').textContent = t('livePlaybackError'); }
+      } catch {
+        $('#liveStatus').textContent = t('livePlaybackError');
+        showVoiceFallback();
+      }
     };
-    liveSocket.onerror = () => { $('#liveStatus').textContent = t('liveSocketError'); stopLive(); };
-    liveSocket.onclose = () => { if (liveStream) { stopLive(); $('#liveStatus').textContent = t('liveSocketClosed'); } };
+    liveSocket.onerror = () => {
+      $('#liveStatus').textContent = t('liveSocketError');
+      stopLive();
+      showVoiceFallback();
+    };
+    liveSocket.onclose = () => {
+      if (liveStream) {
+        stopLive();
+        $('#liveStatus').textContent = t('liveSocketClosed');
+        showVoiceFallback();
+      }
+    };
   } catch (error) {
     stopLive();
     $('#liveStatus').textContent = error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError' ? t('micDenied')
       : error?.name === 'NotFoundError' ? t('liveNoMicrophone')
       : error?.message === 'unsupported' ? t('liveUnsupported')
       : error?.message?.startsWith('Gemini') ? error.message : t('liveUnavailable');
+    showVoiceFallback();
   }
   finally { $('#liveStart').disabled = false; }
 };
@@ -1600,6 +1690,7 @@ $('#shareBtn').onclick = async () => {
 $('#shareStop').onclick = stopShare;
 
 /* ------------------------------------------------------------ SOS */
+$('#voiceAlertContacts').onclick = () => $('#sos').click();
 function renderSosPanel() {
   const panel = $('#sosPanel');
   panel.hidden = false;
