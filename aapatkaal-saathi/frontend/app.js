@@ -44,7 +44,7 @@ const TXT = {
     operatorVoiceUnavailable: 'Speech playback is not available on this phone.',
     operatorNoHindiVoice: 'No Hindi voice found. Add Hindi text-to-speech in phone settings.',
     geminiTitle: 'Find a reviewed card with Gemini',
-    geminiExplain: 'Describe the situation in Hindi or English. Your description is sent to Google Gemini. Do not include names, phone numbers, or exact addresses; GPS is not sent. Gemini tries to match an existing reviewed card. If no card fits, it may give brief general emergency guidance. It does not diagnose or recommend medicines, doses, or risky procedures. Check any guidance carefully and call 112 in an emergency.',
+    geminiExplain: 'Describe the situation in Hindi or English. Your description is sent to Google Gemini. Do not include names, phone numbers, or exact addresses; GPS is not sent. Gemini tries to match an existing reviewed card. If no card fits, it may give brief general emergency guidance. It does not diagnose or recommend medicines, doses, or risky procedures. Gemini Live sends microphone audio through this app server to Google; this app does not store the audio. Check any guidance carefully and call 112 in an emergency.',
     geminiInput: 'What is happening?', geminiPlaceholder: 'For example: “My father has chest pain”',
     geminiVoice: '🎙️ Speak your question or say “Call 112” / “Alert my contacts”',
     voiceUnavailable: 'Voice input is not supported in this browser. Type your question instead.',
@@ -207,7 +207,7 @@ const TXT = {
     operatorVoiceUnavailable: 'इस फ़ोन पर सुनाने की सुविधा उपलब्ध नहीं है।',
     operatorNoHindiVoice: 'हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
     geminiTitle: 'Gemini से जाँचा हुआ कार्ड खोजें',
-    geminiExplain: 'स्थिति हिंदी या अंग्रेज़ी में बताएँ। आपका विवरण Google Gemini को भेजा जाएगा। नाम, फ़ोन नंबर या पूरा पता न लिखें; GPS नहीं भेजा जाता। Gemini पहले मौजूदा जाँचे हुए कार्ड से मिलान करता है। कोई कार्ड न मिले तो यह सीमित सामान्य आपातकालीन जानकारी दे सकता है। यह बीमारी की पहचान, दवा/खुराक की सलाह या जोखिम भरे तरीके नहीं बताता। जानकारी ध्यान से देखें और आपातकाल में 112 पर कॉल करें।',
+    geminiExplain: 'स्थिति हिंदी या अंग्रेज़ी में बताएँ। आपका विवरण Google Gemini को भेजा जाएगा। नाम, फ़ोन नंबर या पूरा पता न लिखें; GPS नहीं भेजा जाता। Gemini पहले मौजूदा जाँचे हुए कार्ड से मिलान करता है। कोई कार्ड न मिले तो यह सीमित सामान्य आपातकालीन जानकारी दे सकता है। यह बीमारी की पहचान, दवा/खुराक की सलाह या जोखिम भरे तरीके नहीं बताता। Gemini Live की माइक्रोफ़ोन आवाज़ इस ऐप के सर्वर से Google को भेजी जाती है; ऐप इसे सेव नहीं करता। जानकारी ध्यान से देखें और आपातकाल में 112 पर कॉल करें।',
     geminiInput: 'क्या हो रहा है?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
     geminiVoice: '🎙️ बोलकर पूछें या कहें “112 पर कॉल” / “मेरे संपर्कों को अलर्ट”',
     voiceUnavailable: 'इस ब्राउज़र में आवाज़ से पूछना उपलब्ध नहीं है। सवाल टाइप करें।',
@@ -1397,7 +1397,7 @@ $('#liveStart').onclick = async () => {
     const localHost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
     if (!window.isSecureContext && !localHost) { $('#liveStatus').textContent = t('liveHttpsRequired'); return; }
     if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext || !window.WebSocket) throw new Error('unsupported');
-    const auth = await api('/api/gemini/live-token', {language: lang});
+    const liveDevice = await ensureDeviceToken();
     $('#liveStatus').textContent = t('liveMicPermission');
     liveStream = await navigator.mediaDevices.getUserMedia({audio: {channelCount: 1, echoCancellation: true, noiseSuppression: true}});
     liveContext = new AudioContext(); liveSource = liveContext.createMediaStreamSource(liveStream);
@@ -1406,15 +1406,16 @@ $('#liveStart').onclick = async () => {
     liveProcessor.onaudioprocess = event => {
       if (liveSocket?.readyState === WebSocket.OPEN) liveSocket.send(JSON.stringify({realtimeInput: {audio: {mimeType: 'audio/pcm;rate=16000', data: pcmBase64(event.inputBuffer.getChannelData(0), liveContext.sampleRate)}}}));
     };
-    liveSocket = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(auth.token)}`);
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    liveSocket = new WebSocket(`${wsProtocol}//${location.host}/api/gemini/live`);
     $('#liveStatus').textContent = t('liveConnecting');
     liveSetupTimer = setTimeout(() => { if (liveSocket && $('#liveStop').hidden) { $('#liveStatus').textContent = t('liveSetupTimeout'); stopLive(); } }, 15000);
-    liveSocket.onopen = () => liveSocket.send(JSON.stringify({setup: {model: auth.model, generationConfig: {responseModalities: ['AUDIO']}, systemInstruction: {parts: [{text: `You are a calm emergency first-aid helper. Speak in ${lang === 'hi' ? 'Hindi' : 'English'}. Give only simple, low-risk first-aid guidance; no diagnosis, medicine, doses, or risky procedures. For emergencies tell the user to call India 112 and follow the operator. Keep replies short.`}]}, inputAudioTranscription: {}, outputAudioTranscription: {}}}));
+    liveSocket.onopen = () => liveSocket.send(JSON.stringify({start: {device_token: liveDevice, language: lang}}));
     liveSocket.onmessage = async event => {
       try {
         const msg = JSON.parse(event.data);
         if (msg.setupComplete) { clearTimeout(liveSetupTimer); liveSetupTimer = null; liveSource.connect(liveProcessor); liveProcessor.connect(liveContext.destination); $('#liveStatus').textContent = t('liveListening'); $('#liveStart').hidden = true; $('#liveStop').hidden = false; return; }
-        if (msg.error) { $('#liveStatus').textContent = t('liveUnavailable'); stopLive(); return; }
+        if (msg.error) { $('#liveStatus').textContent = msg.error.message || t('liveUnavailable'); stopLive(); return; }
         const content = msg.serverContent || {};
         const transcript = content.inputTranscription?.text || content.outputTranscription?.text;
         if (transcript) $('#liveStatus').textContent = transcript.slice(-250);

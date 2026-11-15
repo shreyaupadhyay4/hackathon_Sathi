@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -51,6 +51,7 @@ async def _supervise(name: str, worker):
 
 
 app = FastAPI(title="Aapatkaal Saathi", lifespan=lifespan)
+_live_ws_hits: dict[str, list[float]] = {}
 
 
 def base_url(request: Request) -> str:
@@ -176,6 +177,99 @@ class GeminiRouteRequest(BaseModel):
 
 class GeminiLiveRequest(BaseModel):
     language: Literal["en", "hi"]
+
+
+@app.websocket("/api/gemini/live")
+async def gemini_live_proxy(websocket: WebSocket):
+    """Relay Live audio over the app's origin to avoid client-side WSS restrictions."""
+    await websocket.accept()
+    upstream = None
+    try:
+        ip = websocket.client.host if websocket.client else "?"
+        now = time.monotonic()
+        hits = [stamp for stamp in _live_ws_hits.get(ip, []) if stamp > now - 60]
+        if len(hits) >= 4:
+            await websocket.close(code=4429, reason="Wait before starting another Live session")
+            return
+        hits.append(now)
+        _live_ws_hits[ip] = hits
+        if len(_live_ws_hits) > 10000:
+            _live_ws_hits.clear()
+            _live_ws_hits[ip] = hits
+        start = await asyncio.wait_for(websocket.receive_json(), timeout=10)
+        claims = start.get("start", {}) if isinstance(start, dict) else {}
+        device = claims.get("device_token", "") if isinstance(claims, dict) else ""
+        language = claims.get("language") if isinstance(claims, dict) else None
+        if (
+            not isinstance(device, str) or len(device) != 43
+            or any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in device)
+            or language not in {"en", "hi"}
+        ):
+            await websocket.close(code=4401, reason="Valid device session and language required")
+            return
+
+        auth = await gemini.live_token(language)
+        import websockets
+        from urllib.parse import quote
+        url = (
+            "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta."
+            "GenerativeService.BidiGenerateContentConstrained?access_token="
+            + quote(auth["token"], safe="")
+        )
+        upstream = await websockets.connect(url, open_timeout=gemini.TIMEOUT_SECONDS)
+        instruction = (
+            f"You are a calm emergency first-aid helper. Speak in {'Hindi' if language == 'hi' else 'English'}. "
+            "Give only simple, low-risk first-aid guidance; no diagnosis, medicine, doses, or risky procedures. "
+            "For emergencies tell the user to call India 112 and follow the operator. Keep replies short."
+        )
+        await upstream.send(json.dumps({"setup": {
+            "model": auth["model"],
+            "generationConfig": {"responseModalities": ["AUDIO"]},
+            "systemInstruction": {"parts": [{"text": instruction}]},
+            "inputAudioTranscription": {},
+            "outputAudioTranscription": {},
+        }}))
+        setup_message = await asyncio.wait_for(upstream.recv(), timeout=gemini.TIMEOUT_SECONDS)
+        setup_payload = json.loads(setup_message)
+        if "setupComplete" not in setup_payload:
+            await websocket.send_json({"error": {"message": "Gemini Live setup was rejected."}})
+            await websocket.close(code=1011, reason="Gemini Live setup failed")
+            return
+        await websocket.send_text(setup_message if isinstance(setup_message, str) else setup_message.decode("utf-8"))
+
+        async def from_browser():
+            while True:
+                await upstream.send(await websocket.receive_text())
+
+        async def from_gemini():
+            async for message in upstream:
+                await websocket.send_text(message if isinstance(message, str) else message.decode("utf-8"))
+
+        tasks = [asyncio.create_task(from_browser()), asyncio.create_task(from_gemini())]
+        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+        for task in pending:
+            task.cancel()
+        await asyncio.gather(*pending, return_exceptions=True)
+        for task in done:
+            task.result()
+    except WebSocketDisconnect:
+        pass
+    except gemini.GeminiError as error:
+        try:
+            await websocket.send_json({"error": {"message": str(error)}})
+            await websocket.close(code=1011, reason="Gemini is unavailable")
+        except Exception:
+            pass
+    except Exception as error:
+        logging.getLogger("gemini-live").warning("Live relay failed (%s)", type(error).__name__)
+        try:
+            await websocket.send_json({"error": {"message": "Live audio connection failed."}})
+            await websocket.close(code=1011, reason="Live audio connection failed")
+        except Exception:
+            pass
+    finally:
+        if upstream is not None:
+            await upstream.close()
 
 
 class GeminiHospitalRequest(ReverseLocation):
