@@ -59,6 +59,8 @@ const TXT = {
     geminiRequestRejected: 'Gemini rejected the request. Check the server model and API configuration.',
     geminiBusy: 'Gemini is busy. Choose a card below or call 112.',
     geminiTimedOut: 'Gemini timed out. Choose a card below or call 112.',
+    geminiConnectionError: 'This server cannot connect to Google Gemini. Check its internet/firewall access, then try again.',
+    geminiProviderError: 'Google Gemini returned a service error. Try again later or choose a card below.',
     geminiUnavailable: 'Gemini could not help right now. Choose a card below or call 112.',
     ambulanceNotice: '108 ambulance service availability varies by state. If unavailable, call 112.',
     homeNearbyTitle: 'Nearby hospitals listed on OpenStreetMap',
@@ -208,6 +210,8 @@ const TXT = {
     geminiRequestRejected: 'Gemini ने अनुरोध स्वीकार नहीं किया। सर्वर का मॉडल और API सेटिंग जांचें।',
     geminiBusy: 'Gemini अभी व्यस्त है। नीचे कार्ड चुनें या 112 पर कॉल करें।',
     geminiTimedOut: 'Gemini से जवाब आने में देर हुई। नीचे कार्ड चुनें या 112 पर कॉल करें।',
+    geminiConnectionError: 'यह सर्वर Google Gemini से कनेक्ट नहीं हो पा रहा। सर्वर का इंटरनेट/फ़ायरवॉल जांचें और फिर कोशिश करें।',
+    geminiProviderError: 'Google Gemini की सेवा में त्रुटि आई। बाद में फिर कोशिश करें या नीचे से कार्ड चुनें।',
     geminiUnavailable: 'अभी Gemini से मदद नहीं मिली। नीचे कार्ड चुनें या 112 पर कॉल करें।',
     ambulanceNotice: '108 एम्बुलेंस हर राज्य में उपलब्ध नहीं है। संपर्क न हो तो 112 पर कॉल करें।',
     homeNearbyTitle: 'OpenStreetMap पर दर्ज पास के अस्पताल',
@@ -775,6 +779,8 @@ $('#geminiRun').onclick = async () => {
       : /rejected the request/.test(message) ? t('geminiRequestRejected')
       : /busy/.test(message) ? t('geminiBusy')
       : /timed out/.test(message) ? t('geminiTimedOut')
+      : /cannot connect to google/.test(message) ? t('geminiConnectionError')
+      : /provider returned http/.test(message) ? t('geminiProviderError')
       : t('geminiUnavailable');
   } finally {
     button.disabled = false;

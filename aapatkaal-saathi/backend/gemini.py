@@ -150,7 +150,9 @@ async def classify(description: str, language: str) -> dict:
     except httpx.TimeoutException as error:
         raise GeminiError("Gemini timed out. Choose a card manually or call 112.") from error
     except httpx.RequestError as error:
-        raise GeminiError("Gemini is unavailable. Choose a card manually or call 112.") from error
+        raise GeminiError(
+            "Gemini cannot connect to Google from this server. Check the server's internet or firewall."
+        ) from error
 
     if response.status_code in {429, 503}:
         raise GeminiError("Gemini is temporarily busy. Choose a card manually or try again later.")
@@ -161,7 +163,7 @@ async def classify(description: str, language: str) -> dict:
     if response.status_code == 400:
         raise GeminiError("Gemini rejected the request. Check the model and API configuration.")
     if response.status_code >= 400:
-        raise GeminiError("Gemini is unavailable. Choose a card manually or call 112.")
+        raise GeminiError(f"Gemini provider returned HTTP {response.status_code}. Try again later.")
     try:
         return _parse_response(response.json())
     except (ValueError, TypeError) as error:

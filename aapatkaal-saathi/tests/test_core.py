@@ -884,6 +884,32 @@ def test_gemini_provider_overload_returns_retryable_error(monkeypatch):
         asyncio.run(gemini.classify("someone is hurt", "en"))
 
 
+def test_gemini_connection_failure_explains_server_network_issue(monkeypatch):
+    import asyncio
+    import httpx
+    import pytest
+    from backend import gemini
+    from backend.config import settings
+
+    class Client:
+        def __init__(self, timeout):
+            assert timeout == gemini.TIMEOUT_SECONDS
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, *_args, **_kwargs):
+            raise httpx.ConnectError("network blocked")
+
+    monkeypatch.setattr(settings, "gemini_api_key", "test-key")
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    with pytest.raises(gemini.GeminiError, match="cannot connect to Google"):
+        asyncio.run(gemini.classify("someone is hurt", "en"))
+
+
 def test_gemini_live_eval_has_42_labeled_text_cases():
     cases = json.loads((ROOT / "tests" / "gemini_cases.json").read_text(encoding="utf-8"))
     assert len(cases) == 42
