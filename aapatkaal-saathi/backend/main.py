@@ -200,10 +200,12 @@ async def gemini_live_proxy(websocket: WebSocket):
         claims = start.get("start", {}) if isinstance(start, dict) else {}
         device = claims.get("device_token", "") if isinstance(claims, dict) else ""
         language = claims.get("language") if isinstance(claims, dict) else None
+        mode = claims.get("mode", "conversation") if isinstance(claims, dict) else None
         if (
             not isinstance(device, str) or len(device) != 43
             or any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in device)
             or language not in {"en", "hi"}
+            or mode not in {"conversation", "transcribe"}
         ):
             await websocket.close(code=4401, reason="Valid device session and language required")
             return
@@ -217,18 +219,20 @@ async def gemini_live_proxy(websocket: WebSocket):
             + quote(auth["token"], safe="")
         )
         upstream = await websockets.connect(url, open_timeout=gemini.TIMEOUT_SECONDS)
-        instruction = (
+        instruction = "" if mode == "transcribe" else (
             f"You are a calm emergency first-aid helper. Speak in {'Hindi' if language == 'hi' else 'English'}. "
             "Give only simple, low-risk first-aid guidance; no diagnosis, medicine, doses, or risky procedures. "
             "For emergencies tell the user to call India 112 and follow the operator. Keep replies short."
         )
-        await upstream.send(json.dumps({"setup": {
-            "model": auth["model"],
-            "generationConfig": {"responseModalities": ["AUDIO"]},
-            "systemInstruction": {"parts": [{"text": instruction}]},
+        live_setup = {
+            "model": "models/gemini-3.5-transcribe-live" if mode == "transcribe" else auth["model"],
+            "generationConfig": {"responseModalities": ["TEXT"] if mode == "transcribe" else ["AUDIO"]},
             "inputAudioTranscription": {},
-            "outputAudioTranscription": {},
-        }}))
+        }
+        if mode == "conversation":
+            live_setup["systemInstruction"] = {"parts": [{"text": instruction}]}
+            live_setup["outputAudioTranscription"] = {}
+        await upstream.send(json.dumps({"setup": live_setup}))
         setup_message = await asyncio.wait_for(upstream.recv(), timeout=gemini.TIMEOUT_SECONDS)
         setup_payload = json.loads(setup_message)
         if "setupComplete" not in setup_payload:
