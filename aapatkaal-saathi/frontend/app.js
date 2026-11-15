@@ -48,9 +48,13 @@ const TXT = {
     geminiInput: 'What is happening?', geminiPlaceholder: 'For example: “My father has chest pain”',
     geminiVoice: '🎙️ Speak your question or say “Call 112” / “Alert my contacts”',
     voiceUnavailable: 'Voice input is not supported in this browser. Type your question instead.',
+    voicePermission: 'The browser blocked speech recognition. Allow microphone access for this site, then try again; or use Gemini Live below.',
+    voiceNetwork: 'The browser speech service could not connect. Use Gemini Live below or type your question.',
+    voiceNoSpeech: 'No speech was detected. Move closer to the microphone and try again, or use Gemini Live below.',
+    voiceNoMicrophone: 'No microphone was detected. Connect or enable one, then try again; or type your question.',
     voiceCallConfirm: 'Open the phone dialer to call 112 now?',
     voiceAlertConfirm: 'Send an emergency alert to your saved safety contacts? Location may be shared if available.',
-    voiceError: 'Voice input failed. Type your question or use the call button.',
+    voiceError: 'Speech recognition failed. Use Gemini Live below or type your question.',
     geminiRun: 'Find a reviewed card', geminiWorking: 'Checking for a matching card…',
     liveStart: '🎙️ Start Gemini Live voice help', liveStop: 'Stop Gemini Live', liveStarting: 'Preparing Gemini Live…', liveMicPermission: 'Allow microphone access in your browser…', liveConnecting: 'Connecting audio to Gemini Live…', liveSetupTimeout: 'Gemini Live did not finish connecting. Check your connection and try again.', liveListening: 'Listening. Speak naturally; say “stop” or tap stop to end.', liveUnavailable: 'Live voice could not start. Check microphone permission and Gemini configuration.', liveHttpsRequired: 'Your browser requires HTTPS to use the microphone here. Open the secure app link.', liveNoMicrophone: 'No microphone was found. Connect or enable a microphone, then try again.', liveSocketClosed: 'Gemini Live closed the connection before it was ready. Check the app link and Gemini access, then retry.', liveSocketError: 'Your browser could not connect to Gemini Live. Check internet access or a firewall that may block WebSockets, then retry.', liveUnsupported: 'This browser does not support microphone capture. Try a current version of Chrome, Edge, or Safari.', livePlaybackError: 'Gemini replied, but this browser could not play the audio. Check the selected speaker and try again.', micDenied: 'Microphone access was denied. Allow microphone access in your browser settings, then try again.',
     medicinePhotoLabel: 'Photo of a medicine strip (up to 12 MB; resized on your device)', medicineRead: 'Read visible label aloud', medicineSpeak: '🔊 Read aloud', medicineWorking: 'Resizing photo and reading visible text…', medicineSafety: 'Only visible label text is read. No dosage or treatment advice.', medicinePhotoError: 'Could not process that photo. Try a JPEG, PNG, or WebP image.', medicineCompressError: 'Could not resize the photo below 5 MB. Try cropping closer to the medicine strip.',
@@ -211,9 +215,13 @@ const TXT = {
     geminiInput: 'क्या हो रहा है?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
     geminiVoice: '🎙️ बोलकर पूछें या कहें “112 पर कॉल” / “मेरे संपर्कों को अलर्ट”',
     voiceUnavailable: 'इस ब्राउज़र में आवाज़ से पूछना उपलब्ध नहीं है। सवाल टाइप करें।',
+    voicePermission: 'ब्राउज़र ने आवाज़ पहचानने की अनुमति नहीं दी। साइट के लिए माइक्रोफ़ोन अनुमति दें, या नीचे Gemini Live आज़माएँ।',
+    voiceNetwork: 'ब्राउज़र की आवाज़ सेवा से कनेक्शन नहीं हुआ। नीचे Gemini Live आज़माएँ या सवाल लिखें।',
+    voiceNoSpeech: 'आवाज़ नहीं सुनाई दी। माइक्रोफ़ोन के पास बोलें या नीचे Gemini Live आज़माएँ।',
+    voiceNoMicrophone: 'माइक्रोफ़ोन नहीं मिला। इसे चालू करें या सवाल लिखें।',
     voiceCallConfirm: 'क्या अभी 112 कॉल करने के लिए फ़ोन डायलर खोलें?',
     voiceAlertConfirm: 'क्या सेव किए सुरक्षा संपर्कों को आपातकालीन अलर्ट भेजें? उपलब्ध होने पर लोकेशन साझा हो सकती है।',
-    voiceError: 'आवाज़ नहीं समझ पाए। सवाल टाइप करें या कॉल बटन दबाएँ।',
+    voiceError: 'आवाज़ नहीं समझ पाए। नीचे Gemini Live आज़माएँ या सवाल लिखें।',
     geminiRun: 'जाँचा हुआ कार्ड खोजें', geminiWorking: 'मिलता-जुलता कार्ड देख रहे हैं…',
     liveStart: '🎙️ Gemini Live से बात करें', liveStop: 'Gemini Live बंद करें', liveStarting: 'Gemini Live तैयार कर रहे हैं…', liveMicPermission: 'ब्राउज़र में माइक्रोफ़ोन की अनुमति दें…', liveConnecting: 'Gemini Live से आवाज़ जोड़ रहे हैं…', liveSetupTimeout: 'Gemini Live जुड़ नहीं पाया। इंटरनेट जाँचें और फिर कोशिश करें।', liveListening: 'सुन रहे हैं। बोलें; रोकने के लिए “stop” कहें या बटन दबाएँ।', liveUnavailable: 'Live आवाज़ शुरू नहीं हुई। माइक्रोफ़ोन अनुमति और Gemini सेटिंग जाँचें।', liveHttpsRequired: 'इस पते पर माइक्रोफ़ोन के लिए HTTPS ज़रूरी है। सुरक्षित ऐप लिंक खोलें।', liveNoMicrophone: 'माइक्रोफ़ोन नहीं मिला। माइक्रोफ़ोन जोड़ें या चालू करें और फिर कोशिश करें।', liveSocketClosed: 'Gemini Live जुड़ने से पहले कनेक्शन बंद हो गया। ऐप लिंक और Gemini सेटिंग जाँचें।', liveSocketError: 'ब्राउज़र Gemini Live से नहीं जुड़ पाया। इंटरनेट या WebSocket रोकने वाले फ़ायरवॉल को जाँचें।', liveUnsupported: 'इस ब्राउज़र में माइक्रोफ़ोन नहीं चल रहा। Chrome, Edge या Safari का नया संस्करण आज़माएँ।', livePlaybackError: 'Gemini ने जवाब दिया, लेकिन ब्राउज़र आवाज़ नहीं चला पाया। स्पीकर जाँचें और फिर कोशिश करें।', micDenied: 'माइक्रोफ़ोन की अनुमति नहीं मिली। ब्राउज़र सेटिंग में अनुमति दें और फिर कोशिश करें।',
     medicinePhotoLabel: 'दवा की स्ट्रिप की फोटो (12 MB तक; फ़ोन पर छोटी होगी)', medicineRead: 'दिख रहा नाम पढ़ें', medicineSpeak: '🔊 ज़ोर से पढ़ें', medicineWorking: 'फोटो छोटी करके टेक्स्ट पढ़ रहे हैं…', medicineSafety: 'केवल दिख रहा टेक्स्ट पढ़ा जाएगा। खुराक या इलाज की सलाह नहीं मिलेगी।', medicinePhotoError: 'फोटो नहीं खुली। JPEG, PNG या WebP फोटो आज़माएँ।', medicineCompressError: 'फोटो 5 MB से छोटी नहीं हो पाई। दवा की स्ट्रिप के पास से फोटो लें।',
@@ -808,9 +816,14 @@ $('#geminiVoice').onclick = () => {
     geminiVoiceRequest = true;
     $('#geminiRun').click();
   };
-  recognition.onerror = () => {
+  recognition.onerror = event => {
     $('#geminiResult').hidden = false;
-    $('#geminiResult').textContent = t('voiceError');
+    const reason = event?.error;
+    $('#geminiResult').textContent = reason === 'not-allowed' || reason === 'service-not-allowed' ? t('voicePermission')
+      : reason === 'network' ? t('voiceNetwork')
+      : reason === 'no-speech' ? t('voiceNoSpeech')
+      : reason === 'audio-capture' ? t('voiceNoMicrophone')
+      : t('voiceError');
   };
   try { recognition.start(); }
   catch { $('#geminiResult').hidden = false; $('#geminiResult').textContent = t('voiceError'); }
