@@ -24,7 +24,7 @@ Checks completed before implementation:
 7. **Frontend emergency flows lack repeatable end-to-end coverage.** The existing smoke script checks only the landing page, health endpoint, and first-aid JSON. It does not exercise SOS, contact dialing, voice failures, or walk controls in a browser.
 8. **Offline support is only partial by design.** The app shell, cards, and saved nearby data are available offline; fresh listings, maps, live location, Gemini, and remote alerts require connectivity. The simulated offline run confirmed the cards and 112 link, not every phone/browser combination.
 9. **Rate limits and demo state are process-local.** They are suitable for the documented single-process demo but do not coordinate across multiple workers or replicas. A deployment that scales out without shared state can weaken limits and split demo/watcher state.
-10. **A live demo depends on external providers and device permissions.** OSM, Google Maps, Gemini, browser GPS/microphone support, and Telegram configuration each have separate failure modes. Existing status/fallback UI helps, but only the local HTTP and offline-card paths were exercised here.
+10. **GitHub would not discover the existing CI workflow.** It was stored under `aapatkaal-saathi/.github/workflows/` instead of the repository-root `.github/workflows/`, and GitHub reported no runs. The tests/lint were therefore not being enforced on pushes.
 
 ## Flow review
 
@@ -47,5 +47,6 @@ A read-only security reviewer found **no confirmed vulnerabilities** in token au
 
 - Rounded coordinates sent to the Google Maps embed and Nearby search links to three decimal places (roughly 100 metres at the app's India locations), updated the English/Hindi privacy note, and bumped the service-worker cache key.
 - Fixed the existing Ruff `E402` finding in the opt-in Gemini evaluator with a targeted noqa for the import that follows its `sys.path` setup.
+- Moved the Actions workflow to the repository root, set its app working directory, and limited its token permission to repository contents read.
 - Final validation: **41 tests passed**, Ruff checks passed, Python compilation passed, local deployment smoke check passed, and `git diff --check` passed.
 - The HTTPS tunnel installer was cancelled. No public phone URL or real-device GPS/microphone test is available yet.
