@@ -106,6 +106,9 @@
       <label for="geminiDescription" data-i="geminiInput"></label>
       <textarea id="geminiDescription" rows="3" maxlength="500" autocomplete="off"></textarea>
       <button id="geminiVoice" class="btn ghost wide" type="button" data-i="geminiVoice"></button>
+      <button id="liveStart" class="btn ghost wide" type="button" data-i="liveStart"></button>
+      <button id="liveStop" class="btn ghost wide" type="button" data-i="liveStop" hidden></button>
+      <p id="liveStatus" class="note" role="status" aria-live="polite"></p>
       <button id="geminiRun" class="btn go wide" data-i="geminiRun"></button>
       <p id="geminiResult" class="note" role="status" aria-live="polite" hidden></p>
       <div id="geminiAnswer" class="box" role="status" aria-live="polite" hidden>
@@ -113,6 +116,19 @@
         <p id="geminiAnswerText"></p>
         <p class="note" data-i="geminiAnswerDisclaimer"></p>
       </div>
+      <hr>
+      <label for="medicinePhoto" data-i="medicinePhotoLabel"></label>
+      <p class="note" data-i="medicinePrivacy"></p>
+      <input id="medicinePhoto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment">
+      <button id="medicineRead" class="btn ghost wide" type="button" data-i="medicineRead"></button>
+      <p id="medicineStatus" class="note" role="status" aria-live="polite" hidden></p>
+      <div id="medicineAnswer" class="box" hidden><p id="medicineAnswerText"></p><button id="medicineSpeak" class="btn ghost" type="button" data-i="medicineSpeak"></button></div>
+      <hr>
+      <label for="hospitalName" data-i="hospitalNameLabel"></label>
+      <p class="note" data-i="hospitalPrivacy"></p>
+      <input id="hospitalName" type="text" maxlength="120">
+      <button id="hospitalCheck" class="btn ghost wide" type="button" data-i="hospitalCheck"></button>
+      <p id="hospitalStatus" class="note" role="status" aria-live="polite" hidden></p>
       <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
     </details>
 

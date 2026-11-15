@@ -52,6 +52,9 @@ const TXT = {
     voiceAlertConfirm: 'Send an emergency alert to your saved safety contacts? Location may be shared if available.',
     voiceError: 'Voice input failed. Type your question or use the call button.',
     geminiRun: 'Get safe guidance', geminiWorking: 'Checking your question…',
+    liveStart: '🎙️ Start Gemini Live voice help', liveStop: 'Stop Gemini Live', liveStarting: 'Connecting to Gemini Live…', liveListening: 'Listening. Speak naturally; say “stop” or tap stop to end.', liveUnavailable: 'Live voice could not start. Check microphone permission and Gemini configuration.',
+    medicinePhotoLabel: 'Photo of a medicine strip (up to 5 MB)', medicineRead: 'Read visible label aloud', medicineSpeak: '🔊 Read aloud', medicineWorking: 'Reading visible text…', medicineSafety: 'Only visible label text is read. No dosage or treatment advice.',
+    medicinePrivacy: 'The photo is sent to Google Gemini to read the visible label.', hospitalNameLabel: 'Nearby hospital name', hospitalCheck: 'Check current opening information with Google Search', hospitalWorking: 'Checking current sources…', hospitalGrounded: 'Search-grounded result; hours may change. Call the hospital to confirm.', hospitalNoSources: 'Could not verify current opening information. Call the hospital to confirm.', hospitalPrivacy: 'A rounded, approximate location and hospital name are sent to Google Search grounding.',
     geminiShortInput: 'Add a few words about what happened, or choose a card below.',
     demoBanner: 'Demo mode: alerts are simulated here; no contacts are notified.',
     offlineBanner: 'Offline: saved first-aid cards and nearby listings remain available. Fresh maps and contact alerts need internet; call 112 directly.',
@@ -211,6 +214,9 @@ const TXT = {
     voiceAlertConfirm: 'क्या सेव किए सुरक्षा संपर्कों को आपातकालीन अलर्ट भेजें? उपलब्ध होने पर लोकेशन साझा हो सकती है।',
     voiceError: 'आवाज़ नहीं समझ पाए। सवाल टाइप करें या कॉल बटन दबाएँ।',
     geminiRun: 'सुरक्षित मदद देखें', geminiWorking: 'आपका सवाल समझ रहे हैं…',
+    liveStart: '🎙️ Gemini Live से बात करें', liveStop: 'Gemini Live बंद करें', liveStarting: 'Gemini Live से जुड़ रहे हैं…', liveListening: 'सुन रहे हैं। बोलें; रोकने के लिए “stop” कहें या बटन दबाएँ।', liveUnavailable: 'Live आवाज़ शुरू नहीं हुई। माइक्रोफ़ोन अनुमति और Gemini सेटिंग जाँचें।',
+    medicinePhotoLabel: 'दवा की स्ट्रिप की फोटो (5 MB तक)', medicineRead: 'दिख रहा नाम पढ़ें', medicineSpeak: '🔊 ज़ोर से पढ़ें', medicineWorking: 'दिख रहा टेक्स्ट पढ़ रहे हैं…', medicineSafety: 'केवल दिख रहा टेक्स्ट पढ़ा जाएगा। खुराक या इलाज की सलाह नहीं मिलेगी।',
+    medicinePrivacy: 'फोटो पर लिखा टेक्स्ट पढ़ने के लिए Google Gemini को भेजी जाएगी।', hospitalNameLabel: 'पास के अस्पताल का नाम', hospitalCheck: 'Google Search से अभी के खुले होने की जानकारी देखें', hospitalWorking: 'नई जानकारी खोज रहे हैं…', hospitalGrounded: 'Search से मिली जानकारी; समय बदल सकता है। पुष्टि के लिए अस्पताल को कॉल करें।', hospitalNoSources: 'अभी खुले होने की पुष्टि नहीं हुई। अस्पताल को कॉल करके पूछें।', hospitalPrivacy: 'लगभग की लोकेशन और अस्पताल का नाम Google Search को भेजे जाते हैं।',
     geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
     demoBanner: 'डेमो मोड: अलर्ट केवल इस ऐप में दिखते हैं; किसी संपर्क को संदेश नहीं जाता।',
     offlineBanner: 'इंटरनेट नहीं है: सेव किए प्राथमिक उपचार कार्ड और पास की सूची दिख सकती है। नए नक्शे और संपर्क अलर्ट के लिए इंटरनेट चाहिए; 112 पर सीधे कॉल करें।',
@@ -1065,8 +1071,17 @@ function placeHTML(p) {
   return `<div class="place"><div class="nm">${esc(name)}${type}${p.emergency ? `<span class="badge">${t('emerg')}</span>` : ''}</div>
     <div class="meta"><span class="dist">${fmtDist(p.distance_m)}</span> ${t('away')}${p.address ? ' · ' + esc(p.address) : ''}${p.hours ? ' · ' + esc(p.hours) : ''}</div>
     <div class="acts">${p.phone ? `<a class="btn call" href="tel:${esc(p.phone)}">${t('call')}</a>` : ''}
-    <a class="btn dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}&travelmode=driving">${t('dir')}</a></div></div>`;
+    <a class="btn dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}&travelmode=driving">${t('dir')}</a>
+    ${p.type === 'hospital' ? `<button type="button" class="btn ghost" data-check-hospital="${esc(name)}">${t('hospitalCheck')}</button>` : ''}</div></div>`;
 }
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-check-hospital]');
+  if (!button) return;
+  $('#hospitalName').value = button.dataset.checkHospital;
+  const details = $('#geminiTitle').closest('details'); details.open = true;
+  $('#hospitalCheck').scrollIntoView({behavior: 'smooth', block: 'center'});
+  $('#hospitalCheck').click();
+});
 function renderNear() {
   $('#typeTabs').innerHTML = ['essential', 'hospital', 'pharmacy', 'clinic', 'police'].map(k =>
     `<button class="chip ${k === nearType ? 'on' : ''}" data-k="${k}" aria-pressed="${k === nearType}">${t(k === 'essential' ? 'nearEssentials' : k)}</button>`).join('');
@@ -1353,6 +1368,89 @@ $('#voiceBtn').onclick = () => {
   speak([curCard.title[lang], ...curCard.steps[lang].map((s, i) => `${n} ${i + 1}. ${s}`), t('dontsH'), ...curCard.donts[lang]]);
 };
 $('#stopBtn').onclick = stopSpeak;
+
+/* Gemini Live voice, medicine label reading, and grounded opening lookup */
+let liveSocket = null, liveStream = null, liveContext = null, liveProcessor = null, liveSource = null, liveNextAudioTime = 0;
+function pcmBase64(float32, sourceRate) {
+  const step = sourceRate / 16000, count = Math.floor(float32.length / step), pcm = new Int16Array(count);
+  for (let i = 0; i < count; i++) { const sample = float32[Math.floor(i * step)] || 0; pcm[i] = Math.max(-1, Math.min(1, sample)) * 32767; }
+  const bytes = new Uint8Array(pcm.buffer); let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+function stopLive() {
+  if (liveProcessor) liveProcessor.disconnect(); if (liveSource) liveSource.disconnect();
+  if (liveStream) liveStream.getTracks().forEach(track => track.stop());
+  if (liveSocket && liveSocket.readyState < 2) liveSocket.close();
+  if (liveContext) liveContext.close();
+  liveProcessor = liveSource = liveStream = liveSocket = liveContext = null;
+  $('#liveStart').hidden = false; $('#liveStop').hidden = true;
+}
+$('#liveStop').onclick = stopLive;
+$('#liveStart').onclick = async () => {
+  $('#liveStatus').textContent = t('liveStarting'); $('#liveStart').disabled = true;
+  try {
+    if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext || !window.WebSocket) throw new Error('unsupported');
+    const auth = await api('/api/gemini/live-token', {language: lang});
+    liveStream = await navigator.mediaDevices.getUserMedia({audio: {channelCount: 1, echoCancellation: true, noiseSuppression: true}});
+    liveContext = new AudioContext(); liveSource = liveContext.createMediaStreamSource(liveStream);
+    liveProcessor = liveContext.createScriptProcessor(4096, 1, 1);
+    liveProcessor.onaudioprocess = event => {
+      if (liveSocket?.readyState === WebSocket.OPEN) liveSocket.send(JSON.stringify({realtimeInput: {mediaChunks: [{mimeType: 'audio/pcm;rate=16000', data: pcmBase64(event.inputBuffer.getChannelData(0), liveContext.sampleRate)}]}}));
+    };
+    liveSocket = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(auth.token)}`);
+    liveSocket.onopen = () => liveSocket.send(JSON.stringify({setup: {model: auth.model, generationConfig: {responseModalities: ['AUDIO']}, inputAudioTranscription: {}, outputAudioTranscription: {}}}));
+    liveSocket.onmessage = async event => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.setupComplete) { liveSource.connect(liveProcessor); liveProcessor.connect(liveContext.destination); $('#liveStatus').textContent = t('liveListening'); $('#liveStart').hidden = true; $('#liveStop').hidden = false; return; }
+        const content = msg.serverContent || {};
+        const transcript = content.inputTranscription?.text || content.outputTranscription?.text;
+        if (transcript) $('#liveStatus').textContent = transcript.slice(-250);
+        for (const part of content.modelTurn?.parts || []) if (part.inlineData?.data) {
+          const raw = atob(part.inlineData.data), pcm = new Int16Array(raw.length / 2);
+          for (let i = 0; i < pcm.length; i++) pcm[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
+          const buffer = liveContext.createBuffer(1, pcm.length, 24000), channel = buffer.getChannelData(0);
+          for (let i = 0; i < pcm.length; i++) channel[i] = pcm[i] / 32768;
+          const output = liveContext.createBufferSource(); output.buffer = buffer; output.connect(liveContext.destination);
+          liveNextAudioTime = Math.max(liveNextAudioTime, liveContext.currentTime); output.start(liveNextAudioTime); liveNextAudioTime += buffer.duration;
+        }
+        if (/\bstop\b|बंद करो|रोकें/.test(transcript || '')) stopLive();
+      } catch {}
+    };
+    liveSocket.onerror = () => { $('#liveStatus').textContent = t('liveUnavailable'); stopLive(); };
+    liveSocket.onclose = () => { if (liveStream) { stopLive(); $('#liveStatus').textContent = t('liveUnavailable'); } };
+  } catch { stopLive(); $('#liveStatus').textContent = t('liveUnavailable'); }
+  finally { $('#liveStart').disabled = false; }
+};
+
+$('#medicineRead').onclick = async () => {
+  const file = $('#medicinePhoto').files?.[0], status = $('#medicineStatus');
+  if (!file) { status.hidden = false; status.textContent = t('medicinePhotoLabel'); return; }
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { status.hidden = false; status.textContent = 'Use JPEG, PNG, or WebP up to 5 MB.'; return; }
+  status.hidden = false; status.textContent = t('medicineWorking'); $('#medicineRead').disabled = true;
+  try {
+    const data = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+    const result = await api('/api/gemini/medicine', {image_base64: data, mime_type: file.type, language: lang});
+    $('#medicineAnswerText').textContent = `${result.answer}\n\n${t('medicineSafety')}`;
+    $('#medicineAnswer').hidden = false; status.textContent = ''; speak([result.answer, t('medicineSafety')]);
+  } catch (e) { status.textContent = e.message; $('#medicineAnswer').hidden = true; }
+  finally { $('#medicineRead').disabled = false; }
+};
+$('#medicineSpeak').onclick = () => speak([$('#medicineAnswerText').textContent]);
+
+$('#hospitalCheck').onclick = async () => {
+  const name = $('#hospitalName').value.trim(), status = $('#hospitalStatus');
+  if (name.length < 2 || !pos) { status.hidden = false; status.textContent = !pos ? t('locationPermissionDenied') : t('hospitalNameLabel'); return; }
+  status.hidden = false; status.textContent = t('hospitalWorking'); $('#hospitalCheck').disabled = true;
+  try {
+    const result = await api('/api/gemini/hospital-hours', {name, lat: pos.lat, lon: pos.lon, language: lang});
+    status.replaceChildren();
+    const message = document.createElement('span'); message.textContent = `${result.answer} ${result.grounded ? t('hospitalGrounded') : t('hospitalNoSources')}`; status.append(message);
+    for (const source of result.sources || []) { const link = document.createElement('a'); link.href = source.url; link.target = '_blank'; link.rel = 'noopener'; link.textContent = source.title; status.append(document.createElement('br'), link); }
+  } catch (e) { status.textContent = e.message; }
+  finally { $('#hospitalCheck').disabled = false; }
+};
 
 /* ------------------------------------------------------------ live location share */
 async function startShare() {

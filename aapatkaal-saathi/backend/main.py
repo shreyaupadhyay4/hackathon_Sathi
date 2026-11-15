@@ -174,6 +174,54 @@ class GeminiRouteRequest(BaseModel):
     language: Literal["en", "hi"]
 
 
+class GeminiLiveRequest(BaseModel):
+    language: Literal["en", "hi"]
+
+
+class GeminiHospitalRequest(ReverseLocation):
+    name: str = Field(min_length=2, max_length=120)
+    language: Literal["en", "hi"]
+
+
+class GeminiMedicineRequest(BaseModel):
+    image_base64: str = Field(min_length=1, max_length=7_000_000)
+    mime_type: Literal["image/jpeg", "image/png", "image/webp"]
+    language: Literal["en", "hi"]
+
+
+@app.post("/api/gemini/live-token", dependencies=[Depends(limiter(5, 60)), Depends(token_limiter(5, 60, header="x-device-token"))])
+async def gemini_live_token(body: GeminiLiveRequest, request: Request):
+    _require_device(request)
+    try:
+        return await gemini.live_token(body.language)
+    except gemini.GeminiError as error:
+        raise HTTPException(503, str(error)) from error
+
+
+@app.post("/api/gemini/hospital-hours", dependencies=[Depends(limiter(8, 60)), Depends(token_limiter(5, 60, header="x-device-token"))])
+async def gemini_hospital_hours(body: GeminiHospitalRequest, request: Request):
+    _require_device(request)
+    try:
+        # Round coordinates to about 1 km; exact GPS is not needed for this search.
+        location = f"{body.lat:.2f}, {body.lon:.2f}"
+        return await gemini.hospital_hours(_single_line(body.name, 120), location, body.language)
+    except gemini.GeminiError as error:
+        raise HTTPException(503, str(error)) from error
+
+
+@app.post("/api/gemini/medicine", dependencies=[Depends(limiter(5, 60)), Depends(token_limiter(3, 60, header="x-device-token"))])
+async def gemini_medicine(body: GeminiMedicineRequest, request: Request):
+    _require_device(request)
+    import base64
+    try:
+        image = base64.b64decode(body.image_base64, validate=True)
+        if len(image) > gemini.MAX_IMAGE_BYTES:
+            raise ValueError("Photo must be 5 MB or smaller.")
+        return {"answer": await gemini.read_medicine(image, body.mime_type, body.language)}
+    except (ValueError, gemini.GeminiError) as error:
+        raise HTTPException(422 if isinstance(error, ValueError) else 503, str(error)) from error
+
+
 @app.post(
     "/api/gemini/route",
     dependencies=[

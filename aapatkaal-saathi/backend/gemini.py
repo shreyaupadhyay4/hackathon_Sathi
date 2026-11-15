@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import re
+import base64
 
 import httpx
 
@@ -37,6 +38,7 @@ MIN_CONFIDENCE = 0.7
 MAX_DESCRIPTION_CHARS = 500
 MAX_ANSWER_CHARS = 600
 TIMEOUT_SECONDS = 15
+MAX_IMAGE_BYTES = 5 * 1024 * 1024
 UNSAFE_UNCOVERED_ANSWER = re.compile(
     r"\b(?:mg|mcg|ml|millilit(?:er|re)s?|dose|dosage|medicine|medication|tablet|capsule|pill|"
     r"aspirin|ibuprofen|paracetamol|acetaminophen|antibiotic|cpr|heimlich|tourniquet|splint)\b",
@@ -207,3 +209,80 @@ async def classify(description: str, language: str) -> dict:
         return _parse_response(response.json())
     except (ValueError, TypeError) as error:
         raise GeminiError("Gemini did not return a usable answer.") from error
+
+
+async def _generate(contents: list, *, tools: list | None = None) -> dict:
+    if not configured():
+        raise GeminiError("Gemini is not configured.")
+    body = {"contents": contents, "generationConfig": {"maxOutputTokens": 220}}
+    if tools:
+        body["tools"] = tools
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent",
+                headers={"x-goog-api-key": settings.gemini_api_key}, json=body,
+            )
+    except httpx.RequestError as error:
+        raise GeminiError("Gemini cannot connect to Google.") from error
+    if response.status_code >= 400:
+        raise GeminiError(f"Gemini provider returned HTTP {response.status_code}.")
+    try:
+        return response.json()
+    except (ValueError, TypeError) as error:
+        raise GeminiError("Gemini did not return a usable answer.") from error
+
+
+def _text(payload: dict) -> str:
+    try:
+        return "".join(p["text"] for p in payload["candidates"][0]["content"]["parts"] if isinstance(p.get("text"), str)).strip()[:1200]
+    except (KeyError, IndexError, TypeError):
+        raise GeminiError("Gemini did not return a usable answer.")
+
+
+async def hospital_hours(name: str, location: str, language: str) -> dict:
+    query = f"Is {name} hospital near {location} open right now? Find current official opening hours. If unclear, say cannot verify."
+    payload = await _generate([{"role": "user", "parts": [{"text": f"Use Google Search to verify whether this hospital is open now. Answer in {'Hindi' if language == 'hi' else 'English'}. Distinguish confirmed hours from uncertain information; never claim certainty without a current source. Hospital: {query}"}]}], tools=[{"google_search": {}}])
+    answer = _text(payload)
+    sources = []
+    try:
+        for chunk in payload["candidates"][0].get("groundingMetadata", {}).get("groundingChunks", []):
+            web = chunk.get("web", {})
+            if web.get("uri", "").startswith("https://"):
+                sources.append({"title": web.get("title", "Source")[:160], "url": web["uri"]})
+    except (KeyError, TypeError):
+        pass
+    return {"answer": answer, "sources": sources[:5], "grounded": bool(sources)}
+
+
+async def read_medicine(image: bytes, mime_type: str, language: str) -> str:
+    if not image or len(image) > MAX_IMAGE_BYTES or mime_type not in {"image/jpeg", "image/png", "image/webp"}:
+        raise ValueError("Use a JPEG, PNG, or WebP photo up to 5 MB.")
+    prompt = ("Read only medicine-strip text that is clearly visible: product/brand name and printed strength if legible. "
+              "Do not infer missing text. Do not give dosage, schedule, indication, interactions, or medical advice. "
+              f"Respond in {'Hindi' if language == 'hi' else 'English'}, briefly, and say to ask a pharmacist/clinician to identify unclear text.")
+    payload = await _generate([{"role": "user", "parts": [{"text": prompt}, {"inline_data": {"mime_type": mime_type, "data": base64.b64encode(image).decode("ascii")}}]}])
+    answer = _text(payload)
+    if not answer:
+        raise GeminiError("Gemini could not read the photo.")
+    return answer
+
+
+async def live_token(language: str) -> dict:
+    if not configured():
+        raise GeminiError("Gemini is not configured.")
+    body = {"uses": 1, "liveConnectConstraints": {
+        "model": "models/gemini-3.1-flash-live-preview",
+        "config": {"responseModalities": ["AUDIO"], "systemInstruction": {"parts": [{"text": f"You are a calm emergency first-aid helper. Speak in {'Hindi' if language == 'hi' else 'English'}. Give only simple, low-risk first-aid guidance; no diagnosis, medicine, doses, or risky procedures. For emergencies tell user to call India 112 and follow operator. Keep replies short."}]}}}}
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
+            response = await client.post("https://generativelanguage.googleapis.com/v1alpha/auth_tokens", headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
+    except httpx.RequestError as error:
+        raise GeminiError("Gemini cannot connect to Google.") from error
+    if response.status_code >= 400:
+        raise GeminiError(f"Gemini Live token request failed (HTTP {response.status_code}).")
+    try:
+        data = response.json()
+        return {"token": data["name"], "model": "models/gemini-3.1-flash-live-preview"}
+    except (KeyError, ValueError, TypeError) as error:
+        raise GeminiError("Gemini did not return a Live token.") from error
