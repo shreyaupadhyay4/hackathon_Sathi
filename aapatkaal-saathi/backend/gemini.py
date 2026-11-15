@@ -211,19 +211,27 @@ async def classify(description: str, language: str) -> dict:
         raise GeminiError("Gemini did not return a usable answer.") from error
 
 
-async def _generate(contents: list, *, tools: list | None = None) -> dict:
+async def _generate(
+    contents: list,
+    *,
+    tools: list | None = None,
+    timeout: int = TIMEOUT_SECONDS,
+    timeout_message: str = "Gemini timed out. Try again in a moment.",
+) -> dict:
     if not configured():
         raise GeminiError("Gemini is not configured.")
     body = {"contents": contents, "generationConfig": {"maxOutputTokens": 220}}
     if tools:
         body["tools"] = tools
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
+        async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(
                 f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent",
                 headers={"x-goog-api-key": settings.gemini_api_key}, json=body,
             )
     except httpx.RequestError as error:
+        if isinstance(error, httpx.TimeoutException):
+            raise GeminiError(timeout_message) from error
         raise GeminiError("Gemini cannot connect to Google.") from error
     if response.status_code >= 400:
         raise GeminiError(f"Gemini provider returned HTTP {response.status_code}.")
@@ -261,7 +269,13 @@ async def read_medicine(image: bytes, mime_type: str, language: str) -> str:
     prompt = ("Read only medicine-strip text that is clearly visible: product/brand name and printed strength if legible. "
               "Do not infer missing text. Do not give dosage, schedule, indication, interactions, or medical advice. "
               f"Respond in {'Hindi' if language == 'hi' else 'English'}, briefly, and say to ask a pharmacist/clinician to identify unclear text.")
-    payload = await _generate([{"role": "user", "parts": [{"text": prompt}, {"inline_data": {"mime_type": mime_type, "data": base64.b64encode(image).decode("ascii")}}]}])
+    payload = await _generate(
+        [{"role": "user", "parts": [{"text": prompt}, {
+            "inline_data": {"mime_type": mime_type, "data": base64.b64encode(image).decode("ascii")}
+        }]}],
+        timeout=45,
+        timeout_message="Gemini took too long to read the photo. Try a closer, sharper photo.",
+    )
     answer = _text(payload)
     if not answer:
         raise GeminiError("Gemini could not read the photo.")
