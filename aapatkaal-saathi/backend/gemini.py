@@ -271,12 +271,12 @@ async def read_medicine(image: bytes, mime_type: str, language: str) -> str:
 async def live_token(language: str) -> dict:
     if not configured():
         raise GeminiError("Gemini is not configured.")
-    body = {"uses": 1, "liveConnectConstraints": {
-        "model": "models/gemini-3.1-flash-live-preview",
-        "config": {"responseModalities": ["AUDIO"], "systemInstruction": {"parts": [{"text": f"You are a calm emergency first-aid helper. Speak in {'Hindi' if language == 'hi' else 'English'}. Give only simple, low-risk first-aid guidance; no diagnosis, medicine, doses, or risky procedures. For emergencies tell user to call India 112 and follow operator. Keep replies short."}]}}}}
+    # Keep the token request to supported AuthToken fields. The Live config and
+    # server-authored safety instruction are sent in the first WebSocket setup.
+    body = {"uses": 1}
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-            response = await client.post("https://generativelanguage.googleapis.com/v1alpha/auth_tokens", headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
+            response = await client.post("https://generativelanguage.googleapis.com/v1beta/auth_tokens", headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
     except httpx.RequestError as error:
         raise GeminiError("Gemini cannot connect to Google.") from error
     if response.status_code >= 400:

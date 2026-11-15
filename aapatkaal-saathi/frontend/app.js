@@ -1402,7 +1402,7 @@ $('#liveStart').onclick = async () => {
       if (liveSocket?.readyState === WebSocket.OPEN) liveSocket.send(JSON.stringify({realtimeInput: {mediaChunks: [{mimeType: 'audio/pcm;rate=16000', data: pcmBase64(event.inputBuffer.getChannelData(0), liveContext.sampleRate)}]}}));
     };
     liveSocket = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(auth.token)}`);
-    liveSocket.onopen = () => liveSocket.send(JSON.stringify({setup: {model: auth.model, generationConfig: {responseModalities: ['AUDIO']}, inputAudioTranscription: {}, outputAudioTranscription: {}}}));
+    liveSocket.onopen = () => liveSocket.send(JSON.stringify({setup: {model: auth.model, generationConfig: {responseModalities: ['AUDIO']}, systemInstruction: {parts: [{text: `You are a calm emergency first-aid helper. Speak in ${lang === 'hi' ? 'Hindi' : 'English'}. Give only simple, low-risk first-aid guidance; no diagnosis, medicine, doses, or risky procedures. For emergencies tell the user to call India 112 and follow the operator. Keep replies short.`}]}, inputAudioTranscription: {}, outputAudioTranscription: {}}}));
     liveSocket.onmessage = async event => {
       try {
         const msg = JSON.parse(event.data);
