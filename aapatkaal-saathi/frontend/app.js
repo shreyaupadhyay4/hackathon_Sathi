@@ -52,7 +52,7 @@ const TXT = {
     voiceAlertConfirm: 'Send an emergency alert to your saved safety contacts? Location may be shared if available.',
     voiceError: 'Voice input failed. Type your question or use the call button.',
     geminiRun: 'Find a reviewed card', geminiWorking: 'Checking for a matching card…',
-    liveStart: '🎙️ Start Gemini Live voice help', liveStop: 'Stop Gemini Live', liveStarting: 'Preparing Gemini Live…', liveMicPermission: 'Allow microphone access in your browser…', liveConnecting: 'Connecting audio to Gemini Live…', liveSetupTimeout: 'Gemini Live did not finish connecting. Check your connection and try again.', liveListening: 'Listening. Speak naturally; say “stop” or tap stop to end.', liveUnavailable: 'Live voice could not start. Check microphone permission and Gemini configuration.', micDenied: 'Microphone access was denied. Allow microphone access in your browser settings, then try again.',
+    liveStart: '🎙️ Start Gemini Live voice help', liveStop: 'Stop Gemini Live', liveStarting: 'Preparing Gemini Live…', liveMicPermission: 'Allow microphone access in your browser…', liveConnecting: 'Connecting audio to Gemini Live…', liveSetupTimeout: 'Gemini Live did not finish connecting. Check your connection and try again.', liveListening: 'Listening. Speak naturally; say “stop” or tap stop to end.', liveUnavailable: 'Live voice could not start. Check microphone permission and Gemini configuration.', liveHttpsRequired: 'Your browser requires HTTPS to use the microphone here. Open the secure app link.', liveNoMicrophone: 'No microphone was found. Connect or enable a microphone, then try again.', liveSocketClosed: 'Gemini Live closed the connection before it was ready. Check the app link and Gemini access, then retry.', micDenied: 'Microphone access was denied. Allow microphone access in your browser settings, then try again.',
     medicinePhotoLabel: 'Photo of a medicine strip (up to 12 MB; resized on your device)', medicineRead: 'Read visible label aloud', medicineSpeak: '🔊 Read aloud', medicineWorking: 'Resizing photo and reading visible text…', medicineSafety: 'Only visible label text is read. No dosage or treatment advice.', medicinePhotoError: 'Could not process that photo. Try a JPEG, PNG, or WebP image.', medicineCompressError: 'Could not resize the photo below 5 MB. Try cropping closer to the medicine strip.',
     medicinePrivacy: 'The photo is sent to Google Gemini to read the visible label.', hospitalNameLabel: 'Nearby hospital name', hospitalCheck: 'Check current opening information with Google Search', hospitalWorking: 'Checking current sources…', hospitalGrounded: 'Search-grounded result; hours may change. Call the hospital to confirm.', hospitalNoSources: 'Could not verify current opening information. Call the hospital to confirm.', hospitalPrivacy: 'A rounded, approximate location and hospital name are sent to Google Search grounding.',
     geminiShortInput: 'Add a few words about what happened, or choose a card below.',
@@ -215,7 +215,7 @@ const TXT = {
     voiceAlertConfirm: 'क्या सेव किए सुरक्षा संपर्कों को आपातकालीन अलर्ट भेजें? उपलब्ध होने पर लोकेशन साझा हो सकती है।',
     voiceError: 'आवाज़ नहीं समझ पाए। सवाल टाइप करें या कॉल बटन दबाएँ।',
     geminiRun: 'जाँचा हुआ कार्ड खोजें', geminiWorking: 'मिलता-जुलता कार्ड देख रहे हैं…',
-    liveStart: '🎙️ Gemini Live से बात करें', liveStop: 'Gemini Live बंद करें', liveStarting: 'Gemini Live तैयार कर रहे हैं…', liveMicPermission: 'ब्राउज़र में माइक्रोफ़ोन की अनुमति दें…', liveConnecting: 'Gemini Live से आवाज़ जोड़ रहे हैं…', liveSetupTimeout: 'Gemini Live जुड़ नहीं पाया। इंटरनेट जाँचें और फिर कोशिश करें।', liveListening: 'सुन रहे हैं। बोलें; रोकने के लिए “stop” कहें या बटन दबाएँ।', liveUnavailable: 'Live आवाज़ शुरू नहीं हुई। माइक्रोफ़ोन अनुमति और Gemini सेटिंग जाँचें।', micDenied: 'माइक्रोफ़ोन की अनुमति नहीं मिली। ब्राउज़र सेटिंग में अनुमति दें और फिर कोशिश करें।',
+    liveStart: '🎙️ Gemini Live से बात करें', liveStop: 'Gemini Live बंद करें', liveStarting: 'Gemini Live तैयार कर रहे हैं…', liveMicPermission: 'ब्राउज़र में माइक्रोफ़ोन की अनुमति दें…', liveConnecting: 'Gemini Live से आवाज़ जोड़ रहे हैं…', liveSetupTimeout: 'Gemini Live जुड़ नहीं पाया। इंटरनेट जाँचें और फिर कोशिश करें।', liveListening: 'सुन रहे हैं। बोलें; रोकने के लिए “stop” कहें या बटन दबाएँ।', liveUnavailable: 'Live आवाज़ शुरू नहीं हुई। माइक्रोफ़ोन अनुमति और Gemini सेटिंग जाँचें।', liveHttpsRequired: 'इस पते पर माइक्रोफ़ोन के लिए HTTPS ज़रूरी है। सुरक्षित ऐप लिंक खोलें।', liveNoMicrophone: 'माइक्रोफ़ोन नहीं मिला। माइक्रोफ़ोन जोड़ें या चालू करें और फिर कोशिश करें।', liveSocketClosed: 'Gemini Live जुड़ने से पहले कनेक्शन बंद हो गया। ऐप लिंक और Gemini सेटिंग जाँचें।', micDenied: 'माइक्रोफ़ोन की अनुमति नहीं मिली। ब्राउज़र सेटिंग में अनुमति दें और फिर कोशिश करें।',
     medicinePhotoLabel: 'दवा की स्ट्रिप की फोटो (12 MB तक; फ़ोन पर छोटी होगी)', medicineRead: 'दिख रहा नाम पढ़ें', medicineSpeak: '🔊 ज़ोर से पढ़ें', medicineWorking: 'फोटो छोटी करके टेक्स्ट पढ़ रहे हैं…', medicineSafety: 'केवल दिख रहा टेक्स्ट पढ़ा जाएगा। खुराक या इलाज की सलाह नहीं मिलेगी।', medicinePhotoError: 'फोटो नहीं खुली। JPEG, PNG या WebP फोटो आज़माएँ।', medicineCompressError: 'फोटो 5 MB से छोटी नहीं हो पाई। दवा की स्ट्रिप के पास से फोटो लें।',
     medicinePrivacy: 'फोटो पर लिखा टेक्स्ट पढ़ने के लिए Google Gemini को भेजी जाएगी।', hospitalNameLabel: 'पास के अस्पताल का नाम', hospitalCheck: 'Google Search से अभी के खुले होने की जानकारी देखें', hospitalWorking: 'नई जानकारी खोज रहे हैं…', hospitalGrounded: 'Search से मिली जानकारी; समय बदल सकता है। पुष्टि के लिए अस्पताल को कॉल करें।', hospitalNoSources: 'अभी खुले होने की पुष्टि नहीं हुई। अस्पताल को कॉल करके पूछें।', hospitalPrivacy: 'लगभग की लोकेशन और अस्पताल का नाम Google Search को भेजे जाते हैं।',
     geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
@@ -1394,6 +1394,8 @@ $('#liveStop').onclick = stopLive;
 $('#liveStart').onclick = async () => {
   $('#liveStatus').textContent = t('liveStarting'); $('#liveStart').disabled = true;
   try {
+    const localHost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+    if (!window.isSecureContext && !localHost) { $('#liveStatus').textContent = t('liveHttpsRequired'); return; }
     if (!navigator.mediaDevices?.getUserMedia || !window.AudioContext || !window.WebSocket) throw new Error('unsupported');
     const auth = await api('/api/gemini/live-token', {language: lang});
     $('#liveStatus').textContent = t('liveMicPermission');
@@ -1402,7 +1404,7 @@ $('#liveStart').onclick = async () => {
     await liveContext.resume();
     liveProcessor = liveContext.createScriptProcessor(4096, 1, 1);
     liveProcessor.onaudioprocess = event => {
-      if (liveSocket?.readyState === WebSocket.OPEN) liveSocket.send(JSON.stringify({realtimeInput: {mediaChunks: [{mimeType: 'audio/pcm;rate=16000', data: pcmBase64(event.inputBuffer.getChannelData(0), liveContext.sampleRate)}]}}));
+      if (liveSocket?.readyState === WebSocket.OPEN) liveSocket.send(JSON.stringify({realtimeInput: {audio: {mimeType: 'audio/pcm;rate=16000', data: pcmBase64(event.inputBuffer.getChannelData(0), liveContext.sampleRate)}}}));
     };
     liveSocket = new WebSocket(`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(auth.token)}`);
     $('#liveStatus').textContent = t('liveConnecting');
@@ -1428,8 +1430,12 @@ $('#liveStart').onclick = async () => {
       } catch {}
     };
     liveSocket.onerror = () => { $('#liveStatus').textContent = t('liveUnavailable'); stopLive(); };
-    liveSocket.onclose = () => { if (liveStream) { stopLive(); $('#liveStatus').textContent = t('liveUnavailable'); } };
-  } catch (error) { stopLive(); $('#liveStatus').textContent = error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError' ? t('micDenied') : t('liveUnavailable'); }
+    liveSocket.onclose = () => { if (liveStream) { stopLive(); $('#liveStatus').textContent = t('liveSocketClosed'); } };
+  } catch (error) {
+    stopLive();
+    $('#liveStatus').textContent = error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError' ? t('micDenied')
+      : error?.name === 'NotFoundError' ? t('liveNoMicrophone') : t('liveUnavailable');
+  }
   finally { $('#liveStart').disabled = false; }
 };
 
