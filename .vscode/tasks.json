@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Aapatkaal Saathi",
+			"type": "shell",
+			"command": "cd aapatkaal-saathi && ./run.sh",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

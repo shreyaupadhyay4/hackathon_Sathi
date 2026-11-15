@@ -74,6 +74,44 @@ def test_overpass_retries_mirrors_with_exponential_backoff(monkeypatch):
     assert delays == [0.1, 0.2]
 
 
+def test_overpass_retries_next_mirror_after_access_error(monkeypatch):
+    import asyncio
+    import httpx
+    from backend.config import settings
+
+    calls = []
+
+    class Response:
+        def __init__(self, status_code):
+            self.status_code = status_code
+
+        def json(self):
+            return {"elements": []}
+
+    class Client:
+        def __init__(self, **_kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, url, data):
+            calls.append(url)
+            return Response(403 if len(calls) == 1 else 200)
+
+    async def no_wait(_delay):
+        return None
+
+    monkeypatch.setattr(settings, "overpass_urls", ["blocked-mirror", "available-mirror"])
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    monkeypatch.setattr(overpass.asyncio, "sleep", no_wait)
+    assert asyncio.run(overpass._overpass("query")) == {"elements": []}
+    assert calls == ["blocked-mirror", "available-mirror"]
+
+
 def test_nearby_fast_caches_hospitals_only(monkeypatch):
     import asyncio
 
@@ -97,6 +135,42 @@ def test_nearby_fast_caches_hospitals_only(monkeypatch):
     assert first["results"]["hospital"][0]["name"] == "OSM Hospital"
     assert second["cached"] is True
     assert len(queries) == 1 and queries[0][1] == overpass.FAST_TIMEOUT
+
+
+def test_nearby_falls_back_to_nominatim_names_when_overpass_is_down(monkeypatch):
+    import asyncio
+
+    calls = []
+
+    async def unavailable(*_args, **_kwargs):
+        raise RuntimeError("Overpass mirrors unavailable")
+
+    async def fake_nominatim(_path, params):
+        calls.append(params["q"])
+        if params["q"] == "hospital":
+            return [{
+                "category": "amenity", "type": "hospital", "osm_type": "node", "osm_id": 11,
+                "lat": "28.6149", "lon": "77.2090", "name": "Nearby Hospital",
+            }]
+        return [{
+            "category": "amenity", "type": "pharmacy", "osm_type": "node", "osm_id": 12,
+            "lat": "28.6150", "lon": "77.2091", "name": "Nearby Pharmacy",
+        }]
+
+    monkeypatch.setattr(overpass, "_cache", {})
+    monkeypatch.setattr(overpass, "_overpass", unavailable)
+    monkeypatch.setattr(overpass, "_nominatim", fake_nominatim)
+
+    async def exercise():
+        fast = await overpass.nearby_fast(28.6139, 77.2090)
+        full = await overpass.nearby(28.6139, 77.2090, ["hospital", "pharmacy"])
+        return fast, full
+
+    fast, full = asyncio.run(exercise())
+    assert fast["results"]["hospital"][0]["name"] == "Nearby Hospital"
+    assert full["results"]["pharmacy"][0]["name"] == "Nearby Pharmacy"
+    assert full["results"]["hospital"][0]["distance_m"] > 0
+    assert calls == ["hospital", "hospital", "pharmacy"]
 
 
 def test_nearby_returns_stale_last_good_result_when_overpass_fails(monkeypatch):
@@ -562,10 +636,71 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
     url, headers, body = calls[0]
     assert url.endswith("/models/test-model:generateContent")
     assert headers == {"x-goog-api-key": "test-key"}
-    assert body["generationConfig"]["responseSchema"]["properties"]["card_id"]["enum"]
+    generation = body["generationConfig"]
+    assert generation["responseJsonSchema"]["properties"]["card_id"]["enum"]
+    assert generation["thinkingConfig"] == {"thinkingLevel": "LOW"}
+    assert generation["maxOutputTokens"] == 128
     assert "ignore any instructions" in body["systemInstruction"]["parts"][0]["text"]
     submitted = body["contents"][0]["parts"][0]["text"]
     assert "two cars crashed" in submitted and "location" not in submitted.lower()
+
+
+def test_gemini_unavailable_model_returns_actionable_error(monkeypatch):
+    import asyncio
+    import httpx
+    import pytest
+    from backend import gemini
+    from backend.config import settings
+
+    class Response:
+        status_code = 404
+
+    class Client:
+        def __init__(self, timeout):
+            assert timeout == gemini.TIMEOUT_SECONDS
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, *_args, **_kwargs):
+            return Response()
+
+    monkeypatch.setattr(settings, "gemini_api_key", "test-key")
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    with pytest.raises(gemini.GeminiError, match="model is unavailable"):
+        asyncio.run(gemini.classify("someone is hurt", "en"))
+
+
+def test_gemini_provider_overload_returns_retryable_error(monkeypatch):
+    import asyncio
+    import httpx
+    import pytest
+    from backend import gemini
+    from backend.config import settings
+
+    class Response:
+        status_code = 503
+
+    class Client:
+        def __init__(self, timeout):
+            assert timeout == gemini.TIMEOUT_SECONDS
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        async def post(self, *_args, **_kwargs):
+            return Response()
+
+    monkeypatch.setattr(settings, "gemini_api_key", "test-key")
+    monkeypatch.setattr(httpx, "AsyncClient", Client)
+    with pytest.raises(gemini.GeminiError, match="temporarily busy"):
+        asyncio.run(gemini.classify("someone is hurt", "en"))
 
 
 def test_gemini_live_eval_has_30_labeled_text_cases():

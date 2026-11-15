@@ -37,9 +37,9 @@ Set `PUBLIC_BASE_URL` to that https URL so alert links are correct.
 
 The Help screen can send a short incident description to Gemini and ask it to choose only from card IDs already present in `frontend/firstaid.json`. The app displays the unchanged reviewed card; Gemini cannot provide steps, diagnose, assess urgency, or remove the visible 112 action. An unknown card, low model confidence, missing key, timeout, or provider error falls back to the manual card menu.
 
-Set `GEMINI_API_KEY` in `.env` on the server to enable it. `GEMINI_MODEL` defaults to `gemini-3.8-flash` and can be changed if unavailable to your account. Never put the key in frontend code or commit it. The model call sends the user's typed description and the app's card labels to Google; the app does not include GPS, contact details, or the user's device token in that request. Tell users not to enter names, phone numbers, or exact addresses. Google's current data handling, quota, and pricing terms apply; the rest of the app does not call Gemini and remains usable without the key.
+Set `GEMINI_API_KEY` in `.env` on the server to enable it. `GEMINI_MODEL` defaults to `gemini-3.5-flash-lite` for fast card routing and can be changed if unavailable to your account. Never put the key in frontend code or commit it. The model call sends the user's typed description and the app's card labels to Google; the app does not include GPS, contact details, or the user's device token in that request. Tell users not to enter names, phone numbers, or exact addresses. Google's current data handling, quota, and pricing terms apply; the rest of the app does not call Gemini and remains usable without the key.
 
-The model's confidence is only a routing heuristic, not a measured probability or medical assessment. The optional live evaluation uses 30 synthetic English, Hindi, and Hinglish descriptions:
+The request uses a constrained JSON schema to limit output to known card IDs. The model's confidence is only a routing heuristic, not a measured probability or medical assessment. Gemini never gives medical advice or decides urgency. The optional live evaluation uses 30 synthetic English, Hindi, and Hinglish descriptions:
 
 ```bash
 GEMINI_API_KEY=... python tests/evaluate_gemini.py --run

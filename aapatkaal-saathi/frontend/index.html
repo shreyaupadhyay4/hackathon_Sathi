@@ -7,6 +7,7 @@
 <title>Aapatkaal Saathi · आपातकाल साथी</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -14,6 +15,7 @@
   <div class="brand" data-i="appName">आपातकाल साथी</div>
   <button id="langBtn" class="lang" aria-label="Change language">EN</button>
   <a id="call112" class="call112" href="tel:112" aria-label="Call emergency number 112"><span aria-hidden="true">📞</span> 112</a>
+  <a id="call108" class="call108" href="tel:108" aria-label="Call ambulance number 108; availability varies by state"><span aria-hidden="true">🚑</span> 108</a>
 </header>
 
 <main>
@@ -21,6 +23,7 @@
     <div class="sos-wrap">
       <button id="sos" class="sos" aria-label="SOS"><span>SOS</span></button>
       <p class="hint" data-i="sosHint"></p>
+      <p class="note" data-i="ambulanceNotice"></p>
       <p id="locLine" class="loc" role="status"></p>
     </div>
 
@@ -34,25 +37,6 @@
       <p id="locationIntroStatus" class="note" role="status" aria-live="polite" hidden></p>
     </section>
 
-    <button id="operatorBtn" class="btn danger wide" data-i="operatorOpen"></button>
-    <article id="operatorCard" class="box operator-card" hidden>
-      <h2 data-i="operatorTitle"></h2>
-      <p class="note" data-i="operatorIntro"></p>
-      <label for="operatorPeople" data-i="operatorPeople"></label>
-      <input id="operatorPeople" type="number" min="0" max="99" inputmode="numeric">
-      <label for="operatorEvent" data-i="operatorEvent"></label>
-      <input id="operatorEvent" type="text" maxlength="100">
-      <p id="operatorLocation" class="note" role="status" aria-live="polite"></p>
-      <button id="operatorRetry" class="btn ghost wide" data-i="operatorRetry" hidden></button>
-      <div id="operatorScript" class="operator-script"></div>
-      <p id="operatorVoiceNote" class="note" hidden></p>
-      <div class="row">
-        <button id="operatorRead" class="btn" data-i="operatorRead"></button>
-        <button id="operatorStop" class="btn ghost" data-i="stop" hidden></button>
-      </div>
-      <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
-    </article>
-
     <div id="manualLoc" class="box" hidden>
       <label for="placeQ" data-i="searchPlace"></label>
       <div class="row"><input id="placeQ" type="text"><button id="placeGo" class="btn" data-i="search"></button></div>
@@ -61,14 +45,11 @@
 
     <div id="sosPanel" class="box sospanel" role="region" hidden></div>
 
-    <section class="box" aria-labelledby="geminiTitle" aria-describedby="geminiExplain">
-      <h2 id="geminiTitle" data-i="geminiTitle"></h2>
-      <p id="geminiExplain" class="note" data-i="geminiExplain"></p>
-      <label for="geminiDescription" data-i="geminiInput"></label>
-      <textarea id="geminiDescription" rows="3" maxlength="500" autocomplete="off"></textarea>
-      <button id="geminiRun" class="btn go wide" data-i="geminiRun"></button>
-      <p id="geminiResult" class="note" role="status" aria-live="polite" hidden></p>
-      <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
+    <section id="homeNearby" class="box" aria-labelledby="homeNearbyTitle" hidden>
+      <h2 id="homeNearbyTitle" data-i="homeNearbyTitle"></h2>
+      <p id="homeNearbyStatus" class="note" role="status" aria-live="polite"></p>
+      <div id="homeNearbyList"></div>
+      <div id="homeNearbyActions" class="nearby-actions"></div>
     </section>
 
     <h2 data-i="whatHappened"></h2>
@@ -88,7 +69,42 @@
       <ol id="stepsList"></ol>
       <h4 class="dont" data-i="dontsH"></h4>
       <ul id="dontsList" class="donts"></ul>
+      <section id="incidentShare" class="incident-share" aria-labelledby="incidentShareTitle" hidden>
+        <h4 id="incidentShareTitle" data-i="incidentShareTitle"></h4>
+        <p class="note" data-i="incidentShareExplain"></p>
+        <div id="incidentShareButtons"></div>
+        <p id="incidentShareStatus" class="note" role="status" aria-live="polite" hidden></p>
+      </section>
     </article>
+
+    <button id="operatorBtn" class="btn ghost wide" data-i="operatorOpen"></button>
+    <article id="operatorCard" class="box operator-card" hidden>
+      <h2 data-i="operatorTitle"></h2>
+      <p class="note" data-i="operatorIntro"></p>
+      <label for="operatorPeople" data-i="operatorPeople"></label>
+      <input id="operatorPeople" type="number" min="0" max="99" inputmode="numeric">
+      <label for="operatorEvent" data-i="operatorEvent"></label>
+      <input id="operatorEvent" type="text" maxlength="100">
+      <p id="operatorLocation" class="note" role="status" aria-live="polite"></p>
+      <button id="operatorRetry" class="btn ghost wide" data-i="operatorRetry" hidden></button>
+      <div id="operatorScript" class="operator-script"></div>
+      <p id="operatorVoiceNote" class="note" hidden></p>
+      <div class="row">
+        <button id="operatorRead" class="btn" data-i="operatorRead"></button>
+        <button id="operatorStop" class="btn ghost" data-i="stop" hidden></button>
+      </div>
+      <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
+    </article>
+
+    <details class="box">
+      <summary id="geminiTitle" data-i="geminiTitle"></summary>
+      <p id="geminiExplain" class="note" data-i="geminiExplain"></p>
+      <label for="geminiDescription" data-i="geminiInput"></label>
+      <textarea id="geminiDescription" rows="3" maxlength="500" autocomplete="off"></textarea>
+      <button id="geminiRun" class="btn go wide" data-i="geminiRun"></button>
+      <p id="geminiResult" class="note" role="status" aria-live="polite" hidden></p>
+      <a class="btn danger wide" href="tel:112" data-i="operatorCall"></a>
+    </details>
 
     <div class="box">
       <button id="shareBtn" class="btn wa wide" data-i="shareLive"></button>
@@ -99,6 +115,25 @@
 
   <section id="tab-near" class="tab" hidden>
     <div id="typeTabs" class="chips small"></div>
+    <button id="nearUseLocation" class="btn go wide" type="button" data-i="nearUseLocation"></button>
+    <p id="nearLocationStatus" class="note" role="status" aria-live="polite"></p>
+    <div class="map-switch" role="group" aria-label="Map provider">
+      <button id="nearMapGoogleBtn" class="chip on" type="button" data-i="nearMapGoogle"></button>
+      <button id="nearMapOsmBtn" class="chip" type="button" data-i="nearMapOsm"></button>
+    </div>
+    <iframe id="nearGoogleMap" title="Google Maps nearby services" loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div id="nearMap" role="application"></div>
+    <a id="nearMapGoogleOpen" class="osm-map-link" target="_blank" rel="noopener" data-i="nearMapGoogleOpen"></a>
+    <button id="nearMapCenter" class="btn ghost wide" type="button" data-i="nearMapCenter"></button>
+    <p id="nearMapStatus" class="note" role="status" aria-live="polite"></p>
+    <div id="nearMapLegend" class="map-legend">
+      <span><i class="map-dot current"></i><span data-i="nearMapYou"></span></span>
+      <span><i class="map-dot hospital"></i><span data-i="hospital"></span></span>
+      <span><i class="map-dot clinic"></i><span data-i="clinic"></span></span>
+      <span><i class="map-dot pharmacy"></i><span data-i="pharmacy"></span></span>
+      <span><i class="map-dot police"></i><span data-i="police"></span></span>
+    </div>
     <p id="nearMeta" class="note" role="status" aria-live="polite"></p>
     <div id="nearList" aria-live="polite"></div>
     <button id="nearRefresh" class="btn ghost wide" data-i="refresh"></button>
@@ -118,6 +153,21 @@
       <div id="contactsList"></div>
       <button id="addContact" class="btn wide" data-i="addContact"></button>
     </div>
+
+    <section id="whatsappContactsBox" class="box" aria-labelledby="whatsappContactsTitle">
+      <h3 id="whatsappContactsTitle" data-i="whatsappContactsTitle"></h3>
+      <p class="note" data-i="whatsappContactsExplain"></p>
+      <div id="whatsappContactsList"></div>
+      <form id="whatsappContactForm">
+        <label for="waContactName" data-i="waContactName"></label>
+        <input id="waContactName" type="text" maxlength="40" autocomplete="name" required>
+        <label for="waContactPhone" data-i="waContactPhone"></label>
+        <input id="waContactPhone" type="tel" inputmode="tel" maxlength="24" autocomplete="tel" required>
+        <button id="waContactSave" class="btn wa wide" type="submit" data-i="waContactSave"></button>
+        <button id="waContactCancel" class="btn ghost wide" type="button" data-i="waContactCancel" hidden></button>
+        <p id="waContactStatus" class="note" role="status" aria-live="polite" hidden></p>
+      </form>
+    </section>
 
     <div id="walkSetup" class="box">
       <div id="minChips" class="chips small"></div>
@@ -155,6 +205,7 @@
   <button data-tab="near"><span aria-hidden="true">🏥</span><b data-i="tabNear"></b></button>
   <button data-tab="walk"><span aria-hidden="true">🚶</span><b data-i="tabWalk"></b></button>
 </nav>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

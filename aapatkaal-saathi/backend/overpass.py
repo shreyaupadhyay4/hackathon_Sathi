@@ -14,7 +14,8 @@ TYPE_FILTERS = {
 }
 ALL_TYPES = list(TYPE_FILTERS)
 RADII = [3000, 8000, 20000]  # metres; widen only if too few results
-FAST_TIMEOUT = 0.65
+FAST_TIMEOUT = 3.0
+NOMINATIM_NEARBY_RADIUS = 20000
 HEALTH_TTL = 60
 
 _cache: dict[str, tuple[float, dict]] = {}
@@ -128,7 +129,7 @@ async def _overpass(query: str, timeout: float = 8, backoff_base: float = 0.25) 
                         last = f"{url} -> invalid JSON: {e!r}"
                 else:
                     last = f"{url} -> HTTP {r.status_code}"
-                    if r.status_code not in (408, 429) and r.status_code < 500:
+                    if r.status_code == 400:
                         break
             except httpx.RequestError as e:
                 last = f"{url} -> {e!r}"
@@ -150,6 +151,71 @@ def _save_cache(key: str, payload: dict) -> None:
     _cache[key] = (time.time(), payload)
 
 
+async def nearby_nominatim(
+    lat: float, lon: float, types: list[str], radius_m: int = NOMINATIM_NEARBY_RADIUS
+) -> dict:
+    """Use bounded Nominatim POI search when Overpass mirrors are unavailable."""
+    center_lat, center_lon = round(lat, 3), round(lon, 3)
+    lat_delta = radius_m / 111_320
+    lon_delta = lat_delta / max(math.cos(math.radians(center_lat)), 0.01)
+    south, north = max(-90, center_lat - lat_delta), min(90, center_lat + lat_delta)
+    west, east = max(-180, center_lon - lon_delta), min(180, center_lon + lon_delta)
+    viewbox = f"{west:.5f},{north:.5f},{east:.5f},{south:.5f}"
+    elements = []
+    for kind in ("hospital", "pharmacy"):
+        if kind not in types:
+            continue
+        data = await _nominatim("/search", {
+            "q": kind,
+            "countrycodes": "in",
+            "viewbox": viewbox,
+            "bounded": 1,
+            "limit": 50,
+            "addressdetails": 1,
+            "extratags": 1,
+        })
+        if not isinstance(data, list):
+            raise RuntimeError("Nominatim nearby search returned an invalid response")
+        for place in data:
+            category = place.get("category") or place.get("class")
+            if category not in ("amenity", "healthcare") or place.get("type") != kind:
+                continue
+            try:
+                place_lat, place_lon = float(place["lat"]), float(place["lon"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if haversine(lat, lon, place_lat, place_lon) > radius_m:
+                continue
+            address = place.get("address") or {}
+            extra = place.get("extratags") or {}
+            tags = {
+                category: kind,
+                "name": place.get("name") or str(place.get("display_name", "")).split(",")[0],
+                "phone": extra.get("phone") or extra.get("contact:phone"),
+                "opening_hours": extra.get("opening_hours"),
+                "emergency": extra.get("emergency"),
+                "addr:street": address.get("road"),
+                "addr:suburb": address.get("suburb") or address.get("neighbourhood"),
+                "addr:city": address.get("city") or address.get("town") or address.get("village"),
+            }
+            elements.append({
+                "type": place.get("osm_type", "node"),
+                "id": place.get("osm_id"),
+                "lat": place_lat,
+                "lon": place_lon,
+                "tags": {key: value for key, value in tags.items() if value},
+            })
+    parsed = parse_elements(elements, lat, lon)
+    return {
+        "center": {"lat": lat, "lon": lon},
+        "radius_m": radius_m,
+        "results": {kind: parsed[kind] if kind in types else [] for kind in types},
+        "source": "OpenStreetMap contributors via Nominatim",
+        "fetched_at": time.time(),
+        "cached": False,
+    }
+
+
 async def nearby_fast(lat: float, lon: float) -> dict:
     """Fetch only hospitals within 3 km, with a short deadline for the SOS path."""
     key = f"{lat:.3f},{lon:.3f},hospital@3000"
@@ -163,13 +229,13 @@ async def nearby_fast(lat: float, lon: float) -> dict:
                 timeout=FAST_TIMEOUT,
                 backoff_base=0.05,
             ),
-            timeout=2.5,
+            timeout=9.5,
         )
     except (RuntimeError, asyncio.TimeoutError):
         stale = _cache.get(key)
         if stale:
             return {**stale[1], "cached": True, "stale": True}
-        raise
+        return await nearby_nominatim(lat, lon, ["hospital"], radius_m=3000)
     result = parse_elements(data.get("elements", []), lat, lon)
     payload = {
         "center": {"lat": lat, "lon": lon},
@@ -203,7 +269,7 @@ async def nearby(lat: float, lon: float, types: list[str]) -> dict:
     except RuntimeError:
         if hit:
             return {**hit[1], "cached": True, "stale": True}
-        raise
+        return await nearby_nominatim(lat, lon, types)
     payload = {
         "center": {"lat": lat, "lon": lon},
         "radius_m": used,
@@ -224,8 +290,8 @@ async def health() -> dict:
         return dict(_health_cache[1])
     try:
         await asyncio.wait_for(
-            _overpass("[out:json][timeout:2];node(0);out;", timeout=0.8, backoff_base=0.05),
-            timeout=2.5,
+            _overpass("[out:json][timeout:2];node(0);out;", timeout=3.0, backoff_base=0.05),
+            timeout=9.5,
         )
         status = {"reachable": True, "checked_at": time.time()}
     except (RuntimeError, asyncio.TimeoutError):

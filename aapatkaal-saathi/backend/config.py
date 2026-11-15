@@ -26,7 +26,7 @@ class Settings:
     # Optional Gemini API credentials; the manual first-aid flow works without them.
     gemini_api_key: str = os.environ.get("GEMINI_API_KEY", "").strip()
     gemini_model: str = (
-        os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash"
+        os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
     )
     # Public https URL of your deployment (used in alert links). Auto-detected if empty.
     public_base_url: str = os.environ.get("PUBLIC_BASE_URL", "").strip().rstrip("/")
@@ -39,7 +39,8 @@ class Settings:
             "OVERPASS_URLS",
             "https://overpass-api.de/api/interpreter,"
             "https://overpass.kumi.systems/api/interpreter,"
-            "https://overpass.nchc.org.tw/api/interpreter",
+            "https://overpass.nchc.org.tw/api/interpreter,"
+            "https://overpass.private.coffee/api/interpreter",
         ).split(",")
         if u.strip()
     ]

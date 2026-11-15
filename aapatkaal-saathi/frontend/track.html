@@ -2,28 +2,125 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Live location · Aapatkaal Saathi</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{color-scheme:light dark}
 body{margin:0;font:17px/1.5 system-ui,sans-serif;background:#f4f6f8;color:#1c2024}
 @media (prefers-color-scheme:dark){body{background:#14171a;color:#eef1f4}}
 header{background:#c8102e;color:#fff;padding:12px 14px;font-weight:800}
 main{max-width:640px;margin:0 auto;padding:12px 14px}
-iframe{width:100%;height:55vh;border:0;border-radius:12px;background:#ccc}
+#map{width:100%;height:55vh;min-height:320px;border-radius:12px;background:#ccc}
 .s{font-weight:800}.old{color:#c8102e}.a{display:inline-block;margin:8px 8px 0 0;padding:12px 16px;border-radius:12px;background:#1a5fb4;color:#fff;text-decoration:none;font-weight:800}
 .a.r{background:#c8102e}
+button.a{font:inherit;font-weight:800;border:0;cursor:pointer}
+button.a:disabled{opacity:.55;cursor:not-allowed}
 </style></head><body>
 <header>Live location</header>
 <main>
 <p id="who" class="s">Loading…</p>
 <p id="age"></p>
-<iframe id="map" title="Map" loading="lazy"></iframe>
+<div id="map" role="application" aria-label="Live location and nearby services map"></div>
+<button id="centerMap" class="a" type="button" disabled>Center on live location</button>
+<p id="nearbyStatus" role="status" aria-live="polite">Loading nearby hospitals and services…</p>
+<p style="font-size:.9rem">Markers: <span style="color:#111827">live location</span> · <span style="color:#c8102e">hospital</span> · <span style="color:#1a5fb4">clinic</span> · <span style="color:#147d47">pharmacy</span> · <span style="color:#7a3e9d">police</span></p>
 <a id="g" class="a" target="_blank" rel="noopener">Open in Google Maps</a>
 <a class="a r" href="tel:112">Call 112</a>
 <p style="font-size:.85rem;opacity:.7">This page updates by itself. Map data © OpenStreetMap contributors. If you are worried, call the person, then call 112.</p>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const token = location.pathname.split('/').pop();
+const map = L.map('map').setView([20.5937, 78.9629], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+const serviceMarkers = L.layerGroup().addTo(map);
+const serviceColors = {hospital: '#c8102e', clinic: '#1a5fb4', pharmacy: '#147d47', police: '#7a3e9d'};
 let last = null;
+let liveMarker = null;
+let followLiveLocation = true;
+let nearbyCenter = null;
+let nearbyFetchedAt = 0;
+let nearbyRequest = null;
+
+map.on('dragstart', () => { followLiveLocation = false; });
+document.getElementById('centerMap').addEventListener('click', () => {
+  if (!last) return;
+  followLiveLocation = true;
+  map.setView([last.lat, last.lon], Math.max(map.getZoom(), 14));
+});
+
+function distanceMeters(a, b) {
+  const radians = value => value * Math.PI / 180;
+  const dLat = radians(b.lat - a.lat);
+  const dLon = radians(b.lon - a.lon);
+  const x = Math.sin(dLat / 2) ** 2 +
+    Math.cos(radians(a.lat)) * Math.cos(radians(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 6371000 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
+
+function placePopup(place) {
+  const content = document.createElement('div');
+  const name = document.createElement('strong');
+  name.textContent = place.name || place.type;
+  content.append(name, document.createElement('br'));
+  const kind = document.createElement('span');
+  kind.textContent = place.type.charAt(0).toUpperCase() + place.type.slice(1);
+  content.append(kind);
+  if (place.distance_m != null) {
+    const distance = document.createElement('span');
+    distance.textContent = ` · ${place.distance_m} m away`;
+    content.append(distance);
+  }
+  content.append(document.createElement('br'));
+  const directions = document.createElement('a');
+  directions.href = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}`;
+  directions.target = '_blank';
+  directions.rel = 'noopener';
+  directions.textContent = 'Get directions';
+  content.append(directions);
+  return content;
+}
+
+async function loadNearby(position) {
+  if (nearbyRequest) return nearbyRequest;
+  const movedFar = nearbyCenter && distanceMeters(nearbyCenter, position) > 1500;
+  if (nearbyCenter && (!movedFar || Date.now() - nearbyFetchedAt < 60000)) return;
+  nearbyRequest = (async () => {
+    const response = await fetch('/api/nearby', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({lat: position.lat, lon: position.lon, types: 'hospital,clinic,pharmacy,police'})
+    });
+    if (!response.ok) throw new Error('Nearby services are temporarily unavailable.');
+    const data = await response.json();
+    serviceMarkers.clearLayers();
+    const places = Object.values(data.results || {}).flat();
+    for (const place of places) {
+      if (!serviceColors[place.type] || !Number.isFinite(place.lat) || !Number.isFinite(place.lon)) continue;
+      L.circleMarker([place.lat, place.lon], {
+        radius: 8, color: '#fff', weight: 2, fillColor: serviceColors[place.type], fillOpacity: 1
+      }).bindPopup(placePopup(place)).addTo(serviceMarkers);
+    }
+    nearbyCenter = position;
+    nearbyFetchedAt = Date.now();
+    document.getElementById('nearbyStatus').textContent = places.length
+      ? `${places.length} nearby hospitals and services shown. Listings may be incomplete or out of date.`
+      : 'No nearby services were found in OpenStreetMap.';
+    if (!last) return;
+    if (followLiveLocation) {
+      const bounds = L.latLngBounds([[last.lat, last.lon], ...places
+        .filter(place => Number.isFinite(place.lat) && Number.isFinite(place.lon))
+        .map(place => [place.lat, place.lon])]);
+      map.fitBounds(bounds, {padding: [24, 24], maxZoom: 15});
+    }
+  })().catch(error => {
+    document.getElementById('nearbyStatus').textContent = error.message;
+  }).finally(() => { nearbyRequest = null; });
+  return nearbyRequest;
+}
+
 async function tick(){
   try{
     const r = await fetch('/api/track/' + encodeURIComponent(token));
@@ -34,11 +131,21 @@ async function tick(){
     const el = document.getElementById('age');
     el.textContent = 'Updated ' + (age < 90 ? age + ' seconds' : Math.round(age/60) + ' minutes') + ' ago' + (age > 180 ? ' (phone may be offline)' : '');
     el.className = age > 180 ? 'old' : '';
-    if(!last || Math.abs(last.lat-d.lat) > 0.0002 || Math.abs(last.lon-d.lon) > 0.0002){
-      last = d; const e = 0.004;
-      document.getElementById('map').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' +
-        [d.lon-e, d.lat-e, d.lon+e, d.lat+e].join('%2C') + '&layer=mapnik&marker=' + d.lat + '%2C' + d.lon;
+    const moved = !last || distanceMeters(last, d) > 20;
+    if(moved){
+      last = {lat: d.lat, lon: d.lon};
+      document.getElementById('centerMap').disabled = false;
+      if (!liveMarker) {
+        liveMarker = L.circleMarker([d.lat, d.lon], {
+          radius: 10, color: '#fff', weight: 3, fillColor: '#111827', fillOpacity: 1
+        }).addTo(map).bindPopup('Live location');
+        if (followLiveLocation) map.setView([d.lat, d.lon], 14);
+      } else {
+        liveMarker.setLatLng([d.lat, d.lon]);
+        if (followLiveLocation) map.panTo([d.lat, d.lon]);
+      }
       document.getElementById('g').href = 'https://www.google.com/maps?q=' + d.lat + ',' + d.lon;
+      loadNearby(last);
     }
   }catch(err){ document.getElementById('who').textContent = err.message; }
 }

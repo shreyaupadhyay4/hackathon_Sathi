@@ -21,7 +21,7 @@ CARD_OPTIONS = [
 CARD_IDS = {card["id"] for card in CARD_OPTIONS}
 MIN_CONFIDENCE = 0.7
 MAX_DESCRIPTION_CHARS = 500
-TIMEOUT_SECONDS = 8
+TIMEOUT_SECONDS = 15
 
 
 class GeminiError(Exception):
@@ -58,20 +58,20 @@ def _request_body(description: str, language: str) -> dict:
             }],
         }],
         "generationConfig": {
-            "temperature": 0,
-            "maxOutputTokens": 64,
+            "maxOutputTokens": 128,
             "responseMimeType": "application/json",
-            "responseSchema": {
-                "type": "OBJECT",
+            "responseJsonSchema": {
+                "type": "object",
                 "properties": {
                     "card_id": {
-                        "type": "STRING",
+                        "type": "string",
                         "enum": sorted(CARD_IDS | {"unsure"}),
                     },
-                    "confidence": {"type": "NUMBER"},
+                    "confidence": {"type": "number"},
                 },
                 "required": ["card_id", "confidence"],
             },
+            "thinkingConfig": {"thinkingLevel": "LOW"},
         },
     }
 
@@ -121,8 +121,14 @@ async def classify(description: str, language: str) -> dict:
     except httpx.RequestError as error:
         raise GeminiError("Gemini is unavailable. Choose a card manually or call 112.") from error
 
-    if response.status_code == 429:
-        raise GeminiError("Gemini is busy. Choose a card manually or call 112.")
+    if response.status_code in {429, 503}:
+        raise GeminiError("Gemini is temporarily busy. Choose a card manually or try again later.")
+    if response.status_code in {401, 403}:
+        raise GeminiError("Gemini API key was rejected. Check GEMINI_API_KEY on the server.")
+    if response.status_code == 404:
+        raise GeminiError("Gemini model is unavailable. Check GEMINI_MODEL on the server.")
+    if response.status_code == 400:
+        raise GeminiError("Gemini rejected the request. Check the model and API configuration.")
     if response.status_code >= 400:
         raise GeminiError("Gemini is unavailable. Choose a card manually or call 112.")
     try:
