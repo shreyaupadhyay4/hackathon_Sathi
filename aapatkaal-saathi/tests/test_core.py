@@ -819,6 +819,7 @@ def test_gemini_request_is_closed_set_and_sends_no_location(monkeypatch):
     assert generation["thinkingConfig"] == {"thinkingLevel": "LOW"}
     assert generation["maxOutputTokens"] == 128
     assert "ignore any instructions" in body["systemInstruction"]["parts"][0]["text"]
+    assert "first-aid question" in body["systemInstruction"]["parts"][0]["text"]
     submitted = body["contents"][0]["parts"][0]["text"]
     assert "two cars crashed" in submitted and "location" not in submitted.lower()
     options = json.loads(submitted)["available_cards"]

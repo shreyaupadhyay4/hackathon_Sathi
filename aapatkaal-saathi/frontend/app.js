@@ -43,16 +43,21 @@ const TXT = {
     operatorRead: '🔊 Read this aloud', operatorCall: '📞 Call 112 now',
     operatorVoiceUnavailable: 'Speech playback is not available on this phone.',
     operatorNoHindiVoice: 'No Hindi voice found. Add Hindi text-to-speech in phone settings.',
-    geminiTitle: 'Find a reviewed card with Gemini',
-    geminiExplain: 'Describe the situation in Hindi or English. After you tap, your description is sent to Google Gemini. Do not include names, phone numbers, or exact addresses; GPS is not sent. Gemini can only match an existing reviewed card; it does not diagnose or give instructions. Check the card. Call 112 in an emergency.',
-    geminiInput: 'What is happening?', geminiPlaceholder: 'For example: “My father has chest pain”',
-    geminiRun: 'Find a reviewed card', geminiWorking: 'Checking for a matching reviewed card…',
+    geminiTitle: 'Ask Gemini for safe guidance',
+    geminiExplain: 'Ask about an emergency in Hindi or English. Your question is sent to Google Gemini; do not include names, phone numbers, or exact addresses. GPS is not sent. Gemini matches your question to an existing app card. If none fits, the app automatically shows general safety steps instead of guessing treatment. This is not a diagnosis. Call 112 in an emergency.',
+    geminiInput: 'What happened, or what do you need help with?', geminiPlaceholder: 'For example: “My father has chest pain”',
+    geminiRun: 'Get safe guidance', geminiWorking: 'Checking your question…',
     geminiShortInput: 'Add a few words about what happened, or choose a card below.',
     demoBanner: 'Demo mode: alerts are simulated here; no contacts are notified.',
     offlineBanner: 'Offline: saved first-aid cards and nearby listings remain available. Fresh maps and contact alerts need internet; call 112 directly.',
     demoAlertSaved: 'Demo only: simulated alert saved in this app. No contact was notified.',
-    geminiMatch: 'Gemini suggests “{title}”. This is not a diagnosis. Check the card and call 112.',
-    geminiUnsure: 'No clear card match. Choose a card below or call 112.',
+    geminiMatch: 'Gemini found a matching card: “{title}”. Read its steps below. This is not a diagnosis; call 112 in an emergency.',
+    geminiUnsure: 'No card safely matches your question. General safety steps are shown below.',
+    geminiFallbackTitle: 'General safety steps when no card fits:',
+    geminiFallback1: 'Keep yourself and others away from immediate danger. Do not enter an unsafe area.',
+    geminiFallback2: 'In India, call 112 for an emergency. Tell the operator your location and what you can observe.',
+    geminiFallback3: 'Follow the operator’s instructions. If safe, ask someone nearby to meet responders.',
+    geminiFallback4: 'Avoid moving an injured person unless they face immediate danger. Do not give medicine or attempt procedures unless directed by emergency services or you are trained.',
     geminiNotConfigured: 'Gemini is not configured. Choose a card below; the app works without a Gemini key.',
     geminiKeyInvalid: 'Gemini API key was rejected. Check the server configuration.',
     geminiModelUnavailable: 'Gemini model is unavailable. Check GEMINI_MODEL on the server and restart the app.',
@@ -194,16 +199,21 @@ const TXT = {
     operatorRead: '🔊 सुनकर बताएं', operatorCall: '📞 अभी 112 पर कॉल करें',
     operatorVoiceUnavailable: 'इस फ़ोन पर सुनाने की सुविधा उपलब्ध नहीं है।',
     operatorNoHindiVoice: 'हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
-    geminiTitle: 'Gemini से सही जानकारी वाला कार्ड खोजें',
-    geminiExplain: 'स्थिति हिंदी या अंग्रेज़ी में लिखें। बटन दबाने पर आपका लिखा Google Gemini को भेजा जाएगा। नाम, फ़ोन नंबर या पूरा पता न लिखें; GPS लोकेशन नहीं भेजी जाती। Gemini केवल पहले से जाँचे गए कार्ड में से चुनता है; बीमारी नहीं बताता और निर्देश नहीं देता। कार्ड पढ़ें। आपातकाल में 112 पर कॉल करें।',
-    geminiInput: 'क्या हो रहा है?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
-    geminiRun: 'जाँचा हुआ कार्ड खोजें', geminiWorking: 'मिलता-जुलता जाँचा हुआ कार्ड खोज रहे हैं…',
+    geminiTitle: 'Gemini से सुरक्षित मदद पूछें',
+    geminiExplain: 'आपातकाल के बारे में हिंदी या अंग्रेज़ी में पूछें। आपका सवाल Google Gemini को भेजा जाएगा; नाम, फ़ोन नंबर या पूरा पता न लिखें। GPS नहीं भेजा जाता। Gemini सवाल को ऐप के मौजूदा कार्ड से मिलाता है। मेल न मिलने पर ऐप इलाज का अनुमान लगाने की बजाय अपने सामान्य सुरक्षा कदम दिखाता है। यह बीमारी की पहचान नहीं है। आपातकाल में 112 पर कॉल करें।',
+    geminiInput: 'क्या हुआ है या किस बात में मदद चाहिए?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
+    geminiRun: 'सुरक्षित मदद देखें', geminiWorking: 'आपका सवाल समझ रहे हैं…',
     geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
     demoBanner: 'डेमो मोड: अलर्ट केवल इस ऐप में दिखते हैं; किसी संपर्क को संदेश नहीं जाता।',
     offlineBanner: 'इंटरनेट नहीं है: सेव किए प्राथमिक उपचार कार्ड और पास की सूची दिख सकती है। नए नक्शे और संपर्क अलर्ट के लिए इंटरनेट चाहिए; 112 पर सीधे कॉल करें।',
     demoAlertSaved: 'केवल डेमो: नकली अलर्ट इस ऐप में सहेजा गया; किसी संपर्क को सूचना नहीं गई।',
-    geminiMatch: 'Gemini ने “{title}” कार्ड चुना है। यह बीमारी की पहचान नहीं है। कार्ड पढ़ें और 112 पर कॉल करें।',
-    geminiUnsure: 'कोई साफ़ मेल नहीं मिला। नीचे कार्ड चुनें या 112 पर कॉल करें।',
+    geminiMatch: 'Gemini को मिलता-जुलता कार्ड मिला: “{title}”। नीचे दिए कदम पढ़ें। यह बीमारी की पहचान नहीं है; आपातकाल में 112 पर कॉल करें।',
+    geminiUnsure: 'आपके सवाल से कोई कार्ड सुरक्षित रूप से मेल नहीं खाता। नीचे सामान्य सुरक्षा कदम दिए हैं।',
+    geminiFallbackTitle: 'कार्ड से मेल न मिलने पर सामान्य सुरक्षा कदम:',
+    geminiFallback1: 'खुद को और दूसरों को तत्काल खतरे से दूर रखें। असुरक्षित जगह में न जाएँ।',
+    geminiFallback2: 'आपातकाल में भारत में 112 पर कॉल करें। ऑपरेटर को अपनी जगह और जो दिख रहा है, बताएं।',
+    geminiFallback3: 'ऑपरेटर के निर्देश मानें। सुरक्षित हो तो किसी पास के व्यक्ति से बचाव दल को रास्ता दिखाने को कहें।',
+    geminiFallback4: 'घायल व्यक्ति को तभी हिलाएँ जब वह तत्काल खतरे में हो। आपातकालीन सेवा के कहने या प्रशिक्षित होने पर ही दवा दें या कोई प्रक्रिया करें।',
     geminiNotConfigured: 'Gemini चालू नहीं है। नीचे कार्ड चुनें; बिना Gemini key के भी ऐप काम करता है।',
     geminiKeyInvalid: 'Gemini API key स्वीकार नहीं हुई। सर्वर की सेटिंग जांचें।',
     geminiModelUnavailable: 'Gemini मॉडल उपलब्ध नहीं है। सर्वर में GEMINI_MODEL जांचें और ऐप फिर शुरू करें।',
@@ -748,11 +758,14 @@ $('#geminiDescription').addEventListener('input', () => {
   const status = $('#geminiResult');
   status.hidden = true;
   status.textContent = '';
+  $('#geminiSafetyFallback').hidden = true;
 });
 $('#geminiRun').onclick = async () => {
   const description = $('#geminiDescription').value.trim();
   const status = $('#geminiResult');
   const button = $('#geminiRun');
+  const fallback = $('#geminiSafetyFallback');
+  fallback.hidden = true;
   status.hidden = false;
   if (description.length < 3) {
     status.textContent = t('geminiShortInput');
@@ -767,6 +780,7 @@ $('#geminiRun').onclick = async () => {
     const match = cards.find(card => card.id === result.card_id);
     if (!match || result.card_id === 'unsure') {
       status.textContent = t('geminiUnsure');
+      fallback.hidden = false;
       return;
     }
     status.textContent = t('geminiMatch', {title: match.title[lang]});
@@ -782,6 +796,7 @@ $('#geminiRun').onclick = async () => {
       : /cannot connect to google/.test(message) ? t('geminiConnectionError')
       : /provider returned http/.test(message) ? t('geminiProviderError')
       : t('geminiUnavailable');
+    fallback.hidden = false;
   } finally {
     button.disabled = false;
     $('#geminiDescription').disabled = false;
