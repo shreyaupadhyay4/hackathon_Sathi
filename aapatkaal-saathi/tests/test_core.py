@@ -764,13 +764,20 @@ def test_gemini_parser_accepts_only_known_cards_and_low_confidence_is_unsure():
     }
     assert _parse_response(payload("chest", 0.4))["card_id"] == "unsure"
     assert _parse_response(payload("unsure", 0.99))["card_id"] == "unsure"
+    hand = _parse_response(payload(
+        "unsure", 0.2,
+        "For hand pain after lifting, rest it and avoid heavy lifting; seek care if severe or worsening.",
+    ))
+    assert hand["card_id"] == "unsure" and "hand pain" in hand["answer"]
     assert "chest" in CARD_IDS
     with pytest.raises(GeminiError):
         _parse_response(payload("invented-card", 0.99))
     with pytest.raises(GeminiError):
         _parse_response(payload("chest", True))
-    with pytest.raises(GeminiError, match="usable answer"):
+    with pytest.raises(GeminiError, match="safety checks"):
         _parse_response(payload("unsure", 0.9, "x" * 601))
+    with pytest.raises(GeminiError, match="safety checks"):
+        _parse_response(payload("unsure", 0.2, "Take 200 mg of ibuprofen."))
     with pytest.raises(GeminiError):
         _parse_response({"candidates": [{"finishReason": "MAX_TOKENS", "content": {"parts": []}}]})
     with pytest.raises(GeminiError):

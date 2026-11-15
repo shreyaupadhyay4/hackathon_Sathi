@@ -21,7 +21,7 @@ Aapatkaal Saathi is a one-screen emergency helper for the first minutes of an in
 - The walk timer runs on the server while the server and its persistent SQLite storage are available. A one-time T-60 beep/vibration is best-effort browser behavior. Users can send a quiet contact alert; the screen visibly changes, so it is not covert. Alerts include the last map/track links and, when supported, the last reported battery percentage. A hosting platform that deletes the database can lose walks.
 - Browser GPS generally requires HTTPS. Offline use covers the app shell, first-aid cards, and the last saved nearby list; live maps and alerts need connectivity.
 - First-aid text is general information, not a diagnosis or medical advice. It needs review against current Indian Red Cross, WHO, and MoHFW/NDMA material before public deployment.
-- Gemini is optional and may time out or return an incomplete answer. The user question and app card content for the selected language go to Google; do not enter identifying details. Answers are not clinically validated. Gemini is instructed to use card steps when a card matches and otherwise provide limited general safety guidance; on failure, built-in safety steps and the 112 action remain available.
+- Gemini is optional and may time out or return an incomplete answer. The user question and app card content for the selected language go to Google; do not enter identifying details. Answers are not clinically validated. Gemini is instructed to use card steps when a card matches and otherwise provide limited general safety guidance. On failure, the app reports the error instead of showing a canned answer; manual cards and the 112 action remain available.
 
 ## Likely judge questions
 

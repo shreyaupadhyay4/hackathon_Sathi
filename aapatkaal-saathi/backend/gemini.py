@@ -1,6 +1,7 @@
 """Closed-set Gemini routing to the app's reviewed first-aid cards."""
 import json
 from pathlib import Path
+import re
 
 import httpx
 
@@ -36,6 +37,11 @@ MIN_CONFIDENCE = 0.7
 MAX_DESCRIPTION_CHARS = 500
 MAX_ANSWER_CHARS = 600
 TIMEOUT_SECONDS = 15
+UNSAFE_UNCOVERED_ANSWER = re.compile(
+    r"\b(?:mg|mcg|ml|millilit(?:er|re)s?|dose|dosage|medicine|medication|tablet|capsule|pill|"
+    r"aspirin|ibuprofen|paracetamol|acetaminophen|antibiotic|cpr|heimlich|tourniquet|splint)\b",
+    re.IGNORECASE,
+)
 
 
 class GeminiError(Exception):
@@ -149,8 +155,9 @@ def _parse_response(payload: dict) -> dict:
         or not isinstance(answer, str)
         or not answer.strip()
         or len(answer.strip()) > MAX_ANSWER_CHARS
+        or (card_id == "unsure" and UNSAFE_UNCOVERED_ANSWER.search(answer))
     ):
-        raise GeminiError("Gemini did not return a usable answer.")
+        raise GeminiError("Gemini answer was incomplete or could not pass safety checks.")
 
     if card_id == "unsure" or confidence < MIN_CONFIDENCE:
         card_id = "unsure"

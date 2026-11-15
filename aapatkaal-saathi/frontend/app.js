@@ -56,11 +56,6 @@ const TXT = {
     geminiAnswerTitleCard: 'Gemini answer based on this app card',
     geminiAnswerTitleGeneral: 'Gemini general answer (not covered by an app card)',
     geminiAnswerDisclaimer: 'AI guidance can be wrong. Follow emergency operator instructions; call 112 if anyone is in immediate danger.',
-    geminiFallbackTitle: 'General safety steps when no card fits:',
-    geminiFallback1: 'Keep yourself and others away from immediate danger. Do not enter an unsafe area.',
-    geminiFallback2: 'In India, call 112 for an emergency. Tell the operator your location and what you can observe.',
-    geminiFallback3: 'Follow the operator’s instructions. If safe, ask someone nearby to meet responders.',
-    geminiFallback4: 'Avoid moving an injured person unless they face immediate danger. Do not give medicine or attempt procedures unless directed by emergency services or you are trained.',
     geminiNotConfigured: 'Gemini is not configured. Choose a card below; the app works without a Gemini key.',
     geminiKeyInvalid: 'Gemini API key was rejected. Check the server configuration.',
     geminiModelUnavailable: 'Gemini model is unavailable. Check GEMINI_MODEL on the server and restart the app.',
@@ -215,11 +210,6 @@ const TXT = {
     geminiAnswerTitleCard: 'ऐप कार्ड पर आधारित Gemini का जवाब',
     geminiAnswerTitleGeneral: 'Gemini का सामान्य जवाब (ऐप कार्ड में नहीं)',
     geminiAnswerDisclaimer: 'AI की सलाह गलत हो सकती है। आपातकालीन ऑपरेटर के निर्देश मानें; किसी को तत्काल खतरा हो तो 112 पर कॉल करें।',
-    geminiFallbackTitle: 'कार्ड से मेल न मिलने पर सामान्य सुरक्षा कदम:',
-    geminiFallback1: 'खुद को और दूसरों को तत्काल खतरे से दूर रखें। असुरक्षित जगह में न जाएँ।',
-    geminiFallback2: 'आपातकाल में भारत में 112 पर कॉल करें। ऑपरेटर को अपनी जगह और जो दिख रहा है, बताएं।',
-    geminiFallback3: 'ऑपरेटर के निर्देश मानें। सुरक्षित हो तो किसी पास के व्यक्ति से बचाव दल को रास्ता दिखाने को कहें।',
-    geminiFallback4: 'घायल व्यक्ति को तभी हिलाएँ जब वह तत्काल खतरे में हो। आपातकालीन सेवा के कहने या प्रशिक्षित होने पर ही दवा दें या कोई प्रक्रिया करें।',
     geminiNotConfigured: 'Gemini चालू नहीं है। नीचे कार्ड चुनें; बिना Gemini key के भी ऐप काम करता है।',
     geminiKeyInvalid: 'Gemini API key स्वीकार नहीं हुई। सर्वर की सेटिंग जांचें।',
     geminiModelUnavailable: 'Gemini मॉडल उपलब्ध नहीं है। सर्वर में GEMINI_MODEL जांचें और ऐप फिर शुरू करें।',
@@ -766,15 +756,12 @@ $('#geminiDescription').addEventListener('input', () => {
   status.textContent = '';
   $('#geminiAnswer').hidden = true;
   $('#geminiAnswerText').textContent = '';
-  $('#geminiSafetyFallback').hidden = true;
 });
 $('#geminiRun').onclick = async () => {
   const description = $('#geminiDescription').value.trim();
   const status = $('#geminiResult');
   const button = $('#geminiRun');
-  const fallback = $('#geminiSafetyFallback');
   const answerBox = $('#geminiAnswer');
-  fallback.hidden = true;
   answerBox.hidden = true;
   status.hidden = false;
   if (description.length < 3) {
@@ -810,7 +797,6 @@ $('#geminiRun').onclick = async () => {
       : /provider returned http/.test(message) ? t('geminiProviderError')
       : t('geminiUnavailable');
     answerBox.hidden = true;
-    fallback.hidden = false;
   } finally {
     button.disabled = false;
     $('#geminiDescription').disabled = false;
