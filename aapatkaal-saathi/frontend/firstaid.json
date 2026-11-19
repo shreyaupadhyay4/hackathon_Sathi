@@ -3,7 +3,7 @@
   "review_note": "Draft written from standard first-aid principles. Verify against Indian Red Cross, WHO and MoHFW/NDMA guidance before public use. No medicine doses are given on purpose.",
   "cards": [
     {
-      "id": "accident", "icon": "🚗",
+      "id": "accident", "icon": "🚗", "tools": {"bystanderHelper": true},
       "title": {"en": "Road accident", "hi": "सड़क दुर्घटना"},
       "steps": {
         "en": [
@@ -55,7 +55,7 @@
       }
     },
     {
-      "id": "cpr", "icon": "🫀",
+      "id": "cpr", "icon": "🫀", "tools": {"cprPacer": true},
       "title": {"en": "Not breathing / CPR", "hi": "साँस नहीं / CPR"},
       "steps": {
         "en": [

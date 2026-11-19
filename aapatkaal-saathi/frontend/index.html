@@ -19,8 +19,9 @@
   <a id="call108" class="call108" href="tel:108" aria-label="Call ambulance number 108; availability varies by state"><span aria-hidden="true">🚑</span> 108</a>
 </header>
 
-<div id="demoBanner" class="demo-banner" role="status" hidden></div>
+<div id="demoBanner" class="demo-banner" role="region" aria-label="Demo mode" hidden></div>
 <div id="offlineBanner" class="offline-banner" role="status" aria-live="polite" hidden></div>
+<div id="offlineReadyBadge" class="offline-ready" role="status" aria-live="polite"></div>
 
 <main>
   <section id="tab-help" class="tab" aria-label="Emergency help">
@@ -49,6 +50,21 @@
 
     <div id="sosPanel" class="box sospanel" role="region" hidden></div>
 
+    <section id="handoverCard" class="box handover" aria-labelledby="handoverTitle" hidden>
+      <div class="row handover-head">
+        <h2 id="handoverTitle" data-i="handoverTitle"></h2>
+        <button id="handoverClose" class="btn ghost" type="button" data-i="close"></button>
+      </div>
+      <p class="note" data-i="handoverPrivacy"></p>
+      <label for="handoverBlood" data-i="bloodGroup"></label>
+      <input id="handoverBlood" type="text" maxlength="24" autocomplete="off">
+      <label for="handoverAllergies" data-i="allergies"></label>
+      <input id="handoverAllergies" type="text" maxlength="120" autocomplete="off">
+      <pre id="handoverSummary" class="handover-summary"></pre>
+      <div id="handoverQr" class="handover-qr" role="img"></div>
+      <p id="handoverStatus" class="note" role="status" aria-live="polite"></p>
+    </section>
+
     <section id="homeNearby" class="box" aria-labelledby="homeNearbyTitle" hidden>
       <h2 id="homeNearbyTitle" data-i="homeNearbyTitle"></h2>
       <p id="homeNearbyStatus" class="note" role="status" aria-live="polite"></p>
@@ -73,6 +89,7 @@
       <ol id="stepsList"></ol>
       <h4 class="dont" data-i="dontsH"></h4>
       <ul id="dontsList" class="donts"></ul>
+      <section id="cardTools"></section>
       <section id="incidentShare" class="incident-share" aria-labelledby="incidentShareTitle" hidden>
         <h4 id="incidentShareTitle" data-i="incidentShareTitle"></h4>
         <p class="note" data-i="incidentShareExplain"></p>
@@ -240,6 +257,7 @@
   <button data-tab="walk"><span aria-hidden="true">🚶</span><b data-i="tabWalk"></b></button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/app.js?v=36-rounded-map-location"></script>
+<script src="/qr.js"></script>
+<script src="/app.js?v=37-panic-upgrades"></script>
 </body>
 </html>

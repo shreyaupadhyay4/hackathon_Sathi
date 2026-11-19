@@ -43,6 +43,36 @@ const TXT = {
     operatorRead: '🔊 Read this aloud', operatorCall: '📞 Call 112 now',
     operatorVoiceUnavailable: 'Speech playback is not available on this phone.',
     operatorNoHindiVoice: 'No Hindi voice found. Add Hindi text-to-speech in phone settings.',
+    panicTitle: 'Golden 10-minute emergency help',
+    panicCallScript: 'What to tell 112 · Hindi + English',
+    panicSms: 'No Internet? Send SMS Alert',
+    panicWhatsapp: 'Send WhatsApp Alert',
+    panicChooseIncident: 'Quick incident cards',
+    handoverButton: 'Show ER Handover Card',
+    handoverTitle: 'Emergency handover for hospital staff',
+    handoverPrivacy: 'Optional blood group and allergies stay on this device. Review this summary with hospital staff.',
+    bloodGroup: 'Blood group (optional)', allergies: 'Allergies (optional)', close: 'Close',
+    handoverIncident: 'Incident', handoverStarted: 'SOS started', handoverSymptoms: 'Symptoms / voice or text summary',
+    handoverMedicine: 'Medicine strip label (if read)', handoverNotRecorded: 'Not recorded',
+    handoverQrShort: 'Some long fields are shortened in the QR code; use the full summary above.',
+    helperToggle: 'Bystander Helper Mode', helperYou: 'You: Call 112 and read the location script.',
+    helperOne: 'Helper 1: Warn oncoming traffic 50 m back to prevent another crash.',
+    helperTwo: 'Helper 2: Keep the crowd back for airflow. Do NOT move the victim’s neck or spine.',
+    pacerStart: 'Start CPR Pacer (110 BPM)', pacerStop: 'Stop CPR Pacer',
+    pacerRunning: 'CPR beat running · {time} until compressor change',
+    pacerSwitch: '2 minutes: switch compressors now. Keep CPR going.',
+    pacerAudioUnavailable: 'Audio is unavailable; the timer is still running.',
+    pacerUnsupported: 'Audio pacing is not supported on this device.',
+    offlineReady: 'Offline ready · {cards} cards + last map cached',
+    offlineReadyNoMap: 'Offline ready · {cards} cards; map cache not available yet',
+    loadSampleIncident: 'Load Sample Incident · Panipat GPS',
+    facilityOpen: 'Confirm emergency open', facilityClosed: 'Confirm emergency closed',
+    facilityStatusOpen: 'open', facilityStatusClosed: 'closed',
+    facilityReported: 'Community reported emergency {status} · {age} ago. Listed on OpenStreetMap; call to confirm.',
+    facilitySaved: 'Community status updated. Listed on OpenStreetMap; call to confirm.',
+    facilityError: 'Could not save this community check. Try again when online.',
+    waTrackingFallback: 'Live tracking could not start; the message will use your map pin instead.',
+    qrUnavailable: 'QR generation is unavailable in this browser.',
     geminiTitle: 'Find a reviewed card with Gemini',
     geminiExplain: 'Describe the situation in Hindi or English by typing or using Gemini Live voice input. Say “call 112” or “call [saved WhatsApp contact name]” to open your phone dialer; your phone may ask you to tap Call. Say “alert my contacts” to request a contact alert; the app asks you to confirm first. Voice audio is sent through this app server to Google Gemini and is not stored by this app. A contact name spoken for a call is included in that audio; the saved phone number stays on this device. Avoid sharing other names, phone numbers, or exact addresses; GPS is not sent. Gemini tries to match an existing reviewed card. If no card fits, it may give brief general emergency guidance. It does not diagnose or recommend medicines, doses, or risky procedures. Check any guidance carefully and call 112 in an emergency.',
     geminiInput: 'What is happening?', geminiPlaceholder: 'For example: “My father has chest pain”',
@@ -101,6 +131,8 @@ const TXT = {
     waReady: 'WhatsApp opened for {name}. Review the message and tap Send.',
     waGeneric: 'Emergency',
     waMessage: 'I need help. Emergency: {event}. My location: {map}. Please call me. In India, call 112 for emergency help.',
+    waHospitalLine: 'Nearest listed hospital: {name}',
+    waOsmReminder: 'OpenStreetMap listing only; call to confirm.',
     emergencyPhoneShare: 'Share alert using phone apps',
     emergencyPhoneShareExplain: 'Choose SMS or another available app. Review the message and send it yourself; your location is included when available.',
     emergencyPhoneShareUnavailable: 'Phone sharing is unavailable here. Use WhatsApp below or call 112.',
@@ -212,6 +244,38 @@ const TXT = {
     operatorRead: '🔊 सुनकर बताएं', operatorCall: '📞 अभी 112 पर कॉल करें',
     operatorVoiceUnavailable: 'इस फ़ोन पर सुनाने की सुविधा उपलब्ध नहीं है।',
     operatorNoHindiVoice: 'हिंदी आवाज़ नहीं मिली। फ़ोन की सेटिंग में हिंदी आवाज़ जोड़ें।',
+    panicTitle: 'पहले 10 मिनट की आपातकालीन मदद',
+    panicCallScript: '112 पर क्या बताएं · हिंदी + अंग्रेज़ी',
+    panicSms: 'इंटरनेट नहीं? SMS अलर्ट भेजें',
+    panicWhatsapp: 'WhatsApp पर अलर्ट भेजें',
+    panicChooseIncident: 'तुरंत प्राथमिक उपचार कार्ड चुनें',
+    handoverButton: 'अस्पताल के लिए आपातकालीन सारांश',
+    handoverTitle: 'अस्पताल के लिए आपातकालीन जानकारी',
+    handoverPrivacy: 'वैकल्पिक रक्त समूह और एलर्जी इसी डिवाइस पर रहते हैं। अस्पताल स्टाफ़ के साथ सारांश जाँच लें।',
+    bloodGroup: 'रक्त समूह (वैकल्पिक)', allergies: 'एलर्जी (वैकल्पिक)', close: 'बंद करें',
+    handoverIncident: 'घटना', handoverStarted: 'SOS शुरू हुआ', handoverSymptoms: 'लक्षण / आवाज़ या लिखा सारांश',
+    handoverMedicine: 'दवा की स्ट्रिप पर लिखा नाम (यदि पढ़ा हो)', handoverNotRecorded: 'दर्ज नहीं',
+    handoverQrShort: 'QR कोड में कुछ लंबी जानकारी छोटी की गई है; पूरा सारांश ऊपर देखें।',
+    helperToggle: 'आसपास के लोगों को काम बाँटें',
+    helperYou: 'आप: 112 पर कॉल करें और लोकेशन वाली स्क्रिप्ट पढ़ें।',
+    helperOne: 'सहायक 1: दूसरी टक्कर रोकने के लिए 50 मीटर पीछे से आती गाड़ियों को चेतावनी दें।',
+    helperTwo: 'सहायक 2: हवा के लिए भीड़ को दूर रखें। घायल की गर्दन या रीढ़ को बिल्कुल न हिलाएं।',
+    pacerStart: 'CPR पेसर शुरू करें (110 BPM)', pacerStop: 'CPR पेसर रोकें',
+    pacerRunning: 'CPR की धुन चालू · सहायक बदलने में {time}',
+    pacerSwitch: '2 मिनट: अब CPR करने वाले को बदलें। CPR जारी रखें।',
+    pacerAudioUnavailable: 'आवाज़ उपलब्ध नहीं; टाइमर चलता रहेगा।',
+    pacerUnsupported: 'इस डिवाइस पर आवाज़ से पेसिंग उपलब्ध नहीं है।',
+    offlineReady: 'ऑफ़लाइन तैयार · {cards} कार्ड + आख़िरी नक्शा सेव',
+    offlineReadyNoMap: 'ऑफ़लाइन तैयार · {cards} कार्ड; नक्शा अभी सेव नहीं',
+    loadSampleIncident: 'नमूना घटना खोलें · पानीपत GPS',
+    facilityOpen: 'आपातकालीन सेवा खुली होने की पुष्टि',
+    facilityClosed: 'आपातकालीन सेवा बंद होने की पुष्टि',
+    facilityStatusOpen: 'खुला', facilityStatusClosed: 'बंद',
+    facilityReported: 'समुदाय ने आपातकालीन सेवा {status} · {age} पहले बताई। OpenStreetMap पर दर्ज; कॉल करके पुष्टि करें।',
+    facilitySaved: 'समुदाय की जानकारी अपडेट हुई। OpenStreetMap पर दर्ज; कॉल करके पुष्टि करें।',
+    facilityError: 'समुदाय की जानकारी सेव नहीं हुई। इंटरनेट पर फिर कोशिश करें।',
+    waTrackingFallback: 'लाइव ट्रैकिंग शुरू नहीं हुई; संदेश में नक्शे का पिन जाएगा।',
+    qrUnavailable: 'इस ब्राउज़र में QR बनाना उपलब्ध नहीं है।',
     geminiTitle: 'Gemini से जाँचा हुआ कार्ड खोजें',
     geminiExplain: 'टाइप करके या Gemini Live से बोलकर हिंदी या अंग्रेज़ी में बताएँ। “112 पर कॉल करें” या “[संपर्क का नाम] को कॉल करें” बोलने पर फ़ोन डायलर खुलेगा; कॉल करने के लिए फ़ोन पर Call दबाना पड़ सकता है। WhatsApp संपर्क का नाम और नंबर पहले “साथ चलें” टैब में सेव करें। “मेरे संपर्कों को अलर्ट करें” बोलने पर ऐप पहले पुष्टि पूछेगा। आवाज़ Google Gemini को भेजी जाती है और ऐप में सेव नहीं होती। कॉल के लिए बोला गया संपर्क नाम भी आवाज़ में शामिल होगा; सेव किया फ़ोन नंबर इसी फ़ोन में रहता है। इसके अलावा नाम, फ़ोन नंबर या पूरा पता न बोलें; GPS नहीं भेजा जाता। Gemini पहले मौजूदा जाँचे हुए कार्ड से मिलान करता है। कोई कार्ड न मिले तो यह सीमित सामान्य आपातकालीन जानकारी दे सकता है। यह बीमारी की पहचान, दवा/खुराक की सलाह या जोखिम भरे तरीके नहीं बताता। जानकारी ध्यान से देखें और आपातकाल में 112 पर कॉल करें।',
     geminiInput: 'क्या हो रहा है?', geminiPlaceholder: 'जैसे: “पापा के सीने में दर्द है”',
@@ -270,6 +334,8 @@ const TXT = {
     waReady: '{name} के लिए WhatsApp खुल गया है। संदेश जाँचकर भेजें दबाएं।',
     waGeneric: 'आपातकाल',
     waMessage: 'मुझे मदद चाहिए। आपातकाल: {event}। मेरी लोकेशन: {map}। कृपया मुझे कॉल करें। भारत में आपातकालीन मदद के लिए 112 पर कॉल करें।',
+    waHospitalLine: 'पास का दर्ज अस्पताल: {name}',
+    waOsmReminder: 'यह OpenStreetMap की सूची है; कॉल करके पुष्टि करें।',
     emergencyPhoneShare: 'फ़ोन के ऐप से मदद का संदेश भेजें',
     emergencyPhoneShareExplain: 'SMS या उपलब्ध कोई दूसरा ऐप चुनें। संदेश खुद जाँचकर भेजें; लोकेशन उपलब्ध होने पर शामिल होगी।',
     emergencyPhoneShareUnavailable: 'यहाँ फ़ोन से शेयर करना उपलब्ध नहीं है। नीचे WhatsApp चुनें या 112 पर कॉल करें।',
@@ -349,7 +415,8 @@ const TXT = {
   },
 };
 let lang = store.get('lang', 'hi');
-const t = (k, v = {}) => (TXT[lang][k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x]);
+const tx = (locale, k, v = {}) => (TXT[locale][k] ?? k).replace(/\{(\w+)\}/g, (_, x) => v[x]);
+const t = (k, v = {}) => tx(lang, k, v);
 
 /* ------------------------------------------------------------ state */
 let pos = store.get('lastpos', null);     // {lat, lon, acc}
@@ -384,8 +451,16 @@ let demoSessionPromise = null;
 let deviceToken = store.get('deviceToken', '');
 let deviceTokenPromise = null;
 let sosState = {locating: false, hospitalLoading: false, hospitalError: false, alertPending: false, alertSent: null};
+let sosStartedAt = store.get('sosStartedAt', '');
+let sampleLocationActive = false;
 let operator = {open: false, pos: null, address: '', lookup: 'idle'};
 let operatorRequestId = 0;
+let facilityChecks = store.get('facilityChecks', {});
+if (!facilityChecks || typeof facilityChecks !== 'object' || Array.isArray(facilityChecks)) facilityChecks = {};
+const facilityChecksLoaded = new Set();
+const facilityChecksPending = new Set();
+let helperModeOpen = false;
+let pacer = {running: false, beatTimer: null, cycleTimer: null, remaining: 120, audio: null};
 
 async function ensureDemoSession() {
   if (demoSession && Date.now() < demoSessionExpires - 60000) return demoSession;
@@ -498,13 +573,24 @@ function applyLang() {
   $('#waContactName').placeholder = t('waContactNamePH');
   $('#waContactPhone').placeholder = t('waContactPhonePH');
   $('#yourName').value = store.get('name', '');
-  renderDemoBanner(); renderOfflineBanner(); renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator();
+  $('#handoverBlood').value = store.get('bloodGroup', '');
+  $('#handoverAllergies').value = store.get('allergies', '');
+  renderDemoBanner(); renderOfflineBanner(); renderOfflineReady(); renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator(); renderHandover();
 }
 function renderDemoBanner() {
   const banner = $('#demoBanner');
   if (!banner) return;
   banner.hidden = !demoMode;
-  banner.textContent = demoMode ? t('demoBanner') : '';
+  banner.innerHTML = demoMode
+    ? `${esc(t('demoBanner'))}<button id="loadSampleIncident" class="btn ghost wide" type="button">${esc(t('loadSampleIncident'))}</button>`
+    : '';
+  $('#loadSampleIncident')?.addEventListener('click', loadSampleIncident);
+}
+function renderOfflineReady() {
+  const badge = $('#offlineReadyBadge');
+  if (!badge) return;
+  badge.textContent = nearData ? t('offlineReady', {cards: cards.length || 9})
+    : t('offlineReadyNoMap', {cards: cards.length || 9});
 }
 function renderOfflineBanner() {
   const banner = $('#offlineBanner');
@@ -516,14 +602,21 @@ function renderOfflineBanner() {
 window.addEventListener('online', renderOfflineBanner);
 window.addEventListener('offline', () => {
   renderOfflineBanner();
+  renderOfflineReady();
   nearError = true;
   homeNearbyError = true;
   renderHomeNearby();
   renderNear();
 });
+window.addEventListener('online', () => {
+  facilityChecksLoaded.clear();
+  renderOfflineReady();
+  if (nearData) ensureFacilityChecks(Object.values(nearData.data.results || {}).flat());
+});
 $('#langBtn').onclick = () => { lang = lang === 'hi' ? 'en' : 'hi'; store.set('lang', lang); stopSpeak(); applyLang(); };
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 function showTab(n) {
+  if (n !== 'help') stopPacer();
   document.querySelectorAll('.tab').forEach(s => s.hidden = s.id !== 'tab-' + n);
   document.querySelectorAll('.tabs button').forEach(b => {
     const active = b.dataset.tab === n;
@@ -577,10 +670,13 @@ function renderNearbyLocationStatus(message) {
 }
 
 function locate() {
+  const sampleActiveWhenRequested = sampleLocationActive;
   return new Promise((res, rej) => {
     if (!window.isSecureContext) return rej(new Error('insecure-context'));
     if (!navigator.geolocation) return rej(new Error('no-geo'));
     navigator.geolocation.getCurrentPosition(p => {
+      if (sampleLocationActive && !sampleActiveWhenRequested) return res(pos);
+      sampleLocationActive = false;
       pos = {lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy), updatedAt: Date.now()};
       store.set('lastpos', pos); $('#locLine').textContent = t('locOk', {m: pos.acc});
       locationRequestStatus = '';
@@ -593,6 +689,8 @@ function locate() {
 function startWatch() {
   if (watchId !== null || !navigator.geolocation) return;
   watchId = navigator.geolocation.watchPosition(p => {
+    if (sampleLocationActive) return;
+    sampleLocationActive = false;
     pos = {lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy), updatedAt: Date.now()};
     store.set('lastpos', pos); nearbyLocationRefreshFailed = false;
     if (!$('#tab-near').hidden) {
@@ -671,37 +769,53 @@ $('#skipLocation').onclick = () => {
   renderLocationIntro();
 };
 
-function renderOperator() {
-  $('#operatorCard').hidden = !operator.open;
-  if (!operator.open) return;
-  const lines = [t('operatorHello')];
+function operatorScriptText(locale) {
+  const text = (key, values) => tx(locale, key, values);
+  const lines = [text('operatorHello')];
   if (operator.pos) {
-    lines.push(t('operatorCoordinates', {
+    lines.push(text('operatorCoordinates', {
       lat: operator.pos.lat.toFixed(6), lon: operator.pos.lon.toFixed(6),
     }));
-    lines.push(operator.pos.manual ? t('operatorMapPin')
+    lines.push(operator.pos.manual ? text('operatorMapPin')
       : operator.pos.updatedAt && Date.now() - operator.pos.updatedAt < 120000
-        ? t('operatorGPS', {m: operator.pos.acc ?? '?'})
-        : t('operatorSavedGPS', {m: operator.pos.acc ?? '?'}));
+        ? text('operatorGPS', {m: operator.pos.acc ?? '?'})
+        : text('operatorSavedGPS', {m: operator.pos.acc ?? '?'}));
     if (operator.address) {
-      lines.push(t('operatorLandmark', {address: operator.address}));
+      lines.push(text('operatorLandmark', {address: operator.address}));
     } else if (operator.lookup === 'loading') {
-      lines.push(t('operatorLoading'));
+      lines.push(text('operatorLoading'));
     } else if (operator.lookup !== 'idle') {
-      lines.push(operator.lookup === 'offline' ? t('operatorOffline') : t('operatorUnavailable'));
+      lines.push(operator.lookup === 'offline' ? text('operatorOffline') : text('operatorUnavailable'));
     }
   } else {
-    lines.push(t('operatorSearch'));
+    lines.push(text('operatorSearch'));
   }
-  const count = $('#operatorPeople').value;
+  const count = $('#operatorPeople')?.value || '';
   const validCount = count !== '' && Number.isInteger(Number(count)) && Number(count) >= 0
-    ? count : t('operatorNotCounted');
-  const event = $('#operatorEvent').value.trim() || t('operatorNotSpecified');
-  lines.push(t('operatorPeopleLine', {people: validCount}));
-  lines.push(t('operatorEventLine', {event}));
-  lines.push(t('operatorClosing'));
-  $('#operatorScript').textContent = lines.join('\n\n');
+    ? count : text('operatorNotCounted');
+  const eventField = $('#operatorEvent')?.value.trim();
+  const event = eventField || curCard?.title[locale] || text('operatorNotSpecified');
+  lines.push(text('operatorPeopleLine', {people: validCount}));
+  lines.push(text('operatorEventLine', {event}));
+  lines.push(text('operatorClosing'));
+  return lines.join('\n\n');
+}
 
+function renderInlineCallScripts() {
+  const hindi = $('#sosScriptHi');
+  const english = $('#sosScriptEn');
+  if (hindi) hindi.textContent = operatorScriptText('hi');
+  if (english) english.textContent = operatorScriptText('en');
+}
+
+function renderOperator() {
+  $('#operatorCard').hidden = !operator.open;
+  if (!operator.open) {
+    renderInlineCallScripts();
+    return;
+  }
+  $('#operatorScript').textContent = operatorScriptText(lang);
+  renderInlineCallScripts();
   const status = operator.lookup === 'loading' ? t('operatorLoading')
     : operator.lookup === 'offline' ? t('operatorOffline')
       : operator.lookup === 'unavailable' ? t('operatorUnavailable')
@@ -786,6 +900,7 @@ $('#geminiDescription').addEventListener('input', () => {
   status.textContent = '';
   $('#geminiAnswer').hidden = true;
   $('#geminiAnswerText').textContent = '';
+  renderHandover();
 });
 let geminiVoiceRequest = false;
 // Use Gemini Live's input transcription instead of the browser's remote speech service.
@@ -917,7 +1032,7 @@ $('#placeGo').onclick = async () => {
     const r = await api('/api/geocode', {q});
     $('#placeRes').innerHTML = r.results.map((x, i) => `<button class="btn ghost wide" data-i2="${i}">${esc(x.name.slice(0, 90))}</button>`).join('') || '—';
     $('#placeRes').querySelectorAll('button').forEach(b => b.onclick = () => {
-      const x = r.results[+b.dataset.i2]; pos = {lat: x.lat, lon: x.lon, manual: true, updatedAt: Date.now()};
+      const x = r.results[+b.dataset.i2]; sampleLocationActive = false; pos = {lat: x.lat, lon: x.lon, manual: true, updatedAt: Date.now()};
       nearbyLocationChecked = true;
       locationRequestStatus = '';
       store.set('lastpos', pos); locationPrompted = true; store.set('locationPrompted', true);
@@ -981,6 +1096,7 @@ function saveNearby(data, fullNearby = false) {
   merged.fullNearbyFetched = fullNearby || (sameArea && previous.data.fullNearbyFetched === true);
   nearData = {at: ageAnchor, data: merged};
   store.set('nearby', nearData);
+  renderOfflineReady();
   renderHomeNearby();
 }
 function renderHomeNearby() {
@@ -994,6 +1110,7 @@ function renderHomeNearby() {
   const sameArea = nearData?.data?.center &&
     hav(pos.lat, pos.lon, nearData.data.center.lat, nearData.data.center.lon) < 500;
   const hospitals = sameArea ? placesFor('hospital') : [];
+  ensureFacilityChecks(hospitals);
   if (sameArea) homeNearbySearched = true;
   if (homeNearbyLoading && !hospitals.length) {
     status.textContent = t('homeNearbyLoading');
@@ -1107,6 +1224,7 @@ function placesFor(type) {
 function refreshNearbyDistances() {
   if (!nearData || $('#tab-near').hidden) return;
   const list = placesFor(nearType);
+  ensureFacilityChecks(list);
   const listEl = $('#nearList');
   listEl.innerHTML = list.length ? list.map(placeHTML).join('')
     : `<p class="note">${t(nearError ? 'nearErrorNoSavedType' : 'noResults')}</p>`;
@@ -1115,20 +1233,78 @@ function refreshNearbyDistances() {
 function placeHTML(p) {
   const name = p.name || t('unnamed');
   const type = nearType === 'essential' ? `<span class="badge">${t(p.type)}</span>` : '';
+  const facilityId = p.type === 'hospital' && /^([nwr]\d{1,24})$/.test(p.id || '') ? p.id : '';
+  const facilityActions = facilityId ? `<span class="facility-status" data-facility-label="${facilityId}">${facilityStatusText(facilityId)}</span>
+    <div class="acts"><button type="button" class="btn go" data-facility-id="${facilityId}" data-facility-status="open">${t('facilityOpen')}</button>
+    <button type="button" class="btn danger" data-facility-id="${facilityId}" data-facility-status="closed">${t('facilityClosed')}</button></div>` : '';
   return `<div class="place"><div class="nm">${esc(name)}${type}${p.emergency ? `<span class="badge">${t('emerg')}</span>` : ''}</div>
     <div class="meta"><span class="dist">${fmtDist(p.distance_m)}</span> ${t('away')}${p.address ? ' · ' + esc(p.address) : ''}${p.hours ? ' · ' + esc(p.hours) : ''}</div>
+    ${facilityActions}
     <div class="acts">${p.phone ? `<a class="btn call" href="tel:${esc(p.phone)}">${t('call')}</a>` : ''}
     <a class="btn dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}&travelmode=driving">${t('dir')}</a>
     ${p.type === 'hospital' ? `<button type="button" class="btn ghost" data-check-hospital="${esc(name)}">${t('hospitalCheck')}</button>` : ''}</div></div>`;
 }
 document.addEventListener('click', event => {
   const button = event.target.closest('[data-check-hospital]');
-  if (!button) return;
-  $('#hospitalName').value = button.dataset.checkHospital;
-  const details = $('#geminiTitle').closest('details'); details.open = true;
-  $('#hospitalCheck').scrollIntoView({behavior: 'smooth', block: 'center'});
-  $('#hospitalCheck').click();
+  if (button) {
+    $('#hospitalName').value = button.dataset.checkHospital;
+    const details = $('#geminiTitle').closest('details'); details.open = true;
+    $('#hospitalCheck').scrollIntoView({behavior: 'smooth', block: 'center'});
+    $('#hospitalCheck').click();
+    return;
+  }
+  const facilityButton = event.target.closest('[data-facility-status]');
+  if (facilityButton) submitFacilityCheck(facilityButton.dataset.facilityId, facilityButton.dataset.facilityStatus, facilityButton);
 });
+function facilityStatusText(id) {
+  const check = facilityChecks[id];
+  if (!check || Date.now() - check.checked_at * 1000 >= 24 * 60 * 60 * 1000) return '';
+  const hours = Math.max(0, Math.floor((Date.now() - check.checked_at * 1000) / 3600000));
+  const status = check.status === 'open' ? t('facilityStatusOpen') : t('facilityStatusClosed');
+  const age = hours < 1 ? (lang === 'hi' ? '1 घंटे से कम' : 'less than 1 hour')
+    : lang === 'hi' ? `${hours} घंटे` : `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  return t('facilityReported', {status, age});
+}
+async function ensureFacilityChecks(places) {
+  if (navigator.onLine === false) return;
+  const ids = [...new Set(places.map(place => place.id).filter(id => /^([nwr]\d{1,24})$/.test(id || '')))]
+    .filter(id => !facilityChecksLoaded.has(id) && !facilityChecksPending.has(id));
+  if (!ids.length) return;
+  ids.forEach(id => facilityChecksPending.add(id));
+  try {
+    const result = await api('/api/facility-checks/lookup', {osm_ids: ids});
+    for (const check of result.checks || []) {
+      if (check && ids.includes(check.osm_id) && ['open', 'closed'].includes(check.status)
+          && Number.isFinite(check.checked_at)) facilityChecks[check.osm_id] = check;
+    }
+    ids.forEach(id => facilityChecksLoaded.add(id));
+    store.set('facilityChecks', facilityChecks);
+    renderHomeNearby();
+    renderNear();
+    if (!$('#sosPanel').hidden) renderSosPanel();
+  } catch {
+    ids.forEach(id => facilityChecksLoaded.add(id));
+  } finally {
+    ids.forEach(id => facilityChecksPending.delete(id));
+  }
+}
+async function submitFacilityCheck(id, status, button) {
+  if (!/^([nwr]\d{1,24})$/.test(id || '') || !['open', 'closed'].includes(status)) return;
+  const place = button.closest('.place');
+  const statusEl = place?.querySelector(`[data-facility-label="${id}"]`);
+  button.disabled = true;
+  try {
+    const check = await api('/api/facility-checks', {osm_id: id, status});
+    facilityChecks[id] = check;
+    facilityChecksLoaded.add(id);
+    store.set('facilityChecks', facilityChecks);
+    if (statusEl) statusEl.textContent = facilityStatusText(id);
+    place?.querySelectorAll(`[data-facility-id="${id}"]`).forEach(control => { control.disabled = false; });
+  } catch {
+    button.disabled = false;
+    if (statusEl) statusEl.textContent = t('facilityError');
+  }
+}
 function renderNear() {
   $('#typeTabs').innerHTML = ['essential', 'hospital', 'pharmacy', 'clinic', 'police'].map(k =>
     `<button class="chip ${k === nearType ? 'on' : ''}" data-k="${k}" aria-pressed="${k === nearType}">${t(k === 'essential' ? 'nearEssentials' : k)}</button>`).join('');
@@ -1157,6 +1333,7 @@ function renderNear() {
     appendOsmMap(meta);
   }
   const list = placesFor(nearType);
+  ensureFacilityChecks(list);
   let emergencyNote = '';
   if (nearType === 'hospital' && curCard && ['chest', 'stroke', 'accident', 'snake', 'burn'].includes(curCard.id)) {
     emergencyNote = `<p class="note">${curCard.id === 'snake' ? t('snakebiteHospitalNote') : t('emergencyRankNote')}</p>`;
@@ -1340,7 +1517,7 @@ $('#nearRefresh').onclick = () => loadNearby(true);
 /* ------------------------------------------------------------ first aid cards + voice */
 async function loadCards() {
   try { cards = (await (await fetch('/firstaid.json')).json()).cards; } catch { cards = []; }
-  renderChips();
+  renderOfflineReady(); renderChips();
 }
 function renderChips() {
   $('#chips').innerHTML = cards.map(c =>
@@ -1348,17 +1525,175 @@ function renderChips() {
   $('#chips').querySelectorAll('button').forEach(b => b.onclick = () => openCard(b.dataset.id, true));
 }
 function openCard(id, scroll) {
+  if (id !== 'cpr') stopPacer();
+  helperModeOpen = false;
   curCard = cards.find(c => c.id === id) || null; stopSpeak(); renderChips(); renderCard();
   if (curCard && scroll) $('#card').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 function renderCard() {
   $('#card').hidden = !curCard;
   renderIncidentShare();
-  if (!curCard) return;
+  if (!curCard) { $('#cardTools').replaceChildren(); return; }
   $('#cardTitle').textContent = `${curCard.icon} ${curCard.title[lang]}`;
   $('#stepsList').innerHTML = curCard.steps[lang].map(s => `<li>${esc(s)}</li>`).join('');
   $('#dontsList').innerHTML = curCard.donts[lang].map(s => `<li>${esc(s)}</li>`).join('');
+  const tools = curCard.tools || {};
+  const toolMarkup = [];
+  if (tools.cprPacer) {
+    toolMarkup.push(`<section class="box"><button id="pacerToggle" class="btn go wide" type="button">${t(pacer.running ? 'pacerStop' : 'pacerStart')}</button>
+      <p id="pacerStatus" class="note" role="status" aria-live="polite"></p><p id="pacerAlert" class="note" role="status" aria-live="polite"></p></section>`);
+  }
+  if (tools.bystanderHelper) {
+    toolMarkup.push(`<section class="box"><button id="helperToggle" class="btn ghost wide" type="button" aria-expanded="${helperModeOpen}">${t('helperToggle')}</button>
+      <div id="helperCards" class="role-cards" ${helperModeOpen ? '' : 'hidden'}><div class="role-card">${t('helperYou')}</div>
+      <div class="role-card">${t('helperOne')}</div><div class="role-card">${t('helperTwo')}</div></div></section>`);
+  }
+  $('#cardTools').innerHTML = toolMarkup.join('');
+  updatePacerUI();
+  renderHandover();
+  $('#pacerToggle')?.addEventListener('click', togglePacer);
+  $('#helperToggle')?.addEventListener('click', () => {
+    helperModeOpen = !helperModeOpen;
+    const cardsEl = $('#helperCards');
+    cardsEl.hidden = !helperModeOpen;
+    $('#helperToggle').setAttribute('aria-expanded', String(helperModeOpen));
+  });
 }
+function truncateUtf8(value, maxBytes) {
+  const encoder = new TextEncoder();
+  let result = '', truncated = false;
+  for (const character of String(value || '')) {
+    if (encoder.encode(result + character).length > maxBytes) { truncated = true; break; }
+    result += character;
+  }
+  return {value: result, truncated};
+}
+function renderHandover() {
+  if ($('#handoverCard').hidden) return;
+  const incident = curCard?.title[lang] || t('waGeneric');
+  const symptoms = $('#geminiDescription').value.trim() || liveTranscript.trim();
+  const medicine = $('#medicineAnswerText').textContent.trim();
+  const started = sosStartedAt ? new Date(sosStartedAt).toLocaleString(lang === 'hi' ? 'hi-IN' : 'en-IN') : t('handoverNotRecorded');
+  const blood = $('#handoverBlood').value.trim();
+  const allergies = $('#handoverAllergies').value.trim();
+  const values = {
+    incident, started: sosStartedAt ? new Date(sosStartedAt).toISOString() : t('handoverNotRecorded'),
+    symptoms: symptoms || t('handoverNotRecorded'), medicine: medicine || t('handoverNotRecorded'),
+    blood: blood || t('handoverNotRecorded'), allergies: allergies || t('handoverNotRecorded'),
+  };
+  $('#handoverSummary').textContent = [
+    `${t('handoverIncident')}: ${incident}`,
+    `${t('handoverStarted')}: ${started}`,
+    `${t('handoverSymptoms')}: ${values.symptoms}`,
+    `${t('handoverMedicine')}: ${values.medicine}`,
+    `${t('bloodGroup')}: ${values.blood}`,
+    `${t('allergies')}: ${values.allergies}`,
+  ].join('\n\n');
+  const compact = [
+    ['Incident', truncateUtf8(values.incident, 24)],
+    ['SOS', truncateUtf8(values.started, 24)],
+    ['Symptoms', truncateUtf8(values.symptoms, 50)],
+    ['Medicine', truncateUtf8(values.medicine, 40)],
+    ['Blood', truncateUtf8(blood || '-', 10)],
+    ['Allergies', truncateUtf8(allergies || '-', 20)],
+  ];
+  const qrText = compact.map(([label, item]) => `${label}: ${item.value}`).join('\n');
+  const qr = $('#handoverQr');
+  const status = $('#handoverStatus');
+  if (window.QrGenerator) {
+    qr.innerHTML = window.QrGenerator.toSvg(qrText, t('handoverTitle'));
+    status.textContent = compact.some(([, item]) => item.truncated) ? t('handoverQrShort') : '';
+  } else {
+    qr.replaceChildren();
+    status.textContent = t('qrUnavailable');
+  }
+}
+$('#handoverBlood').addEventListener('input', event => {
+  store.set('bloodGroup', event.target.value);
+  renderHandover();
+});
+$('#handoverAllergies').addEventListener('input', event => {
+  store.set('allergies', event.target.value);
+  renderHandover();
+});
+$('#handoverClose').onclick = () => { $('#handoverCard').hidden = true; };
+function pacerTime(seconds) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+function updatePacerUI() {
+  const button = $('#pacerToggle');
+  const status = $('#pacerStatus');
+  if (button) button.textContent = t(pacer.running ? 'pacerStop' : 'pacerStart');
+  if (status) status.textContent = pacer.running
+    ? `${t('pacerRunning', {time: pacerTime(pacer.remaining)})}${pacer.audioError ? ` ${t('pacerAudioUnavailable')}` : ''}` : '';
+}
+function playPacerBeat() {
+  if (pacer.audio) {
+    try {
+      const oscillator = pacer.audio.createOscillator();
+      const gain = pacer.audio.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 880;
+      gain.gain.setValueAtTime(0.13, pacer.audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, pacer.audio.currentTime + 0.08);
+      oscillator.connect(gain); gain.connect(pacer.audio.destination);
+      oscillator.start(); oscillator.stop(pacer.audio.currentTime + 0.08);
+    } catch {
+      pacer.audioError = true;
+      pacer.audio = null;
+    }
+  }
+  try { navigator.vibrate?.(75); } catch {}
+}
+function stopPacer() {
+  clearInterval(pacer.beatTimer);
+  clearInterval(pacer.cycleTimer);
+  pacer.beatTimer = pacer.cycleTimer = null;
+  pacer.running = false;
+  try { navigator.vibrate?.(0); } catch {}
+  if (pacer.audio) {
+    const audio = pacer.audio;
+    pacer.audio = null;
+    audio.close().catch(() => {});
+  }
+  updatePacerUI();
+}
+async function togglePacer() {
+  if (pacer.running) { stopPacer(); return; }
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  pacer.audioError = !AudioContext;
+  if (AudioContext) {
+    try {
+      pacer.audio = new AudioContext();
+      await pacer.audio.resume();
+    } catch {
+      if (pacer.audio) pacer.audio.close().catch(() => {});
+      pacer.audio = null;
+      pacer.audioError = true;
+    }
+  }
+  pacer.running = true;
+  pacer.remaining = 120;
+  $('#pacerAlert').textContent = '';
+  playPacerBeat();
+  pacer.beatTimer = setInterval(playPacerBeat, 60000 / 110);
+  pacer.cycleTimer = setInterval(() => {
+    pacer.remaining--;
+    if (pacer.remaining <= 0) {
+      pacer.remaining = 120;
+      $('#pacerAlert').textContent = t('pacerSwitch');
+      if (window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(t('pacerSwitch'));
+        utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+        speechSynthesis.speak(utterance);
+      }
+      setTimeout(() => { if ($('#pacerAlert')) $('#pacerAlert').textContent = ''; }, 8000);
+    }
+    updatePacerUI();
+  }, 1000);
+  updatePacerUI();
+}
+window.addEventListener('pagehide', stopPacer);
 function whatsappContactButtons(attribute) {
   return waContacts.map((c, i) =>
     `<button class="btn wa wide" ${attribute}="${i}">${esc(t('waContactSend', {name: c.label}))}</button>`).join('');
@@ -1517,7 +1852,10 @@ $('#liveStart').onclick = async () => {
           return;
         }
         const transcript = content.inputTranscription?.text || content.outputTranscription?.text;
-        if (transcript) $('#liveStatus').textContent = transcript.slice(-250);
+        if (transcript) {
+          $('#liveStatus').textContent = transcript.slice(-250);
+          renderHandover();
+        }
         for (const part of content.modelTurn?.parts || []) if (part.inlineData?.data) {
           const raw = atob(part.inlineData.data), pcm = new Int16Array(raw.length / 2);
           for (let i = 0; i < pcm.length; i++) pcm[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
@@ -1592,7 +1930,7 @@ $('#medicineRead').onclick = async () => {
     const data = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(photo); });
     const result = await api('/api/gemini/medicine', {image_base64: data, mime_type: 'image/jpeg', language: lang});
     $('#medicineAnswerText').textContent = `${result.answer}\n\n${t('medicineSafety')}`;
-    $('#medicineAnswer').hidden = false; status.textContent = ''; speak([result.answer, t('medicineSafety')]);
+    $('#medicineAnswer').hidden = false; status.textContent = ''; renderHandover(); speak([result.answer, t('medicineSafety')]);
   } catch (e) { status.textContent = e.message === 'too-large' ? t('medicineCompressError') : e.message === 'canvas' || e.message === 'encode' ? t('medicinePhotoError') : e.message; $('#medicineAnswer').hidden = true; }
   finally { $('#medicineRead').disabled = false; }
 };
@@ -1657,7 +1995,8 @@ async function shareEmergencyWithContact(index, button) {
   }
   try {
     const positionAge = pos?.updatedAt ? Date.now() - pos.updatedAt : Infinity;
-    const current = positionAge >= 0 && positionAge <= 60000 ? pos : await ensureLocation();
+    const current = sampleLocationActive || pos?.manual || (positionAge >= 0 && positionAge <= 60000)
+      ? pos : await ensureLocation();
     if (!current) {
       popup?.close();
       for (const id of ['incidentShareStatus', 'sosWAStatus']) {
@@ -1668,13 +2007,27 @@ async function shareEmergencyWithContact(index, button) {
     }
     const map = `https://www.google.com/maps?q=${current.lat},${current.lon}`;
     const event = curCard?.title[lang] || t('waGeneric');
-    const message = t('waMessage', {event, map});
+    let liveLink = share?.url || '';
+    let trackingFailed = false;
+    if (!liveLink) {
+      try {
+        await startShare();
+        liveLink = share?.url || '';
+      } catch {
+        trackingFailed = true;
+      }
+    }
+    const hospital = placesFor('hospital')[0];
+    const hospitalLine = hospital
+      ? `${hospital.name || t('unnamed')} · ${hospital.lat},${hospital.lon}`
+      : (lang === 'hi' ? 'पास का दर्ज अस्पताल उपलब्ध नहीं' : 'Nearest listed hospital unavailable');
+    const message = `${t('waMessage', {event, map: liveLink || map})}\n${t('waHospitalLine', {name: hospitalLine})}\n${t('waOsmReminder')}`;
     const url = `https://wa.me/${contact.phone}?text=${encodeURIComponent(message)}`;
     if (popup) popup.location.href = url;
     else window.location.href = url;
     for (const id of ['incidentShareStatus', 'sosWAStatus']) {
       const status = document.getElementById(id);
-      if (status) status.textContent = t('waReady', {name: contact.label});
+      if (status) status.textContent = `${t('waReady', {name: contact.label})}${trackingFailed ? ` ${t('waTrackingFallback')}` : ''}`;
     }
   } finally {
     if (button) button.disabled = false;
@@ -1695,7 +2048,16 @@ function renderSosPanel() {
   const panel = $('#sosPanel');
   panel.hidden = false;
   const best = placesFor('hospital')[0];
-  let html = `<h3>${t('nearest')}</h3>`;
+  ensureFacilityChecks(best ? [best] : []);
+  const quickCards = cards.map(card =>
+    `<button class="chip" type="button" data-sos-card="${esc(card.id)}"><i aria-hidden="true">${esc(card.icon)}</i>${esc(card.title[lang])}</button>`).join('');
+  const smsBody = `SOS ${curCard?.id || 'emergency'} ${pos ? `${pos.lat},${pos.lon}` : 'no-gps'} battery ${batteryPercent() ?? '?'}%`.slice(0, 160);
+  let html = `<h2>${t('panicTitle')}</h2>
+    <a class="btn danger wide panic-call" href="tel:112" aria-label="${t('call112Label')}"><span aria-hidden="true">📞</span> 112</a>
+    <h3>${t('panicCallScript')}</h3>
+    <strong>हिंदी</strong><div id="sosScriptHi" class="sos-script"></div>
+    <strong>English</strong><div id="sosScriptEn" class="sos-script"></div>
+    <h3>${t('nearest')}</h3>`;
   if (sosState.locating) {
     html += `<p class="note">${t('locating')}</p>`;
   } else if (sosState.hospitalLoading) {
@@ -1712,22 +2074,37 @@ function renderSosPanel() {
   } else {
     html += `<p class="note">${sosState.hospitalError ? t('hospitalUnavailable') : t('noResults')}</p>`;
   }
-  html += `<a class="btn danger wide" href="tel:112" aria-label="${t('call112Label')}"><span aria-hidden="true">📞</span> 112</a>`;
+  html += `<section class="panic-actions"><h3>${t('panicChooseIncident')}</h3><div class="chips sos-quick-chips">${quickCards}</div></section>`;
+  html += `<button id="showHandoverBtn" class="btn ghost wide" type="button">${t('handoverButton')}</button>`;
   html += `<p class="note">${t('emergencyPhoneShareExplain')}</p><button id="sosPhoneShare" class="btn ghost wide">${t('emergencyPhoneShare')}</button><p id="sosPhoneShareStatus" class="note" role="status" aria-live="polite" hidden></p>`;
   if (waContacts.length) {
-    html += `<p class="note">${t('incidentShareExplain')}</p>${whatsappContactButtons('data-sos-wa')}<p id="sosWAStatus" class="note" role="status" aria-live="polite" hidden></p>`;
+    html += `<button id="sosPrimaryWA" class="btn wa wide" type="button">${t('panicWhatsapp')}: ${esc(waContacts[0].label)}</button><p id="sosWAStatus" class="note" role="status" aria-live="polite" hidden></p>`;
   } else {
-    html += `<button id="sosWA" class="btn wa wide">${t('sendWA')}</button>`;
+    html += `<button id="sosAddWA" class="btn wa wide" type="button">${t('waAddContact')}</button>`;
   }
+  html += `<a class="btn ghost wide" href="sms:?body=${encodeURIComponent(smsBody)}">${t('panicSms')}</a>`;
   const alertText = sosState.alertPending ? t('sendingAlert')
     : sosState.alertSent === null ? t('noContacts')
       : sosState.alertSent > 0 ? demoMode ? t('demoAlertSaved') : t('alertedN', {n: sosState.alertSent})
         : t('alertFail');
   html += `<p class="note" role="status" aria-live="polite">${alertText}</p>`;
   panel.innerHTML = html;
+  renderInlineCallScripts();
+  panel.querySelectorAll('[data-sos-card]').forEach(button => {
+    button.onclick = () => openCard(button.dataset.sosCard, true);
+  });
   $('#sosPhoneShare')?.addEventListener('click', shareEmergencyFromPhone);
-  $('#sosWA')?.addEventListener('click', () => openWA(shareText()));
-  bindWhatsAppButtons(panel, 'data-sos-wa');
+  $('#sosPrimaryWA')?.addEventListener('click', button => shareEmergencyWithContact(0, button.currentTarget));
+  $('#sosAddWA')?.addEventListener('click', () => {
+    showTab('walk');
+    $('#whatsappContactsBox').scrollIntoView({behavior: 'smooth', block: 'start'});
+    $('#waContactName').focus();
+  });
+  $('#showHandoverBtn').onclick = () => {
+    $('#handoverCard').hidden = false;
+    renderHandover();
+    $('#handoverCard').scrollIntoView({behavior: 'smooth', block: 'start'});
+  };
 }
 async function shareEmergencyFromPhone() {
   const status = $('#sosPhoneShareStatus');
@@ -1750,11 +2127,14 @@ async function shareEmergencyFromPhone() {
     }
   }
 }
-$('#sos').onclick = async () => {
+async function triggerSOS(fromSample = false) {
+  sosStartedAt = new Date().toISOString();
+  store.set('sosStartedAt', sosStartedAt);
+  renderHandover();
   sosState = {locating: true, hospitalLoading: false, hospitalError: false, alertPending: false, alertSent: null};
   renderSosPanel();
   $('#sosPanel').scrollIntoView({behavior: 'smooth'});
-  const hasLocation = !!(await ensureLocation());
+  const hasLocation = fromSample ? !!pos : !!(await ensureLocation());
   const codes = joinedCodes();
   if (!hasLocation && !codes.length) {
     sosState.locating = false;
@@ -1763,6 +2143,12 @@ $('#sos').onclick = async () => {
     return;
   }
 
+  operator.pos = pos ? {...pos} : null;
+  operator.address = '';
+  operator.lookup = operator.pos ? (navigator.onLine === false ? 'offline' : 'loading') : 'unavailable';
+  renderOperator();
+  renderInlineCallScripts();
+  if (operator.pos && navigator.onLine !== false) lookupOperatorAddress();
   sosState.locating = false;
   sosState.hospitalLoading = true;
   sosState.alertPending = codes.length > 0;
@@ -1785,7 +2171,42 @@ $('#sos').onclick = async () => {
       .catch(() => { sosState.alertSent = 0; })
       .finally(() => { sosState.alertPending = false; renderSosPanel(); });
   }
-};
+}
+$('#sos').onclick = () => triggerSOS();
+
+async function loadSampleIncident() {
+  if (!demoMode) return;
+  const button = $('#loadSampleIncident');
+  if (button) button.disabled = true;
+  try {
+    sampleLocationActive = true;
+    pos = {lat: 29.3909, lon: 76.9635, acc: 100, manual: true, updatedAt: Date.now()};
+    store.set('lastpos', pos);
+    locationPrompted = true;
+    store.set('locationPrompted', true);
+    nearbyLocationChecked = true;
+    nearbyLocationRefreshFailed = false;
+    locationRequestStatus = '';
+    homeNearbySearched = false;
+    $('#locLine').textContent = `${pos.lat}, ${pos.lon} · Panipat sample`;
+    openCard('accident', false);
+    renderLocationIntro();
+    renderNearbyLocationStatus();
+    renderHomeNearby();
+    operator.pos = {...pos};
+    operator.address = '';
+    operator.lookup = navigator.onLine === false ? 'offline' : 'loading';
+    renderOperator();
+    await triggerSOS(true);
+    loadHomeNearby(true);
+    walkMin = 1;
+    store.set('walkMin', walkMin);
+    renderMinChips();
+    await startWalk(true);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
 
 /* ------------------------------------------------------------ safety contacts */
 function normalizeWhatsAppPhone(value) {
@@ -1939,17 +2360,19 @@ function renderMinChips() {
     `<button class="chip ${m === walkMin ? 'on' : ''}" data-m="${m}" aria-pressed="${m === walkMin}">${m === 1 ? t('demo1') : m + ' ' + t('min')}</button>`).join('');
   $('#minChips').querySelectorAll('button').forEach(b => b.onclick = () => { walkMin = +b.dataset.m; store.set('walkMin', walkMin); renderMinChips(); });
 }
-$('#walkStart').onclick = async () => {
+async function startWalk(fromSample = false) {
+  if (fromSample && !demoMode) return;
   unlockWalkReminderAudio();
   if (!pos) await ensureLocation(); if (!pos) return alert(t('needLoc'));
-  if (!joinedCodes().length && !confirm(t('noJoined'))) return;
+  if (!joinedCodes().length && !fromSample && !confirm(t('noJoined'))) return;
   try {
     const w = await api('/api/walk', {minutes: walkMin, codes: joinedCodes(), lat: pos.lat, lon: pos.lon, name: myName(), battery: batteryPercent()});
     walkSt = {id: w.id, track: w.track, deadline: w.deadline * 1000, status: 'active', sent: 0, reminderDone: false};
     store.set('walk', walkSt); runWalk(); renderWalk();
     try { await navigator.wakeLock?.request('screen'); } catch {}
   } catch (e) { alert(e.message); }
-};
+}
+$('#walkStart').onclick = () => startWalk();
 function runWalk() {
   walkTimers.forEach(clearInterval); walkTimers = [];
   if (!walkSt || !['active', 'alerting'].includes(walkSt.status)) return;
@@ -2024,10 +2447,15 @@ $('#deleteData').onclick = async () => {
     if (watchId !== null) navigator.geolocation?.clearWatch(watchId);
     watchId = null;
     for (const key of ['contacts', 'waContacts', 'share', 'walk', 'name', 'lastpos', 'nearby',
-      'demoSession', 'demoSessionExpires', 'deviceToken', 'locationPrompted']) {
+      'demoSession', 'demoSessionExpires', 'deviceToken', 'locationPrompted',
+      'bloodGroup', 'allergies', 'sosStartedAt']) {
       try { localStorage.removeItem(key); } catch {}
     }
     contacts = []; waContacts = []; editingWaContact = null; share = null; walkSt = null; pos = null; nearData = null;
+    sosStartedAt = ''; sampleLocationActive = false;
+    $('#handoverBlood').value = ''; $('#handoverAllergies').value = '';
+    $('#handoverCard').hidden = true;
+    stopPacer();
     homeNearbyLoading = false; homeNearbyError = false; homeNearbySearched = false;
     demoSession = ''; demoSessionExpires = 0; deviceToken = '';
     demoSessionChecked = false; locationPrompted = false; locationRequestStatus = '';
@@ -2039,7 +2467,7 @@ $('#deleteData').onclick = async () => {
     $('#yourName').value = ''; $('#operatorPeople').value = ''; $('#operatorEvent').value = '';
     $('#locLine').textContent = '';
     $('#demoBox').hidden = true; $('#sosPanel').hidden = true;
-    renderContacts(); renderWhatsappContacts(); renderCard(); renderShare(); renderWalk(); renderLocationIntro(); renderHomeNearby(); renderOperator();
+    renderContacts(); renderWhatsappContacts(); renderCard(); renderShare(); renderWalk(); renderLocationIntro(); renderHomeNearby(); renderOfflineReady(); renderOperator();
     status.textContent = t('deleteSuccess');
   } catch {
     status.textContent = t('deleteFail');

@@ -8,11 +8,15 @@ Hindi + English. Real OpenStreetMap data. Core app works without API keys.
 | Feature | How it works |
 |---|---|
 | Big **SOS** button | Gets GPS, finds nearest hospitals, starts a live-location link, alerts your Telegram contacts, shows 112 |
+| **Golden 10-minute panic panel** | Keeps the 112 call script in Hindi and English, saved-contact WhatsApp draft, quick first-aid cards, SMS coordinates, nearby hospitals, and ER handover summary on the Help screen |
 | **Emergency calling** | 112 is always available as a direct call link. 108 is shown as an ambulance option where available; coverage varies by state |
 | **Gemini question answers** (optional) | Gives a short answer in Hindi or English. When a card matches, the answer is based on its steps and the card opens automatically; otherwise Gemini gives limited general safety guidance |
 | **What to tell 112** | Builds a Hindi or English call script from your coordinates, an approximate OSM place/road, and details you enter; nothing but coordinates for reverse lookup are sent to the server |
 | **Nearby map and services** | Google Maps coordinate pin recenters as GPS moves; OpenStreetMap also shows a live location marker and nearby facilities. Hospital and pharmacy lists show distance from your current location, with clinic/police filters and Call and Directions buttons |
 | **9 first-aid cards** (accident, chest pain, CPR, snakebite, burn, choking, bleeding, seizure, stroke) | Short steps plus a red **"Do NOT do this"** list, Hindi and English, read aloud by the phone's voice |
+| **CPR and bystander helpers** | CPR card has an offline 110 BPM audio/vibration pacer and two-minute compressor reminders; accident card assigns clear bystander roles |
+| **ER handover QR** | Creates an on-device QR triage summary with the incident, timestamp, symptom text, medicine label text, and optional locally saved blood group/allergies |
+| **Community hospital checks** | Users can report emergency open/closed status for an OSM listing; reports expire after 24 hours and do not replace calling the hospital |
 | **Emergency WhatsApp message** | After choosing a first-aid card, open WhatsApp with that incident and a map link for a locally saved contact. Review and tap Send; the phone number stays on the device and is not sent to Gemini |
 | **Live location on WhatsApp** | Creates a link to a page that updates every 10 seconds, with nearby hospital, clinic, pharmacy, and police markers on an OpenStreetMap map (no login for the receiver) |
 | **Walk with me** | Timer runs on the server. A one-time beep/vibration may remind you at one minute. Check in, extend, send a regular alert, or send a quiet contact alert. Alerts include map and live-track links; the latest battery percentage is included only when the browser provides it. |
@@ -55,6 +59,7 @@ This sends 43 requests and may consume account quota. Do not claim an accuracy p
 ## Telegram alerts
 
 * **No token = demo mode.** A persistent banner says alerts are simulated and no contacts are notified. Demo contacts count as joined; simulated messages appear in the Walk tab and are scoped to an unguessable browser session for up to 24 hours (server memory only).
+  The banner's Panipat sample preset loads a fixed demo pin, opens the accident guidance and SOS panel, searches nearby hospitals when online, and starts a one-minute demo Walk timer. It is hidden when real Telegram delivery is configured.
 * **Real alerts:** talk to [@BotFather](https://t.me/BotFather), `/newbot`, put the token in `.env` as `TELEGRAM_BOT_TOKEN`, restart.
   In the app: Walk tab > **+ Add contact** > send the invite link by WhatsApp. The contact opens it and presses **Start**. Invite links expire after 7 days and can only be used once.
   A Telegram bot can only message people who started it first. This is a Telegram rule, say so in the pitch.

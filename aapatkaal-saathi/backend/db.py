@@ -11,6 +11,7 @@ from .config import settings
 _lock = threading.Lock()
 _conn: sqlite3.Connection | None = None
 CONTACT_INVITE_TTL = 7 * 24 * 60 * 60
+FACILITY_CHECK_TTL = 24 * 60 * 60
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS contacts(
@@ -23,6 +24,9 @@ CREATE TABLE IF NOT EXISTS walks(
   id TEXT PRIMARY KEY, track TEXT, name TEXT, deadline REAL, status TEXT,
   codes TEXT, base TEXT, sent INTEGER DEFAULT 0, created REAL, demo_session TEXT,
   alert_reason TEXT, owner TEXT);
+CREATE TABLE IF NOT EXISTS facility_checks(
+  osm_id TEXT PRIMARY KEY, status TEXT NOT NULL CHECK(status IN ('open','closed')),
+  checked_at REAL NOT NULL);
 """
 
 
@@ -91,6 +95,37 @@ def new_id(n: int = 32) -> str:
 
 def owner_digest(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+# ---- community facility checks ----
+def set_facility_check(osm_id: str, status: str) -> dict:
+    checked_at = time.time()
+    run(
+        "INSERT INTO facility_checks(osm_id,status,checked_at) VALUES(?,?,?) "
+        "ON CONFLICT(osm_id) DO UPDATE SET status=excluded.status,checked_at=excluded.checked_at",
+        (osm_id, status, checked_at),
+    )
+    return {"osm_id": osm_id, "status": status, "checked_at": checked_at}
+
+
+def get_facility_checks(osm_ids: list[str]) -> list[dict]:
+    ids = list(dict.fromkeys(osm_ids))
+    if not ids:
+        return []
+    now = time.time()
+    placeholders = ",".join("?" for _ in ids)
+    with _lock:
+        c = conn()
+        c.execute("DELETE FROM facility_checks WHERE checked_at<=?", (now - FACILITY_CHECK_TTL,))
+        result = [
+            dict(row) for row in c.execute(
+                f"SELECT osm_id,status,checked_at FROM facility_checks "
+                f"WHERE osm_id IN ({placeholders}) AND checked_at>?",
+                (*ids, now - FACILITY_CHECK_TTL),
+            ).fetchall()
+        ]
+        c.commit()
+        return result
 
 
 # ---- contacts ----

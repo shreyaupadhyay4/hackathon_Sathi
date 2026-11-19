@@ -342,6 +342,28 @@ class NearbyRequest(ReverseLocation):
     types: str = Field("hospital,clinic,pharmacy,police", max_length=120)
 
 
+FacilityOsmId = Annotated[str, Field(min_length=2, max_length=32, pattern=r"^[nwr]\d+$")]
+
+
+class FacilityCheckRequest(BaseModel):
+    osm_id: FacilityOsmId
+    status: Literal["open", "closed"]
+
+
+class FacilityCheckLookup(BaseModel):
+    osm_ids: list[FacilityOsmId] = Field(max_length=100)
+
+
+@app.post("/api/facility-checks/lookup", dependencies=[Depends(limiter(60, 60))])
+async def facility_check_lookup(body: FacilityCheckLookup):
+    return {"checks": db.get_facility_checks(body.osm_ids)}
+
+
+@app.post("/api/facility-checks", dependencies=[Depends(limiter(30, 60))])
+async def facility_check_submit(body: FacilityCheckRequest):
+    return db.set_facility_check(body.osm_id, body.status)
+
+
 @app.post("/api/nearby", dependencies=[Depends(limiter(30, 60))])
 async def api_nearby(body: NearbyRequest):
     try:

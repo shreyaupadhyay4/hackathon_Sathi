@@ -19,4 +19,6 @@ health = get("/api/health").decode("utf-8").replace(" ", "")
 assert '"ok":true' in health
 cards = get("/firstaid.json").decode("utf-8")
 assert '"cards"' in cards and '"snake"' in cards
+qr = get("/qr.js").decode("utf-8")
+assert "QrGenerator" in qr
 print(f"Smoke check passed for {BASE}")

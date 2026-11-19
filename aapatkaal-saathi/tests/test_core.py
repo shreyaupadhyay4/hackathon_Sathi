@@ -961,6 +961,9 @@ def test_env_loader_reads_bom_file_and_fills_empty_process_value(monkeypatch, tm
 def test_first_aid_cards_complete_in_both_languages():
     data = json.loads((ROOT / "frontend" / "firstaid.json").read_text(encoding="utf-8"))
     assert len(data["cards"]) >= 8
+    by_id = {card["id"]: card for card in data["cards"]}
+    assert by_id["cpr"]["tools"]["cprPacer"] is True
+    assert by_id["accident"]["tools"]["bystanderHelper"] is True
     for c in data["cards"]:
         for k in ("steps", "donts"):
             assert len(c[k]["en"]) == len(c[k]["hi"]) > 0, c["id"]
@@ -969,6 +972,18 @@ def test_first_aid_cards_complete_in_both_languages():
         blob = json.dumps(c, ensure_ascii=False).lower()
         for bad in (" mg", "tablet", "ml "):
             assert bad not in blob, (c["id"], bad)
+
+
+def test_facility_checks_expire_after_24_hours(monkeypatch):
+    from backend import db
+
+    now = [1_800_000_000.0]
+    monkeypatch.setattr(db.time, "time", lambda: now[0])
+    saved = db.set_facility_check("n12345", "open")
+    assert saved["checked_at"] == now[0]
+    assert db.get_facility_checks(["n12345"]) == [saved]
+    now[0] += db.FACILITY_CHECK_TTL
+    assert db.get_facility_checks(["n12345"]) == []
 
 
 def test_api_flow_demo_mode(monkeypatch):
@@ -1002,6 +1017,12 @@ def test_api_flow_demo_mode(monkeypatch):
         reverse = c.post("/api/reverse", json={"lat": 26.45, "lon": 80.35})
         assert reverse.status_code == 200 and "26.45,80.35" in reverse.json()["address"]
         assert c.post("/api/reverse", json={"lat": 91, "lon": 0}).status_code == 422
+        check = c.post("/api/facility-checks", json={"osm_id": "n12345", "status": "open"})
+        assert check.status_code == 200 and check.json()["status"] == "open"
+        lookup = c.post("/api/facility-checks/lookup", json={"osm_ids": ["n12345", "w67890"]})
+        assert lookup.status_code == 200
+        assert lookup.json()["checks"][0]["osm_id"] == "n12345"
+        assert c.post("/api/facility-checks", json={"osm_id": "not-an-osm-id", "status": "open"}).status_code == 422
 
         async def failed_reverse(_lat, _lon):
             raise RuntimeError("provider unavailable")
