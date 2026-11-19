@@ -14,12 +14,14 @@
 <body>
 <header class="top">
   <div class="brand" data-i="appName">आपातकाल साथी</div>
-  <button id="langBtn" class="lang" aria-label="Change language">EN</button>
+  <button id="langEn" class="lang active" aria-label="English" data-lang="en">English</button>
+  <button id="langHi" class="lang" aria-label="हिन्दी" data-lang="hi">हिन्दी</button>
   <a id="call112" class="call112" href="tel:112" aria-label="Call emergency number 112"><span aria-hidden="true">📞</span> 112</a>
   <a id="call108" class="call108" href="tel:108" aria-label="Call ambulance number 108; availability varies by state"><span aria-hidden="true">🚑</span> 108</a>
 </header>
 
 <div id="demoBanner" class="demo-banner" role="region" aria-label="Demo mode" hidden></div>
+<div id="sampleModeBanner" class="demo-banner sample-banner" role="status" aria-live="polite" hidden></div>
 <div id="offlineBanner" class="offline-banner" role="status" aria-live="polite" hidden></div>
 <div id="offlineReadyBadge" class="offline-ready" role="status" aria-live="polite"></div>
 

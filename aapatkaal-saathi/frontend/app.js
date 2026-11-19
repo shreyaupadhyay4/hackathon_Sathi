@@ -93,6 +93,7 @@ const TXT = {
     medicinePrivacy: 'The photo is sent to Google Gemini to read the visible label.', hospitalNameLabel: 'Nearby hospital name', hospitalCheck: 'Check current opening information with Google Search', hospitalWorking: 'Checking current sources…', hospitalGrounded: 'Search-grounded result; hours may change. Call the hospital to confirm.', hospitalNoSources: 'Could not verify current opening information. Call the hospital to confirm.', hospitalPrivacy: 'A rounded, approximate location and hospital name are sent to Google Search grounding.',
     geminiShortInput: 'Add a few words about what happened, or choose a card below.',
     demoBanner: 'Demo mode: alerts are simulated here; no contacts are notified.',
+    clearSample: 'Clear sample · use real location',
     offlineBanner: 'Offline: saved first-aid cards and nearby listings remain available. Fresh maps and contact alerts need internet; call 112 directly.',
     demoAlertSaved: 'Demo only: simulated alert saved in this app. No contact was notified.',
     geminiMatch: 'Gemini found a matching card: “{title}”. Read its steps below. This is not a diagnosis; call 112 in an emergency.',
@@ -296,6 +297,7 @@ const TXT = {
     medicinePrivacy: 'फोटो पर लिखा टेक्स्ट पढ़ने के लिए Google Gemini को भेजी जाएगी।', hospitalNameLabel: 'पास के अस्पताल का नाम', hospitalCheck: 'Google Search से अभी के खुले होने की जानकारी देखें', hospitalWorking: 'नई जानकारी खोज रहे हैं…', hospitalGrounded: 'Search से मिली जानकारी; समय बदल सकता है। पुष्टि के लिए अस्पताल को कॉल करें।', hospitalNoSources: 'अभी खुले होने की पुष्टि नहीं हुई। अस्पताल को कॉल करके पूछें।', hospitalPrivacy: 'लगभग की लोकेशन और अस्पताल का नाम Google Search को भेजे जाते हैं।',
     geminiShortInput: 'क्या हुआ, इसके बारे में कुछ शब्द लिखें या नीचे से कार्ड चुनें।',
     demoBanner: 'डेमो मोड: अलर्ट केवल इस ऐप में दिखते हैं; किसी संपर्क को संदेश नहीं जाता।',
+    clearSample: 'नमूना साफ़ करें · वास्तविक लोकेशन का उपयोग करें',
     offlineBanner: 'इंटरनेट नहीं है: सेव किए प्राथमिक उपचार कार्ड और पास की सूची दिख सकती है। नए नक्शे और संपर्क अलर्ट के लिए इंटरनेट चाहिए; 112 पर सीधे कॉल करें।',
     demoAlertSaved: 'केवल डेमो: नकली अलर्ट इस ऐप में सहेजा गया; किसी संपर्क को सूचना नहीं गई।',
     geminiMatch: 'Gemini को मिलता-जुलता कार्ड मिला: “{title}”। नीचे दिए कदम पढ़ें। यह बीमारी की पहचान नहीं है; आपातकाल में 112 पर कॉल करें।',
@@ -554,8 +556,9 @@ function applyLang() {
   $('#voiceNote').hidden = true;
   $('#operatorVoiceNote').hidden = true;
   document.querySelectorAll('[data-i]').forEach(e => { e.textContent = t(e.dataset.i); });
-  $('#langBtn').textContent = lang === 'hi' ? 'EN' : 'हिं';
-  $('#langBtn').setAttribute('aria-label', t('changeLanguage'));
+  const langEn = $('#langEn'); const langHi = $('#langHi');
+  if (langEn) { langEn.classList.toggle('active', lang === 'en'); langEn.setAttribute('aria-pressed', String(lang === 'en')); }
+  if (langHi) { langHi.classList.toggle('active', lang === 'hi'); langHi.setAttribute('aria-pressed', String(lang === 'hi')); }
   $('#sos').setAttribute('aria-label', t('sosLabel'));
   $('#call112').setAttribute('aria-label', t('call112Label'));
   $('#call108').setAttribute('aria-label', t('call108Label'));
@@ -575,16 +578,24 @@ function applyLang() {
   $('#yourName').value = store.get('name', '');
   $('#handoverBlood').value = store.get('bloodGroup', '');
   $('#handoverAllergies').value = store.get('allergies', '');
-  renderDemoBanner(); renderOfflineBanner(); renderOfflineReady(); renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator(); renderHandover();
+  renderDemoBanner(); renderSampleModeBanner(); renderOfflineBanner(); renderOfflineReady(); renderLocationIntro(); renderHomeNearby(); renderChips(); renderCard(); renderNear(); renderContacts(); renderWhatsappContacts(); renderMinChips(); renderShare(); renderWalk(); renderOperator(); renderHandover();
 }
 function renderDemoBanner() {
   const banner = $('#demoBanner');
   if (!banner) return;
   banner.hidden = !demoMode;
-  banner.innerHTML = demoMode
-    ? `${esc(t('demoBanner'))}<button id="loadSampleIncident" class="btn ghost wide" type="button">${esc(t('loadSampleIncident'))}</button>`
-    : '';
-  $('#loadSampleIncident')?.addEventListener('click', loadSampleIncident);
+  if (demoMode) {
+    banner.textContent = t('demoBanner');
+    const btn = document.createElement('button');
+    btn.id = 'loadSampleIncident';
+    btn.className = 'btn ghost wide';
+    btn.type = 'button';
+    btn.textContent = t('loadSampleIncident');
+    btn.onclick = loadSampleIncident;
+    banner.appendChild(btn);
+  } else {
+    banner.textContent = '';
+  }
 }
 function renderOfflineReady() {
   const badge = $('#offlineReadyBadge');
@@ -613,7 +624,8 @@ window.addEventListener('online', () => {
   renderOfflineReady();
   if (nearData) ensureFacilityChecks(Object.values(nearData.data.results || {}).flat());
 });
-$('#langBtn').onclick = () => { lang = lang === 'hi' ? 'en' : 'hi'; store.set('lang', lang); stopSpeak(); applyLang(); };
+$('#langEn')?.addEventListener('click', () => { if (lang !== 'en') { lang = 'en'; store.set('lang', lang); stopSpeak(); applyLang(); } });
+$('#langHi')?.addEventListener('click', () => { if (lang !== 'hi') { lang = 'hi'; store.set('lang', lang); stopSpeak(); applyLang(); } });
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 function showTab(n) {
   if (n !== 'help') stopPacer();
@@ -2203,9 +2215,53 @@ async function loadSampleIncident() {
     store.set('walkMin', walkMin);
     renderMinChips();
     await startWalk(true);
+    renderSampleModeBanner();
   } finally {
     if (button) button.disabled = false;
   }
+}
+
+function renderSampleModeBanner() {
+  const banner = $('#sampleModeBanner');
+  if (!banner) return;
+  const active = demoMode && sampleLocationActive;
+  banner.hidden = !active;
+  if (active) {
+    banner.textContent = `🧪 Sample mode active — Panipat GPS (${pos.lat}, ${pos.lon}) · simulated data for demo`;
+    const btn = document.createElement('button');
+    btn.id = 'clearSample';
+    btn.className = 'btn ghost wide';
+    btn.type = 'button';
+    btn.textContent = t('clearSample');
+    btn.onclick = clearSampleMode;
+    banner.appendChild(btn);
+  } else {
+    banner.textContent = '';
+  }
+}
+
+function clearSampleMode() {
+  sampleLocationActive = false;
+  pos = store.get('lastpos', null);
+  locationPrompted = false;
+  store.set('locationPrompted', false);
+  nearbyLocationChecked = false;
+  nearbyLocationRefreshFailed = false;
+  locationRequestStatus = '';
+  homeNearbySearched = false;
+  $('#locLine').textContent = pos ? t('locSaved') : '';
+  $('#sosPanel').hidden = true;
+  sosStartedAt = '';
+  store.set('sosStartedAt', '');
+  stopPacer();
+  helperModeOpen = false;
+  renderLocationIntro();
+  renderNearbyLocationStatus();
+  renderHomeNearby();
+  renderOperator();
+  renderSosPanel();
+  renderSampleModeBanner();
+  $('#sampleModeBanner').hidden = true;
 }
 
 /* ------------------------------------------------------------ safety contacts */
