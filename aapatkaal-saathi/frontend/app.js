@@ -1553,6 +1553,7 @@ function renderCard() {
   const toolMarkup = [];
   if (tools.cprPacer) {
     toolMarkup.push(`<section class="box"><button id="pacerToggle" class="btn go wide" type="button">${t(pacer.running ? 'pacerStop' : 'pacerStart')}</button>
+      <div id="pacerBeat" class="pacer-beat" aria-hidden="true"></div>
       <p id="pacerStatus" class="note" role="status" aria-live="polite"></p><p id="pacerAlert" class="note" role="status" aria-live="polite"></p></section>`);
   }
   if (tools.bystanderHelper) {
@@ -1635,9 +1636,11 @@ function pacerTime(seconds) {
 function updatePacerUI() {
   const button = $('#pacerToggle');
   const status = $('#pacerStatus');
+  const beat = $('#pacerBeat');
   if (button) button.textContent = t(pacer.running ? 'pacerStop' : 'pacerStart');
   if (status) status.textContent = pacer.running
     ? `${t('pacerRunning', {time: pacerTime(pacer.remaining)})}${pacer.audioError ? ` ${t('pacerAudioUnavailable')}` : ''}` : '';
+  if (beat) beat.classList.toggle('beating', pacer.running);
 }
 function playPacerBeat() {
   if (pacer.audio) {
@@ -2064,7 +2067,7 @@ function renderSosPanel() {
   const quickCards = cards.map(card =>
     `<button class="chip" type="button" data-sos-card="${esc(card.id)}"><i aria-hidden="true">${esc(card.icon)}</i>${esc(card.title[lang])}</button>`).join('');
   const smsBody = `SOS ${curCard?.id || 'emergency'} ${pos ? `${pos.lat},${pos.lon}` : 'no-gps'} battery ${batteryPercent() ?? '?'}%`.slice(0, 160);
-  let html = `<h2>${t('panicTitle')}</h2>
+  let html = `<div class="panic-panel-head"><h2 style="margin:0">${t('panicTitle')}</h2><span class="badge" style="background:var(--red);color:#fff">${t('emergency')}</span></div>
     <a class="btn danger wide panic-call" href="tel:112" aria-label="${t('call112Label')}"><span aria-hidden="true">📞</span> 112</a>
     <h3>${t('panicCallScript')}</h3>
     <strong>हिंदी</strong><div id="sosScriptHi" class="sos-script"></div>
