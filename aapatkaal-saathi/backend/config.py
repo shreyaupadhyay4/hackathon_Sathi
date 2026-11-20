@@ -30,7 +30,10 @@ class Settings:
     # Optional Gemini API credentials; the manual first-aid flow works without them.
     gemini_api_key: str = os.environ.get("GEMINI_API_KEY", "").strip()
     gemini_model: str = (
-        os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
+        os.environ.get("GEMINI_MODEL", "gemini-1.5-flash").strip() or "gemini-1.5-flash"
+    )
+    gemini_vision_model: str = (
+        os.environ.get("GEMINI_VISION_MODEL", "gemini-1.5-flash").strip() or "gemini-1.5-flash"
     )
     # Public https URL of your deployment (used in alert links). Auto-detected if empty.
     public_base_url: str = (

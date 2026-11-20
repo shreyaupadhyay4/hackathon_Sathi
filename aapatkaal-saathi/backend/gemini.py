@@ -217,6 +217,7 @@ async def _generate(
     tools: list | None = None,
     timeout: int = TIMEOUT_SECONDS,
     timeout_message: str = "Gemini timed out. Try again in a moment.",
+    model: str | None = None,
 ) -> dict:
     if not configured():
         raise GeminiError("Gemini is not configured.")
@@ -226,7 +227,7 @@ async def _generate(
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent",
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model or settings.gemini_model}:generateContent",
                 headers={"x-goog-api-key": settings.gemini_api_key}, json=body,
             )
     except httpx.RequestError as error:
@@ -275,6 +276,7 @@ async def read_medicine(image: bytes, mime_type: str, language: str) -> str:
         }]}],
         timeout=45,
         timeout_message="Gemini took too long to read the photo. Try a closer, sharper photo.",
+        model=settings.gemini_vision_model,
     )
     answer = _text(payload)
     if not answer:
